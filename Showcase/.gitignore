@@ -40,5 +40,4 @@ Thumbs.db
 *.dotCover
 
 node_modules/
-npm/
 dist/

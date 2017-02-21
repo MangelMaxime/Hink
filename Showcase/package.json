@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "fable-compiler": "^0.7.43",
+    "fable-core": "^0.7.27",
+    "fable-import-pixi": "^0.0.10",
+    "fs-extra": "^2.0.0"
+  },
+  "private": true,
+  "version": "0.0.1",
+  "name": "hink"
+}
