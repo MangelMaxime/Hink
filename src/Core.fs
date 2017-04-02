@@ -1,5 +1,6 @@
 ﻿namespace Hink
 
+open Fable.Core.JsInterop
 open Fable.Import.Browser
 open Fable.Import.PIXI
 open Hink.Inputs
@@ -58,11 +59,11 @@ module Core =
     member val RootContainer = Container() with get
 
     member self.Init () =
-      let options =
-        [ BackgroundColor (float 0xFFFFFF)
-          Resolution 1.
-          Antialias true
-        ]
+      let options = createEmpty<RendererOptions>
+      options.BackgroundColor <- float 0xFFFFFF
+      options.Resolution <- 1.
+      options.Antialias <- true
+
       // Init the renderer
       self.Renderer <- WebGLRenderer(window.innerWidth, window.innerHeight, options)
       // Init the canvas
@@ -118,7 +119,7 @@ module Theme =
   type StateSwitchTheme =
     {
       BackgroundColor: int
-      TextStyle: TextStyle list
+      TextStyle: TextStyle
       CircleColor: int
     }
 
@@ -128,7 +129,7 @@ module Theme =
       Width: float
       ActiveTheme: StateSwitchTheme
       InactiveTheme: StateSwitchTheme
-      TextStyle: TextStyle list
+      TextStyle: TextStyle
       CircleRadius: float
       CirclePadding: float
     }
@@ -158,12 +159,26 @@ module Theme =
     let ASBESTOS = 0x7F8C8D
 
     let TextStyle =
-      [
-        FontFamilly "Arial"
-        FontSize 14.
-      ]
+      let style = createEmpty<Fable.Import.PIXI.TextStyle>
+      style.FontFamily <- "Arial"
+      style.FontSize <- 14.
+      style
 
     let Switch =
+      let activeTextStyle =
+        let style = createEmpty<Fable.Import.PIXI.TextStyle>
+        style.FontFamily <- "Arial"
+        style.FontSize <- 14.
+        style.Fill <- (U2.Case2 (float TURQUOISE))
+        style
+
+      let inactiveTextStyle =
+        let style = createEmpty<Fable.Import.PIXI.TextStyle>
+        style.FontFamily <- "Arial"
+        style.FontSize <- 14.
+        style.Fill <- (U2.Case2 (float CLOUDS))
+        style
+
       {
         Height = 28.
         Width = 70.
@@ -171,23 +186,13 @@ module Theme =
           {
             BackgroundColor = WET_ASPHALT
             CircleColor = TURQUOISE
-            TextStyle =
-              [
-                Fill (Case2 (float TURQUOISE))
-                FontFamilly "Arial"
-                FontSize 14.
-              ]
+            TextStyle = activeTextStyle
           }
         InactiveTheme =
           {
             BackgroundColor = SILVER
             CircleColor = ASBESTOS
-            TextStyle =
-              [
-                Fill (Case2 (float CLOUDS))
-                FontFamilly "Arial"
-                FontSize 14.
-              ]
+            TextStyle = inactiveTextStyle
           }
         TextStyle = TextStyle
         CircleRadius = 10.

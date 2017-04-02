@@ -40,7 +40,6 @@ module Switch =
       background
         .clear()
         .beginFill(float color)
-        //.drawRoundedRect(self.X, self.Y, self.Width, self.Height, self.Height / 2.)
         .drawRoundedRect(
           0.,
           0.,
@@ -104,11 +103,11 @@ module Switch =
       // Set display
       updateUI()
 
-      self.UI.on_mouseup(JsFunc1(fun ev ->
+      self.UI.on_mouseup(fun ev ->
         active <- not active
         updateUI()
         onStateChange.Trigger(SwitchStateChange.Create(self, ev))
-      )) |> ignore
+      ) |> ignore
 
     member self.OnStateChanged = onStateChange.Publish
 

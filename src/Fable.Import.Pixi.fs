@@ -144,38 +144,38 @@ module PIXI =
         member __.destroy(): unit = failwith "JS only"
         member __.getChildByName(name: string): DisplayObject = failwith "JS only"
         member __.getGlobalPosition(point: Point): Point = failwith "JS only"
-        [<Emit("$0.on('click',$1...)")>] member __.on_click(fn: JsFunc1<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.on('mousedown',$1...)")>] member __.on_mousedown(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.on('mouseout',$1...)")>] member __.on_mouseout(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.on('mouseover',$1...)")>] member __.on_mouseover(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.on('mouseup',$1...)")>] member __.on_mouseup(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.on('mouseupoutside',$1...)")>] member __.on_mouseupoutside(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.on('rightclick',$1...)")>] member __.on_rightclick(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.on('rightdown',$1...)")>] member __.on_rightdown(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.on('rightup',$1...)")>] member __.on_rightup(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.on('rightupoutside',$1...)")>] member __.on_rightupoutside(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.on('tap',$1...)")>] member __.on_tap(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.on('touchend',$1...)")>] member __.on_touchend(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.on('touchendoutside',$1...)")>] member __.on_touchendoutside(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.on('touchmove',$1...)")>] member __.on_touchmove(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.on('touchstart',$1...)")>] member __.on_touchstart(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.on('click',$1...)")>] member __.on_click(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.on('mousedown',$1...)")>] member __.on_mousedown(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.on('mouseout',$1...)")>] member __.on_mouseout(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.on('mouseover',$1...)")>] member __.on_mouseover(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.on('mouseup',$1...)")>] member __.on_mouseup(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.on('mouseupoutside',$1...)")>] member __.on_mouseupoutside(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.on('rightclick',$1...)")>] member __.on_rightclick(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.on('rightdown',$1...)")>] member __.on_rightdown(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.on('rightup',$1...)")>] member __.on_rightup(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.on('rightupoutside',$1...)")>] member __.on_rightupoutside(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.on('tap',$1...)")>] member __.on_tap(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.on('touchend',$1...)")>] member __.on_touchend(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.on('touchendoutside',$1...)")>] member __.on_touchendoutside(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.on('touchmove',$1...)")>] member __.on_touchmove(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.on('touchstart',$1...)")>] member __.on_touchstart(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
         member __.on(``event``: string, fn: Function, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.once('click',$1...)")>] member __.once_click(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.once('mousedown',$1...)")>] member __.once_mousedown(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.once('mouseout',$1...)")>] member __.once_mouseout(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.once('mouseover',$1...)")>] member __.once_mouseover(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.once('mouseup',$1...)")>] member __.once_mouseup(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.once('mouseclick',$1...)")>] member __.once_mouseclick(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.once('mouseupoutside',$1...)")>] member __.once_mouseupoutside(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.once('rightclick',$1...)")>] member __.once_rightclick(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.once('rightdown',$1...)")>] member __.once_rightdown(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.once('rightup',$1...)")>] member __.once_rightup(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.once('rightupoutside',$1...)")>] member __.once_rightupoutside(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.once('tap',$1...)")>] member __.once_tap(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.once('touchend',$1...)")>] member __.once_touchend(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.once('touchendoutside',$1...)")>] member __.once_touchendoutside(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.once('touchmove',$1...)")>] member __.once_touchmove(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.once('touchstart',$1...)")>] member __.once_touchstart(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.once('click',$1...)")>] member __.once_click(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.once('mousedown',$1...)")>] member __.once_mousedown(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.once('mouseout',$1...)")>] member __.once_mouseout(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.once('mouseover',$1...)")>] member __.once_mouseover(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.once('mouseup',$1...)")>] member __.once_mouseup(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.once('mouseclick',$1...)")>] member __.once_mouseclick(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.once('mouseupoutside',$1...)")>] member __.once_mouseupoutside(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.once('rightclick',$1...)")>] member __.once_rightclick(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.once('rightdown',$1...)")>] member __.once_rightdown(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.once('rightup',$1...)")>] member __.once_rightup(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.once('rightupoutside',$1...)")>] member __.once_rightupoutside(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.once('tap',$1...)")>] member __.once_tap(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.once('touchend',$1...)")>] member __.once_touchend(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.once('touchendoutside',$1...)")>] member __.once_touchendoutside(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.once('touchmove',$1...)")>] member __.once_touchmove(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.once('touchstart',$1...)")>] member __.once_touchstart(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
         member __.once(``event``: string, fn: Function, ?context: obj): EventEmitter = failwith "JS only"
 
     and [<AllowNullLiteral>] [<Import("Container","PIXI")>] Container() =
@@ -199,12 +199,12 @@ module PIXI =
         member __.generateTexture(renderer: U2<CanvasRenderer, WebGLRenderer>, ?resolution: float, ?scaleMode: float): Texture = failwith "JS only"
         member __.renderWebGL(renderer: WebGLRenderer): unit = failwith "JS only"
         member __.renderCanvas(renderer: CanvasRenderer): unit = failwith "JS only"
-        [<Emit("$0.once('added',$1...)")>] member __.once_added(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.once('added',$1...)")>] member __.once_added(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
         member __.once(``event``: string, fn: Function, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.once('removed',$1...)")>] member __.once_removed(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.on('added',$1...)")>] member __.on_added(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.once('removed',$1...)")>] member __.once_removed(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.on('added',$1...)")>] member __.on_added(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
         member __.on(``event``: string, fn: Function, ?context: obj): EventEmitter = failwith "JS only"
-        [<Emit("$0.on('removed',$1...)")>] member __.on_removed(fn: Func<InteractionEvent, unit>, ?context: obj): EventEmitter = failwith "JS only"
+        [<Emit("$0.on('removed',$1...)")>] member __.on_removed(fn: InteractionEvent -> unit, ?context: obj): EventEmitter = failwith "JS only"
 
     and [<Import("GraphicsData","PIXI")>] GraphicsData(lineWidth: float, lineColor: float, lineAlpha: float, fillColor: float, fillAlpha: float, fill: bool, shape: U4<Circle, Rectangle, Ellipse, Polygon>) =
         member __.lineWidth with get(): float = failwith "JS only" and set(v: float): unit = failwith "JS only"
@@ -351,8 +351,7 @@ module PIXI =
         member __.EMPTY with get(): Rectangle = failwith "JS only" and set(v: Rectangle): unit = failwith "JS only"
         member __.clone(): Rectangle = failwith "JS only"
 
-    and [<KeyValueList>]
-        ParticleContainerProperties =
+    and ParticleContainerProperties =
         | Scale of bool
         | Position of bool
         | Rotation of bool
@@ -395,20 +394,29 @@ module PIXI =
     and ParticleShader =
         interface end
 
-    and [<KeyValueList>]
-        RendererOptions =
-        | View of HTMLCanvasElement
-        | Transparent of bool
-        | Antialias of bool
-        | AutoResize of bool
-        | Resolution of float
-        | ClearBeforeRendering of bool
-        | PreserveDrawingBuffer of bool
-        | ForceFXAA of bool
-        | RoundPixels of bool
-        | BackgroundColor of float
+    and RendererOptions =
+        [<Emit("$0.view{{=$1}}")>]
+        abstract View : HTMLCanvasElement with get, set
+        [<Emit("$0.transparent{{=$1}}")>]
+        abstract Transparent : bool with get, set
+        [<Emit("$0.antialias{{=$1}}")>]
+        abstract Antialias : bool with get, set
+        [<Emit("$0.autoResize{{=$1}}")>]
+        abstract AutoResize : bool with get, set
+        [<Emit("$0.resolution{{=$1}}")>]
+        abstract Resolution : float with get, set
+        [<Emit("$0.clearBeforeRendering{{=$1}}")>]
+        abstract ClearBeforeRendering : bool with get, set
+        [<Emit("$0.preserveDrawingBuffer{{=$1}}")>]
+        abstract PreserveDrawingBuffer : bool with get, set
+        [<Emit("$0.forceFXAA{{=$1}}")>]
+        abstract ForceFXAA : bool with get, set
+        [<Emit("$0.roundPixels{{=$1}}")>]
+        abstract RoundPixels : bool with get, set
+        [<Emit("$0.backgroundColor{{=$1}}")>]
+        abstract BackgroundColor : float with get, set
 
-    and [<Import("SystemRenderer","PIXI")>] SystemRenderer(system: string, ?width: float, ?height: float, ?options: RendererOptions list) =
+    and [<Import("SystemRenderer","PIXI")>] SystemRenderer(system: string, ?width: float, ?height: float, ?options: RendererOptions) =
         inherit EventEmitter()
         member __._backgroundColor with get(): float = failwith "JS only" and set(v: float): unit = failwith "JS only"
         member __._backgroundColorRgb with get(): ResizeArray<float> = failwith "JS only" and set(v: ResizeArray<float>): unit = failwith "JS only"
@@ -431,7 +439,7 @@ module PIXI =
         member __.resize(width: float, height: float): unit = failwith "JS only"
         member __.destroy(?removeView: bool): unit = failwith "JS only"
 
-    and [<Import("CanvasRenderer","PIXI")>] CanvasRenderer(?width: float, ?height: float, ?options: RendererOptions list) =
+    and [<Import("CanvasRenderer","PIXI")>] CanvasRenderer(?width: float, ?height: float, ?options: RendererOptions) =
         inherit SystemRenderer("")
         member __.context with get(): CanvasRenderingContext2D = failwith "JS only" and set(v: CanvasRenderingContext2D): unit = failwith "JS only"
         member __.refresh with get(): bool = failwith "JS only" and set(v: bool): unit = failwith "JS only"
@@ -473,7 +481,7 @@ module PIXI =
         static member tintWithPerPixel(texture: Texture, color: float, canvas: HTMLCanvasElement): unit = failwith "JS only"
         static member roundColor(color: float): float = failwith "JS only"
 
-    and [<Import("WebGLRenderer","PIXI")>] WebGLRenderer(?width: float, ?height: float, ?options: RendererOptions list) =
+    and [<Import("WebGLRenderer","PIXI")>] WebGLRenderer(?width: float, ?height: float, ?options: RendererOptions) =
         inherit SystemRenderer("")
         member __._useFXAA with get(): bool = failwith "JS only" and set(v: bool): unit = failwith "JS only"
         member __._FXAAFilter with get(): obj (* filters.FXAAFilter *) = failwith "JS only" and set(v: obj (* filters.FXAAFilter *)): unit = failwith "JS only"
@@ -693,45 +701,62 @@ module PIXI =
         member __.start(): unit = failwith "JS only"
         member __.destroy(): unit = failwith "JS only"
 
-    and [<KeyValueList>]
-        TextStyle =
-        | FontFamilly of string
-        | FontSize of float
-        | FontStyle of string
-        | Fill of U2<string,float>
-        | Align of string
-        | Stroke of U2<string,float>
-        | StrokeThickness of float
-        | WordWrap
-        | WordWrapWidth of float
-        | LineHeight of float
-        | DropShadow of bool
-        | DropShadowColor of U2<string, float>
-        | DropShadowAngle of float
-        | DropShadowDistance of float
-        | Padding of float
-        | TextBaseline of string
-        | LineJoin of string
-        | MiterLimit of float
+    and TextStyle =
+        [<Emit("$0.fontFamily{{=$1}}")>]
+        abstract FontFamily : string with get, set
+        [<Emit("$0.fontSize{{=$1}}")>]
+        abstract FontSize : float with get, set
+        [<Emit("$0.fontStyle{{=$1}}")>]
+        abstract FontStyle : string with get, set
+        [<Emit("$0.fill{{=$1}}")>]
+        abstract Fill : U2<string,float> with get, set
+        [<Emit("$0.align{{=$1}}")>]
+        abstract Align : string with get, set
+        [<Emit("$0.stroke{{=$1}}")>]
+        abstract Stroke : U2<string,float> with get, set
+        [<Emit("$0.strokeThickness{{=$1}}")>]
+        abstract StrokeThickness : float with get, set
+        [<Emit("$0.wordWrap{{=$1}}")>]
+        abstract WordWrap : bool with get, set
+        [<Emit("$0.wordWrapWidth{{=$1}}")>]
+        abstract WordWrapWidth : float with get, set
+        [<Emit("$0.lineHeight{{=$1}}")>]
+        abstract LineHeight : float with get, set
+        [<Emit("$0.dropShadow{{=$1}}")>]
+        abstract DropShadow : bool with get, set
+        [<Emit("$0.dropShadowColor{{=$1}}")>]
+        abstract DropShadowColor : U2<string, float> with get, set
+        [<Emit("$0.dropShadowAngle{{=$1}}")>]
+        abstract DropShadowAngle : float with get, set
+        [<Emit("$0.dropShadowDistance{{=$1}}")>]
+        abstract DropShadowDistance : float with get, set
+        [<Emit("$0.padding{{=$1}}")>]
+        abstract Padding : float with get, set
+        [<Emit("$0.textBaseline{{=$1}}")>]
+        abstract TextBaseline : string with get, set
+        [<Emit("$0.lineJoin{{=$1}}")>]
+        abstract LineJoin : string with get, set
+        [<Emit("$0.miterLimit{{=$1}}")>]
+        abstract MiterLimit : float with get, set
 
-    and [<Import("Text","PIXI")>] Text(?text: string, ?style: TextStyle list, ?resolution: float) =
+    and [<Import("Text","PIXI")>] Text(?text: string, ?style: TextStyle, ?resolution: float) =
         inherit Sprite()
         member __.fontPropertiesCache with get(): obj = failwith "JS only" and set(v: obj): unit = failwith "JS only"
         member __.fontPropertiesCanvas with get(): HTMLCanvasElement = failwith "JS only" and set(v: HTMLCanvasElement): unit = failwith "JS only"
         member __.fontPropertiesContext with get(): CanvasRenderingContext2D = failwith "JS only" and set(v: CanvasRenderingContext2D): unit = failwith "JS only"
         member __._text with get(): string = failwith "JS only" and set(v: string): unit = failwith "JS only"
-        member __._style with get(): TextStyle list = failwith "JS only" and set(v: TextStyle list): unit = failwith "JS only"
+        member __._style with get(): TextStyle = failwith "JS only" and set(v: TextStyle): unit = failwith "JS only"
         member __.canvas with get(): HTMLCanvasElement = failwith "JS only" and set(v: HTMLCanvasElement): unit = failwith "JS only"
         member __.context with get(): CanvasRenderingContext2D = failwith "JS only" and set(v: CanvasRenderingContext2D): unit = failwith "JS only"
         member __.dirty with get(): bool = failwith "JS only" and set(v: bool): unit = failwith "JS only"
         member __.resolution with get(): float = failwith "JS only" and set(v: float): unit = failwith "JS only"
         member __.text with get(): string = failwith "JS only" and set(v: string): unit = failwith "JS only"
-        member __.style with get(): TextStyle list = failwith "JS only" and set(v: TextStyle list): unit = failwith "JS only"
+        member __.style with get(): TextStyle = failwith "JS only" and set(v: TextStyle): unit = failwith "JS only"
         member __.width with get(): float = failwith "JS only" and set(v: float): unit = failwith "JS only"
         member __.height with get(): float = failwith "JS only" and set(v: float): unit = failwith "JS only"
         member __.updateText(): unit = failwith "JS only"
         member __.updateTexture(): unit = failwith "JS only"
-        member __.determineFontProperties(fontStyle: TextStyle list): TextStyle list = failwith "JS only"
+        member __.determineFontProperties(fontStyle: TextStyle): TextStyle = failwith "JS only"
         member __.wordWrap(text: string): bool = failwith "JS only"
 
     and [<Import("BaseTexture","PIXI")>] BaseTexture(source: U2<HTMLImageElement, HTMLCanvasElement>, ?scaleMode: float, ?resolution: float) =
@@ -881,13 +906,12 @@ module PIXI =
 
     module extras =
 
-        [<KeyValueList>]
         type BitmapTextStyle =
-            | Font of U2<string, obj>
-            | Align of string
-            | Tint of float
+            abstract Font : U2<string, obj> option with get, set
+            abstract Align : string option with get, set
+            abstract Tint : float option  with get, set
 
-        and [<Import("extras.BitmapText","PIXI")>] BitmapText(text: string, ?style: BitmapTextStyle list) =
+        and [<Import("extras.BitmapText","PIXI")>] BitmapText(text: string, ?style: BitmapTextStyle) =
             inherit Container()
             member __.fonts with get(): obj = failwith "JS only" and set(v: obj): unit = failwith "JS only"
             member __._glyphs with get(): ResizeArray<Sprite> = failwith "JS only" and set(v: ResizeArray<Sprite>): unit = failwith "JS only"
@@ -1317,5 +1341,5 @@ module PIXI =
         static member SPRITE_BATCH_SIZE with get(): float = failwith "JS only"
 
         static member loader with get(): loaders.Loader = failwith "JS only"
-        static member autoDetectRenderer(width: float, height: float, ?options: RendererOptions list, ?noWebGL: bool): U2<WebGLRenderer, CanvasRenderer> = failwith "JS only"
+        static member autoDetectRenderer(width: float, height: float, ?options: RendererOptions, ?noWebGL: bool): U2<WebGLRenderer, CanvasRenderer> = failwith "JS only"
 

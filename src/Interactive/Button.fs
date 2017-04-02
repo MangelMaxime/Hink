@@ -54,25 +54,25 @@ module Button =
       self.UI <- container
 
       let resetBackground () =
-        self.UI.once_mouseout(JsFunc1(fun _ ->
+        self.UI.once_mouseout(fun _ ->
           drawStandardBrackground ()
-        )) |> ignore
+        ) |> ignore
 
-      self.UI.on_mouseover(JsFunc1(fun _ ->
+      self.UI.on_mouseover(fun _ ->
         drawBackground background 0x48c9b0
         resetBackground()
-      )) |> ignore
+      ) |> ignore
 
-      self.UI.on_mousedown(JsFunc1(fun _ ->
+      self.UI.on_mousedown(fun _ ->
         drawHoverBrackground ()
         resetBackground()
-      )) |> ignore
+      ) |> ignore
 
-      self.UI.on_mouseup(JsFunc1(fun ev ->
+      self.UI.on_mouseup(fun ev ->
         onClick.Trigger(self, ev)
         drawStandardBrackground ()
         self.UI.removeAllListeners("mouseout") |> ignore
-      )) |> ignore
+      ) |> ignore
 
     member self.Text
       with get () = text.text
