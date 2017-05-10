@@ -4,6 +4,7 @@ open Hink.Core
 open Hink.Widgets.Container
 open Hink.Widgets.Display
 open Hink.Widgets.Interactive
+open Fable.Import
 
 module Main =
 
@@ -69,6 +70,24 @@ module Main =
       y = 50.
     )
 
+  let buttonWithCallback =
+    Button(
+      x = 100.,
+      y = 100.,
+      onClick = (fun _ -> Browser.console.log("constructor callback"))
+    )
+
+  let withOnClick (onClick: 'T -> unit) widget =
+    try
+      (widget :> IClickable<'T>).OnClick.Add(onClick)
+    with
+      | _ -> failwith "Widget doesn't implement IClickale"
+
+  customButton
+  |> withOnClick (fun event ->
+    Browser.console.log("ko")
+  )
+
   // app.AddWidget(button)
   // app.AddWidget(buttonLabel)
   app.AddWidget(label)
@@ -80,7 +99,7 @@ module Main =
 
   app
     .RootContainer
-    .addChild(buttonDefault, customButton)
+    .addChild(buttonDefault, customButton, buttonWithCallback)
     |> ignore
 
   // Start app

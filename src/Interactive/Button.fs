@@ -23,10 +23,11 @@ module Button =
 
   and Button( ?x: float, ?y: float,
               ?width: float, ?height: float,
-              ?str: string) as self =
+              ?str: string,
+              ?onClick: ButtonOnClick -> unit) as self =
     inherit Container()
 
-    let onClick = new Event<ButtonOnClick>()
+    let onClickEvent = new Event<ButtonOnClick>()
     let drawBackground (g: Graphics) color=
       g
         .clear()
@@ -79,13 +80,17 @@ module Button =
       ) |> ignore
 
       self.on_mouseup(fun ev ->
-        onClick.Trigger(ButtonOnClick.Create(self, ev))
+        onClickEvent.Trigger(ButtonOnClick.Create(self, ev))
         drawStandardBrackground ()
         self.removeAllListeners("mouseout") |> ignore
       ) |> ignore
 
+      // Register onClick callback if one given in the constructor
+      if onClick.IsSome then
+        onClickEvent.Publish.Add(onClick.Value)
+
     interface IClickable<ButtonOnClick> with
-      member this.OnClick = onClick.Publish
+      member this.OnClick = onClickEvent.Publish
 
     member self.text
       with get () = internalText.text
