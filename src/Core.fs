@@ -10,44 +10,10 @@ module Core =
 
   [<AbstractClass>]
   type Widget () =
-    let mutable x = 0.
-    let mutable y = 0.
-    let mutable width = 100.
-    let mutable height = 32.
-
     member val UI = Container() with get, set
 
-    abstract CreateUI: unit -> unit
-
-    default self.CreateUI () = ()
-
-    // General helpers
-    member self.Position pos =
-      self.UI.position <- pos
-
-    member self.X
-      with get () = x
-      and set (value) =
-        x <- value
-        self.CreateUI()
-
-    member self.Y
-      with get () = y
-      and set (value) =
-        y <- value
-        self.CreateUI()
-
-    member self.Width
-      with get () = width
-      and set (value) =
-        width <- value
-        self.CreateUI()
-
-    member self.Height
-      with get () = height
-      and set (value) =
-        height <- value
-        self.CreateUI()
+  and IClickable<'T> =
+    abstract member OnClick: IEvent<'T>
 
   and Application () =
     member val Renderer = Unchecked.defaultof<WebGLRenderer> with get, set

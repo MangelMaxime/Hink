@@ -21,11 +21,15 @@ module Button =
         Event = event
       }
 
-  and Button(str) as self =
-    inherit Widget()
-    let onClick = new Event<Button * InteractionEvent>()
+  and Button( ?x: float, ?y: float,
+              ?width: float, ?height: float,
+              ?str: string) as self =
+    inherit Container()
+
+    let onClick = new Event<ButtonOnClick>()
     let drawBackground (g: Graphics) color=
       g
+        .clear()
         .beginFill(float color)
         .drawRoundedRect(0., 0., 80., 34., 4.)
         .endFill()
@@ -39,44 +43,51 @@ module Button =
     let drawHoverBrackground () =
       drawBackground background 0x16A085
 
-    let text = Text(str, Hink.Theme.Default.TextStyle)
+    let internalText = Text(defaultArg str "Button", Hink.Theme.Default.TextStyle)
 
     do
-      let container = Container()
+      // Position
+      self.x <- defaultArg x 0.
+      self.y <- defaultArg y 0.
+      // Size
+      self.width <- defaultArg width 80.
+      self.height <- defaultArg height 80.
+      // Interactive
+      self.interactive <- true
+      self.buttonMode <- true
 
       drawStandardBrackground ()
 
-      text.anchor <- Point(0.5, 0.5)
-      text.x <- 80. / 2.
-      text.y <- 34. / 2.
-      container.addChild(background, text) |> ignore
-      container.interactive <- true
-      self.UI <- container
+      internalText.anchor <- Point(0.5, 0.5)
+      internalText.x <- 80. / 2.
+      internalText.y <- 34. / 2.
+      self.addChild(background, internalText) |> ignore
 
       let resetBackground () =
-        self.UI.once_mouseout(fun _ ->
+        self.once_mouseout(fun _ ->
           drawStandardBrackground ()
         ) |> ignore
 
-      self.UI.on_mouseover(fun _ ->
+      self.on_mouseover(fun _ ->
         drawBackground background 0x48c9b0
         resetBackground()
       ) |> ignore
 
-      self.UI.on_mousedown(fun _ ->
+      self.on_mousedown(fun _ ->
         drawHoverBrackground ()
         resetBackground()
       ) |> ignore
 
-      self.UI.on_mouseup(fun ev ->
-        onClick.Trigger(self, ev)
+      self.on_mouseup(fun ev ->
+        onClick.Trigger(ButtonOnClick.Create(self, ev))
         drawStandardBrackground ()
-        self.UI.removeAllListeners("mouseout") |> ignore
+        self.removeAllListeners("mouseout") |> ignore
       ) |> ignore
 
-    member self.Text
-      with get () = text.text
-      and set(value) =
-        text.text <- value
+    interface IClickable<ButtonOnClick> with
+      member this.OnClick = onClick.Publish
 
-    member self.OnClick = onClick.Publish
+    member self.text
+      with get () = internalText.text
+      and set(value) =
+        internalText.text <- value

@@ -13,20 +13,20 @@ module Main =
 
   // Build UI
   let mutable counter = 0
-  let button = Button("Click me")
-  button.UI.x <- 20.
-  button.UI.y <- 10.
+  // let button = Button("Click me")
+  // button.UI.x <- 20.
+  // button.UI.y <- 10.
 
-  let buttonText count = sprintf "Count: %i" count
-  let buttonLabel = Label(buttonText counter)
-  buttonLabel.UI.x <- 110.
-  buttonLabel.UI.y <- 20.
+  // let buttonText count = sprintf "Count: %i" count
+  // let buttonLabel = Label(buttonText counter)
+  // buttonLabel.UI.x <- 110.
+  // buttonLabel.UI.y <- 20.
 
-  button.OnClick.Add(
-    fun _ ->
-      counter <- counter + 1
-      buttonLabel.Text <- buttonText counter
-  )
+  // button.OnClick.Add(
+  //   fun _ ->
+  //     counter <- counter + 1
+  //     buttonLabel.Text <- buttonText counter
+  // )
 
   let label = Label("I am a label")
   label.UI.x <- 20.
@@ -60,14 +60,28 @@ module Main =
   window.UI.x <- 20.
   window.UI.y <- 200.
 
-  app.AddWidget(button)
-  app.AddWidget(buttonLabel)
+
+  let buttonDefault = Button()
+
+  let customButton =
+    Button(
+      x = 50.,
+      y = 50.
+    )
+
+  // app.AddWidget(button)
+  // app.AddWidget(buttonLabel)
   app.AddWidget(label)
   app.AddWidget(checkbox)
   app.AddWidget(checkboxLabel)
   app.AddWidget(switch)
   app.AddWidget(switchLabel)
   //app.AddWidget(window)
+
+  app
+    .RootContainer
+    .addChild(buttonDefault, customButton)
+    |> ignore
 
   // Start app
   app.Start()
