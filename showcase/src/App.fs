@@ -13,12 +13,6 @@ module Main =
   app.Init()
 
   // Build UI
-  let mutable counter = 0
-
-  let label = Label("I am a label")
-  label.UI.x <- 20.
-  label.UI.y <- 60.
-
   let switch =
     Switch(
       x = 20.,
@@ -41,26 +35,18 @@ module Main =
   window.UI.x <- 20.
   window.UI.y <- 200.
 
-  let defaultButton = Button()
-
-  let customButton =
+  let mutable counter = 0
+  let counterButton =
     Button(
-      x = 50.,
-      y = 50.
+      x = 20.,
+      y = 20.,
+      str = "Click me !",
+      onClick = (
+        fun event ->
+          counter <- counter + 1
+          event.Sender.text <- sprintf "Clicked: %i" counter
+      )
     )
-
-  let buttonWithCallback =
-    Button(
-      x = 100.,
-      y = 100.,
-      onClick = (fun _ -> Browser.console.log("constructor callback"))
-    )
-
-  customButton
-  |> withOnClick (fun event ->
-    Browser.console.log("ko")
-  )
-  |> ignore
 
   let checkbox =
     Checkbox(
@@ -69,13 +55,12 @@ module Main =
       onStateChange = (fun event -> Browser.console.log event.NewState)
     )
 
-  app.AddWidget(label)
   app.AddWidget(switchLabel)
   //app.AddWidget(window)
 
   app
     .RootContainer
-    .addChild(defaultButton, customButton, buttonWithCallback, checkbox, switch)
+    .addChild(counterButton, checkbox, switch)
     |> ignore
 
   // Start app
