@@ -15,6 +15,9 @@ module Core =
   and IClickable<'T> =
     abstract member OnClick: IEvent<'T>
 
+  and IStateChangeable<'T> =
+    abstract member OnStateChange: IEvent<'T>
+
   and Application () =
     member val Renderer = Unchecked.defaultof<WebGLRenderer> with get, set
     member val Canvas = Unchecked.defaultof<HTMLCanvasElement> with get, set

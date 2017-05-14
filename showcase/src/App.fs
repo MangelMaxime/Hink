@@ -33,18 +33,18 @@ module Main =
   label.UI.x <- 20.
   label.UI.y <- 60.
 
-  let checkbox = Checkbox()
-  checkbox.UI.x <- 20.
-  checkbox.UI.y <- 100.
+  // let checkbox = Checkbox()
+  // checkbox.UI.x <- 20.
+  // checkbox.UI.y <- 100.
 
-  let checkboxText state = sprintf "Checkbox value: %b" state
-  let checkboxLabel = Label(checkboxText checkbox.State)
-  checkboxLabel.UI.x <- 55.
-  checkboxLabel.UI.y <- 103.
+  // let checkboxText state = sprintf "Checkbox value: %b" state
+  // let checkboxLabel = Label(checkboxText checkbox.State)
+  // checkboxLabel.UI.x <- 55.
+  // checkboxLabel.UI.y <- 103.
 
-  checkbox.StateChange.Add(fun evt ->
-    checkboxLabel.Text <- checkboxText evt.NewState
-  )
+  // checkbox.StateChange.Add(fun evt ->
+  //   checkboxLabel.Text <- checkboxText evt.NewState
+  // )
 
   let switch = Switch(20., 150.)
 
@@ -62,7 +62,7 @@ module Main =
   window.UI.y <- 200.
 
 
-  let buttonDefault = Button()
+  let defaultButton = Button()
 
   let customButton =
     Button(
@@ -78,28 +78,35 @@ module Main =
     )
 
   let withOnClick (onClick: 'T -> unit) widget =
-    try
-      (widget :> IClickable<'T>).OnClick.Add(onClick)
-    with
-      | _ -> failwith "Widget doesn't implement IClickale"
+    (widget :> IClickable<'T>).OnClick.Add(onClick)
+
+  let withOnStateChange (onStateChange: 'T -> unit) widget =
+    (widget :> IStateChangeable<'T>).OnStateChange.Add(onStateChange)
 
   customButton
   |> withOnClick (fun event ->
     Browser.console.log("ko")
   )
 
+  let checkbox =
+    Checkbox(
+      x = 20.,
+      y = 100.,
+      onStateChange = (fun event -> Browser.console.log event.NewState)
+    )
+
   // app.AddWidget(button)
   // app.AddWidget(buttonLabel)
   app.AddWidget(label)
-  app.AddWidget(checkbox)
-  app.AddWidget(checkboxLabel)
+  // app.AddWidget(checkbox)
+  // app.AddWidget(checkboxLabel)
   app.AddWidget(switch)
   app.AddWidget(switchLabel)
   //app.AddWidget(window)
 
   app
     .RootContainer
-    .addChild(buttonDefault, customButton, buttonWithCallback)
+    .addChild(defaultButton, customButton, buttonWithCallback, checkbox)
     |> ignore
 
   // Start app

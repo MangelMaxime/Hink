@@ -19,13 +19,17 @@ module Checkbox =
     static member Create (sender, ?event) =
       {
         Sender = sender
-        NewState = sender.State
+        NewState = sender.state
         Event = event
       }
 
-  and Checkbox() as self =
-    inherit Widget()
-    let onStateChange = new Event<CheckboxStateChange>()
+  and Checkbox( ?x: float, ?y: float,
+                ?width: float, ?height: float,
+                ?state: bool,
+                ?onStateChange: CheckboxStateChange -> unit) as self =
+    inherit Container()
+
+    let onStateChangeEvent = new Event<CheckboxStateChange>()
     let drawBackground (g: Graphics) color =
       g
         .beginFill(float color)
@@ -50,46 +54,58 @@ module Checkbox =
           tick.text <- ""
 
     do
-      let container = Container()
+      // Position
+      self.x <- defaultArg x 0.
+      self.y <- defaultArg y 0.
+      // Size
+      self.width <- defaultArg width 22.
+      self.height <- defaultArg height 22.
+      // Interactive
+      self.interactive <- true
+      self.buttonMode <- true
 
       drawStandardBrackground ()
+
       tick.anchor <- Point(0.5, 0.5)
       tick.x <- 22. / 2.
       tick.y <- 22. / 2.
-      container.addChild(background, tick) |> ignore
-      container.interactive <- true
-      self.UI <- container
+
+      self.addChild(background, tick) |> ignore
 
       let resetBackground () =
-        self.UI.once_mouseout(fun _ ->
+        self.once_mouseout(fun _ ->
           drawStandardBrackground ()
         ) |> ignore
 
-      self.UI.on_mouseover(fun _ ->
+      self.on_mouseover(fun _ ->
         drawBackground background 0x48c9b0
         resetBackground()
       ) |> ignore
 
-      self.UI.on_mousedown(fun _ ->
+      self.on_mousedown(fun _ ->
         drawHoverBrackground ()
         resetBackground()
       ) |> ignore
 
-      self.UI.on_mouseup(fun ev ->
+      self.on_mouseup(fun ev ->
         drawStandardBrackground ()
         active <- not active
 
         updateTickText()
-        onStateChange.Trigger(CheckboxStateChange.Create(self, ev))
+        onStateChangeEvent.Trigger(CheckboxStateChange.Create(self, ev))
 
-        self.UI.removeAllListeners("mouseout") |> ignore
+        self.removeAllListeners("mouseout") |> ignore
       ) |> ignore
 
-    member self.StateChange = onStateChange.Publish
+      if onStateChange.IsSome then
+        onStateChangeEvent.Publish.Add(onStateChange.Value)
 
-    member self.State
+    interface IStateChangeable<CheckboxStateChange> with
+      member self.OnStateChange = onStateChangeEvent.Publish
+
+    member self.state
       with get () = active
       and set (value) =
         active <- value
         updateTickText()
-        onStateChange.Trigger(CheckboxStateChange.Create(self))
+        onStateChangeEvent.Trigger(CheckboxStateChange.Create(self))
