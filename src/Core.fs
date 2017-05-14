@@ -68,6 +68,14 @@ module Core =
       self.RootContainer.addChild(widget.UI)
       |> ignore
 
+  let withOnClick (onClick: 'T -> unit) widget =
+    (widget :> IClickable<'T>).OnClick.Add(onClick)
+    widget
+
+  let withOnStateChange (onStateChange: 'T -> unit) widget =
+    (widget :> IStateChangeable<'T>).OnStateChange.Add(onStateChange)
+    widget
+
 module Theme =
 
   type TextTheme =
