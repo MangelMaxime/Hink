@@ -9,18 +9,18 @@ open Hink.Core
 [<AutoOpen>]
 module Label =
 
-  type Label(str) as self =
-    inherit Widget()
+  type Label(?x, ?y, ?str) as self =
+    inherit Container()
 
-    let text = Text(str, Hink.Theme.Default.TextStyle)
+    let internalText = Text(defaultArg str "", Hink.Theme.Default.TextStyle)
 
     do
-      let container = Container()
+      // Position
+      self.x <- defaultArg x 0.
+      self.y <- defaultArg y 0.
+      self.addChild(internalText) |> ignore
 
-      container.addChild(text) |> ignore
-      self.UI <- container
-
-    member self.Text
-      with get () = text.text
+    member self.text
+      with get () = internalText.text
       and set(value) =
-        text.text <- value
+        internalText.text <- value

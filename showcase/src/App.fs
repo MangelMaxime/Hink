@@ -19,27 +19,32 @@ module Main =
       y = 150.
     )
 
-  let switchText state = sprintf "Checkbox value: %b" state
-  let switchLabel = Label(switchText switch.state)
-  switchLabel.UI.x <- 100.
-  switchLabel.UI.y <- 155.
+  let switchText state = sprintf "Switch value: %b" state
+  let switchLabel =
+    Label(
+      x = 100.,
+      y= 155.,
+      str = switchText switch.state
+    )
 
   switch
   |> withOnStateChange(
     fun event ->
-        switchLabel.Text <- switchText event.NewState
+        switchLabel.text <- switchText event.NewState
     )
   |> ignore
 
-  let window = Window()
-  window.UI.x <- 20.
-  window.UI.y <- 200.
+  let window =
+    Window(
+      x = 20.,
+      y = 200.
+    )
 
   let mutable counter = 0
   let counterButton =
     Button(
       x = 20.,
-      y = 20.,
+      y = 40.,
       str = "Click me !",
       onClick = (
         fun event ->
@@ -48,19 +53,25 @@ module Main =
       )
     )
 
+  let checbkoxLabel =
+    Label (
+      x = 50.,
+      y = 105.,
+      str = "Checkbox value: false"
+    )
+
   let checkbox =
     Checkbox(
       x = 20.,
       y = 100.,
-      onStateChange = (fun event -> Browser.console.log event.NewState)
+      onStateChange =
+        ( fun event ->
+          checbkoxLabel.text <- sprintf "Checkbox value: %b" event.NewState )
     )
-
-  app.AddWidget(switchLabel)
-  //app.AddWidget(window)
 
   app
     .RootContainer
-    .addChild(counterButton, checkbox, switch)
+    .addChild(counterButton, checkbox, checbkoxLabel, switch, switchLabel, window)
     |> ignore
 
   // Start app

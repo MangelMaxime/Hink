@@ -8,8 +8,8 @@ open Hink.Core
 [<AutoOpen>]
 module Window =
 
-  type Window(?title) as self =
-    inherit Widget()
+  type Window(?x, ?y, ?width, ?height, ?title) as self =
+    inherit Container()
 
     let mutable title = defaultArg title ""
 
@@ -25,16 +25,21 @@ module Window =
     let drawStandardBrackground () =
       drawBackground background 0x1ABC9C
 
-    let drawHoverBrackground () =
-      drawBackground background 0x16A085
-
     let titleText = Text(title, Hink.Theme.Default.TextStyle)
     let titleBar = Container()
     let titleBarBackground = Graphics()
     let content = Container()
 
     do
-      let container = Container()
+      // Position
+      self.x <- defaultArg x 0.
+      self.y <- defaultArg y 0.
+      // Size
+      self.width <- defaultArg width 300.
+      self.height <- defaultArg height 200.
+      // Interactive
+      self.interactive <- true
+      self.buttonMode <- true
 
       drawStandardBrackground ()
 
@@ -48,10 +53,8 @@ module Window =
       titleText.x <- 80. / 2.
       titleText.y <- 34. / 2.
       titleBar.addChild(titleBarBackground, titleText) |> ignore
-       
-      container.addChild(background, titleBar) |> ignore
-      container.interactive <- true
-      self.UI <- container
+
+      self.addChild(background, titleBar) |> ignore
 
       // let resetBackground () =
       //   self.UI.once_mouseout(JsFunc1(fun _ ->
