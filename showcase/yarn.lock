@@ -1120,13 +1120,9 @@ extsprintf@1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/extsprintf/-/extsprintf-1.0.2.tgz#e1080e0658e300b06294990cc70e1502235fd550"
 
-fable-core@next:
-  version "1.0.0-narumi-914"
-  resolved "https://registry.yarnpkg.com/fable-core/-/fable-core-1.0.0-narumi-914.tgz#1c95a3eb1774987d83fc9fde1ead9ede4c341640"
-
-fable-loader@^1.0.0-narumi-912:
-  version "1.0.0-narumi-912"
-  resolved "https://registry.yarnpkg.com/fable-loader/-/fable-loader-1.0.0-narumi-912.tgz#9e6b389f2535f665829cad62c08901cd56c2ec3a"
+fable-loader@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/fable-loader/-/fable-loader-1.0.0.tgz#1a866d500145eaa078e30b8eeef20d6f45e5206e"
   dependencies:
     fable-utils "^1.0.0"
 
