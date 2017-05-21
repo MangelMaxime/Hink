@@ -13,19 +13,19 @@ module Window =
 
     let mutable title = defaultArg title ""
 
-    let drawBackground (g: Graphics) color=
+    let drawBodyBackground (g: Graphics) color=
       g
         .beginFill(float color)
         .drawRoundedRect(0., 0., 80., 34., 4.)
         .endFill()
         |> ignore
 
-    let background = Graphics()
+    let body = Graphics()
 
-    let drawStandardBrackground () =
-      drawBackground background 0x1ABC9C
+    let drawBodyStandardBrackground () =
+      drawBodyBackground body 0x1ABC9C
 
-    let titleText = Text(title, Hink.Theme.Default.TextStyle)
+    let titleBarText = Text(title, Hink.Theme.Default.TextStyle)
     let titleBar = Container()
     let titleBarBackground = Graphics()
     let content = Container()
@@ -41,7 +41,7 @@ module Window =
       self.interactive <- true
       self.buttonMode <- true
 
-      drawStandardBrackground ()
+      drawBodyStandardBrackground ()
 
       titleBarBackground
         .beginFill(float 0x34495E)
@@ -49,12 +49,12 @@ module Window =
         .endFill()
         |> ignore
 
-      titleText.anchor <- Point(0., 0.5)
-      titleText.x <- 80. / 2.
-      titleText.y <- 34. / 2.
-      titleBar.addChild(titleBarBackground, titleText) |> ignore
+      titleBarText.anchor <- Point(0., 0.5)
+      titleBarText.x <- 80. / 2.
+      titleBarText.y <- 34. / 2.
+      titleBar.addChild(titleBarBackground, titleBarText) |> ignore
 
-      self.addChild(background, titleBar) |> ignore
+      self.addChild(body, titleBar) |> ignore
 
       // let resetBackground () =
       //   self.UI.once_mouseout(JsFunc1(fun _ ->
