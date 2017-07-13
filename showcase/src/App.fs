@@ -34,12 +34,12 @@ module Main =
     )
   |> ignore
 
-//   let window =
-//     Window(
-//       x = 20.,
-//       y = 200.
-//     )
-
+  let window =
+    Window(
+      x = 20.,
+      y = 200.
+    )
+//
   let mutable counter = 0
   let counterButton =
     Button(
@@ -71,7 +71,7 @@ module Main =
 
   app
     .RootContainer
-    .addChild(counterButton, checkbox, checbkoxLabel, switch, switchLabel)//, window)
+    .addChild(counterButton, checkbox, checbkoxLabel, switch, switchLabel, window)
     |> ignore
 
   // Start app
