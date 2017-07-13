@@ -25,5 +25,8 @@ export default {
     ],
     format: 'iife',
     moduleName: 'hinkShowcase',
-    external: ['PIXI']
+    external: ['PIXI'],
+    globals: {
+        PIXI: 'PIXI'
+    }
 };
