@@ -17,7 +17,7 @@ module Switch =
               NewState = sender.state
               Event = event }
 
-    and Switch(?x, ?y, ?width, ?height, ?theme, ?onStateChange : SwitchStateChange -> unit) =
+    and Switch(?x, ?y, ?width, ?height, ?theme, ?onStateChange : SwitchStateChange -> unit) as self =
         inherit Container()
         // Themes
         let mutable theme = defaultArg theme Hink.Theme.Default.Switch
@@ -56,32 +56,32 @@ module Switch =
 
         do
             //Position
-            base.x <- defaultArg x 0.
-            base.y <- defaultArg y 0.
+            self.x <- defaultArg x 0.
+            self.y <- defaultArg y 0.
             // Build text
             text.anchor <- Point(0., 0.5)
             text.x <- theme.CirclePadding
             text.y <- theme.Height / 2.
             // Interactive
-            base.interactive <- true
-            base.buttonMode <- true
+            self.interactive <- true
+            self.buttonMode <- true
             // Attach all components togethers
-            base.addChild (background, text, circle) |> ignore
+            self.addChild (background, text, circle) |> ignore
             // Set display
             updateUI()
-            base.on_mouseup (fun ev ->
+            self.on_mouseup (fun ev ->
                 active <- not active
                 updateUI()
-                onStateChangeEvent.Trigger(SwitchStateChange.Create(base, ev)))
+                onStateChangeEvent.Trigger(SwitchStateChange.Create(self, ev)))
             |> ignore
             if onStateChange.IsSome then onStateChangeEvent.Publish.Add(onStateChange.Value)
 
         interface IStateChangeable<SwitchStateChange> with
-            member this.OnStateChange = onStateChangeEvent.Publish
+            member self.OnStateChange = onStateChangeEvent.Publish
 
-        member this.state
+        member self.state
             with get () = active
             and set (value) =
                 active <- value
                 updateUI()
-                onStateChangeEvent.Trigger(SwitchStateChange.Create(base))
+                onStateChangeEvent.Trigger(SwitchStateChange.Create(self))

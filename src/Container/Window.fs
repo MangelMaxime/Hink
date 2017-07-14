@@ -10,7 +10,7 @@ module Window =
     let private makeContainer() = Container()
     let private makeGraphics() = Graphics()
 
-    type Window(?x, ?y, ?width, ?height, ?title) =
+    type Window(?x, ?y, ?width, ?height, ?title) as self =
         inherit Container()
         let mutable title = defaultArg title ""
         let drawBodyBackground (g : Graphics) color =
@@ -23,21 +23,21 @@ module Window =
         let content = makeContainer()
         do
             // Position
-            base.x <- defaultArg x 0.
-            base.y <- defaultArg y 0.
+            self.x <- defaultArg x 0.
+            self.y <- defaultArg y 0.
             // Size
-            base.width <- defaultArg width 300.
-            base.height <- defaultArg height 200.
+            self.width <- defaultArg width 300.
+            self.height <- defaultArg height 200.
             // Interactive
-            base.interactive <- true
-            base.buttonMode <- true
+            self.interactive <- true
+            self.buttonMode <- true
             drawBodyStandardBrackground()
-            titleBarBackground.beginFill(float 0x34495E).drawRect(0., 0., base.width, 20.).endFill() |> ignore
+            titleBarBackground.beginFill(float 0x34495E).drawRect(0., 0., self.width, 20.).endFill() |> ignore
             titleBarText.anchor <- Point(0., 0.5)
             titleBarText.x <- 80. / 2.
             titleBarText.y <- 34. / 2.
             titleBar.addChild (titleBarBackground, titleBarText) |> ignore
-            base.addChild (body, titleBar) |> ignore
+            self.addChild (body, titleBar) |> ignore
 // let resetBackground () =
 //   self.UI.once_mouseout(JsFunc1(fun _ ->
 //     drawStandardBrackground ()

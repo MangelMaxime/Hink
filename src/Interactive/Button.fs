@@ -15,7 +15,7 @@ module Button =
             { Sender = sender
               Event = event }
 
-    and Button(?x : float, ?y : float, ?width : float, ?height : float, ?str : string, ?onClick : ButtonOnClick -> unit) =
+    and Button(?x : float, ?y : float, ?width : float, ?height : float, ?str : string, ?onClick : ButtonOnClick -> unit) as self =
         inherit Container()
         let onClickEvent = new Event<ButtonOnClick>()
         let drawBackground (g : Graphics) color =
@@ -27,32 +27,32 @@ module Button =
 
         do
             // Position
-            base.x <- defaultArg x 0.
-            base.y <- defaultArg y 0.
+            self.x <- defaultArg x 0.
+            self.y <- defaultArg y 0.
             // Size
-            base.width <- defaultArg width 80.
-            base.height <- defaultArg height 80.
+            self.width <- defaultArg width 80.
+            self.height <- defaultArg height 80.
             // Interactive
-            base.interactive <- true
-            base.buttonMode <- true
+            self.interactive <- true
+            self.buttonMode <- true
             drawStandardBrackground()
             internalText.anchor <- Point(0.5, 0.5)
             internalText.x <- 80. / 2.
             internalText.y <- 34. / 2.
-            base.addChild (background, internalText) |> ignore
-            let resetBackground() = base.once_mouseout (fun _ -> drawStandardBrackground()) |> ignore
-            base.on_mouseover (fun _ ->
+            self.addChild (background, internalText) |> ignore
+            let resetBackground() = self.once_mouseout (fun _ -> drawStandardBrackground()) |> ignore
+            self.on_mouseover (fun _ ->
                 drawBackground background 0x48c9b0
                 resetBackground())
             |> ignore
-            base.on_mousedown (fun _ ->
+            self.on_mousedown (fun _ ->
                 drawHoverBrackground()
                 resetBackground())
             |> ignore
-            base.on_mouseup (fun ev ->
-                onClickEvent.Trigger(ButtonOnClick.Create(base, ev))
+            self.on_mouseup (fun ev ->
+                onClickEvent.Trigger(ButtonOnClick.Create(self, ev))
                 drawStandardBrackground()
-                base.removeAllListeners ("mouseout") |> ignore)
+                self.removeAllListeners ("mouseout") |> ignore)
             |> ignore
             // Register onClick callback if one given in the constructor
             if onClick.IsSome then onClickEvent.Publish.Add(onClick.Value)
@@ -60,6 +60,6 @@ module Button =
         interface IClickable<ButtonOnClick> with
             member this.OnClick = onClickEvent.Publish
 
-        member this.text
+        member self.text
             with get () = internalText.text
             and set (value) = internalText.text <- value
