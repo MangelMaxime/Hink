@@ -39,7 +39,7 @@ module Main =
       x = 20.,
       y = 200.
     )
-//
+
   let mutable counter = 0
   let counterButton =
     Button(
