@@ -18,9 +18,9 @@ module Window =
         let body = Graphics()
         let drawBodyStandardBrackground() = drawBodyBackground body 0x1ABC9C
         let titleBarText = Text(title, Hink.Theme.Default.TextStyle)
-        let titleBar = makeContainer()
-        let titleBarBackground = makeGraphics()
-        let content = makeContainer()
+        let titleBar = Container()
+        let titleBarBackground = Graphics()
+        let content = Container()
         do
             // Position
             self.x <- defaultArg x 0.
@@ -32,7 +32,7 @@ module Window =
             self.interactive <- true
             self.buttonMode <- true
             drawBodyStandardBrackground()
-            titleBarBackground.beginFill(float 0x34495E).drawRect(0., 0., self.width, 20.).endFill() |> ignore
+            titleBarBackground.beginFill(float 0x34495E).drawRect(0., 0., 80., 20.).endFill() |> ignore
             titleBarText.anchor <- Point(0., 0.5)
             titleBarText.x <- 80. / 2.
             titleBarText.y <- 34. / 2.
