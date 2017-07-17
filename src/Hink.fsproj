@@ -3,15 +3,11 @@
     <TargetFramework>netstandard1.6</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Fable.Import.Pixi.fs" />
     <Compile Include="Inputs\Mouse.fs" />
     <Compile Include="Inputs\Keyboard.fs" />
-    <Compile Include="Core.fs" />
-    <Compile Include="Display\Label.fs" />
-    <Compile Include="Interactive\Button.fs" />
-    <Compile Include="Interactive\Checkbox.fs" />
-    <Compile Include="Interactive\Switch.fs" />
-    <Compile Include="Container\Window.fs" />
+    <Compile Include="Helpers.fs" />
+    <Compile Include="Theme.fs" />
+    <Compile Include="Hink.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>
