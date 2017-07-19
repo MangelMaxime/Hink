@@ -4,29 +4,32 @@ import serve from 'rollup-plugin-serve';
 import cjs from 'rollup-plugin-commonjs';
 import nodeResolve from 'rollup-plugin-node-resolve';
 
+
+const isProduction = process.env.BUID == "production";
+
 export default {
     entry: './Showcase.fsproj',
     dest: './public/dist/js/bundle.js',
     plugins: [
-        fable(),
+        fable({
+            define: isProduction ? [] : ["DEBUG"]
+        }),
         livereload(),
         serve({
             contentBase: 'public',
-            port: 8080
+            port: 8081
         }),
         cjs({
             include: './node_modules/**',
             namedExports: {
-                // 'react': ['createElement', 'Component'],
-                // 'react-dom': ['render']
             }
         }),
         nodeResolve({ jsnext: true, main: true, browser: true })
     ],
-    format: 'iife',
-    moduleName: 'hinkShowcase',
-    external: ['PIXI'],
+    external: ['stats.js'],
     globals: {
-        PIXI: 'PIXI'
-    }
+        'stats.js': 'Stats'
+    },
+    format: 'iife',
+    moduleName: 'hinkShowcase'
 };

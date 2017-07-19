@@ -59,7 +59,8 @@ module Mouse =
           mutable Middle : ButtonState
           mutable IsDragging : bool
           mutable HasBeenInitiated : bool
-          mutable Element : HTMLElement }
+          mutable Element : HTMLElement
+          mutable JustReleased : bool }
 
         /// Initial state of Mouse
         static member Initial =
@@ -70,11 +71,15 @@ module Mouse =
               Middle = false
               IsDragging = false
               HasBeenInitiated = false
-              Element = window.document.body }
+              Element = window.document.body
+              JustReleased = false }
 
-        member self.HitRegion(x, y, w, h) = self.X > x && self.X <= x + w && self.Y > y && self.Y < y + h
-        member self.SetCursor cursor = self.Element.style.cursor <- cursor
-        member self.ResetCursor() = self.Element.style.cursor <- Cursor.Auto
+        member this.HitRegion(x, y, w, h) = this.X > x && this.X <= x + w && this.Y > y && this.Y < y + h
+        member this.SetCursor cursor = this.Element.style.cursor <- cursor
+        member this.ResetCursor() = this.Element.style.cursor <- Cursor.Auto
+
+        member this.ResetReleased () =
+            this.JustReleased <- false
 
     /// Variable used to access current Mouse state
     let Manager = Record.Initial
@@ -99,6 +104,7 @@ module Mouse =
                 | 1. ->
                     Manager.Left <- false
                     Manager.IsDragging <- false
+                    Manager.JustReleased <- true
                 | 2. -> Manager.Middle <- false
                 | 3. -> Manager.Right <- false
                 | _ -> failwith "Not supported button"

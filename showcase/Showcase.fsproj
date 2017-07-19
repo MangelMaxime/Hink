@@ -3,6 +3,7 @@
     <TargetFramework>netstandard1.6</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="src/Libs/Stats.fs" />
     <Compile Include="src/App.fs" />
   </ItemGroup>
   <ItemGroup>
