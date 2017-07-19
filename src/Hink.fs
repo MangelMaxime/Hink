@@ -28,12 +28,21 @@ module Gui =
           mutable Width : float
           mutable Height : float }
 
-    type Window =
+    type WindowInfo =
         { mutable X : float
           mutable Y : float
           mutable Width : float
           mutable Height : float
-          mutable Layout : Layout }
+          mutable Layout : Layout
+          mutable HasFocus : bool }
+
+        static member Default = // TODO: Use theme ?
+            { X = 0.
+              Y = 0.
+              Width = 100.
+              Height = 200.
+              Layout = Vertical
+              HasFocus = false }
 
     type Row =
         { mutable Ratios : float []
@@ -54,8 +63,10 @@ module Gui =
           mutable Cursor : Cursor
           /// Store if the cursor has been styled in the last loop. Ex: Hover
           mutable IsCursorStyled : bool
-          mutable CurrentWindow : Window option
+          mutable CurrentWindow : WindowInfo option
           mutable LastReferenceTick : DateTime
+          /// Store if the current Window gain focus during his rendering time
+          mutable HasGainFocus : bool
           mutable Delta : TimeSpan }
 
         static member Create (canvas : Browser.HTMLCanvasElement, ?fontSize, ?theme) =
@@ -83,6 +94,7 @@ module Gui =
                   Height = 0. }
               CurrentWindow = None
               RowInfo = None
+              HasGainFocus = false
               LastReferenceTick = DateTime.Now
               Delta = TimeSpan.Zero }
 
@@ -91,6 +103,8 @@ module Gui =
         member this.Prepare () =
             let now = DateTime.Now
             this.Delta <- now - this.LastReferenceTick
+
+            this.Context.globalCompositeOperation <- "source-over"
 
             if this.Delta > oneSecond then
                 this.LastReferenceTick <- now
@@ -109,7 +123,9 @@ module Gui =
             // Help detecting if the mouse cursor need to be reset on the next loop
             this.IsCursorStyled <- false
 
-            // TODO: EndRow + EndWindow
+            // Close current window
+            if this.CurrentWindow.IsSome then
+                this.EndWindow()
             this.CurrentWindow <- None
             this.RowInfo <- None
 
@@ -123,7 +139,7 @@ module Gui =
             match this.CurrentWindow with
             | None -> true
             | Some window ->
-                this.Cursor.Y + elementH > 0. && this.Cursor.Y < window.Height
+                this.Cursor.Y + elementH > 0. && this.Cursor.Y < window.Y + window.Height - elementH
 
         member this.IsHover(?elementH) =
             let elementH = defaultArg elementH this.Theme.Element.Height
@@ -168,22 +184,21 @@ module Gui =
                 this.Cursor.X <- this.Cursor.Width + this.Theme.Element.SeparatorSize
 
         member this.EndWindow() =
-            ()
+            // if this.CurrentWindow.Value.HasFocus then
+            //     this.Context.globalCompositeOperation <- "destination-over"
+            this.HasGainFocus <- false
+            this.CurrentWindow <- None
             // TODO: Handle scroll + save window position
 
-        member this.Window(x: float, y: float, width: float, height: float) =
-            this.CurrentWindow <- Some { X = x
-                                         Y = y
-                                         Width = width
-                                         Height = height
-                                         Layout = Vertical }
+        member this.Window(windowInfo : WindowInfo, ?backgroundColor) =
+            this.CurrentWindow <- Some windowInfo
 
             this.Cursor.X <- this.CurrentWindow.Value.X
             this.Cursor.Y <- this.CurrentWindow.Value.Y  // TODO: handle scroll
-            this.Cursor.Width <- width
-            this.Cursor.Height <- height
+            this.Cursor.Width <- windowInfo.Width
+            this.Cursor.Height <- windowInfo.Height
 
-            this.Context.fillStyle <- !^this.Theme.Window.Background
+            this.Context.fillStyle <- !^(defaultArg backgroundColor this.Theme.Window.Background)
             this.Context.fillRect(
                 this.Cursor.X,
                 this.Cursor.Y, // TODO: handle scroll

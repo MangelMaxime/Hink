@@ -22,6 +22,17 @@ module Main =
     Browser.document.body.appendChild stats.dom |> ignore
     #endif
 
+    let window1 = { WindowInfo.Default with X = 10.
+                                            Y = 300.
+                                            Width = 400.
+                                            Height = 300.
+                                            HasFocus = true }
+
+    let window2 = { WindowInfo.Default with X = 300.
+                                            Y = 300.
+                                            Width = 400.
+                                            Height = 285. }
+
     let rec render _ =
         ui.Context.clearRect(0., 0., ui.Canvas.width, ui.Canvas.height)
         ui.Context.fillStyle <- !^"#fff"
@@ -32,8 +43,7 @@ module Main =
 
         ui.Prepare()
 
-
-        ui.Window(10., 10., 400., 285.)
+        ui.Window(window1)
         if ui.Button("Click me") then
             buttonCounter <- buttonCounter + 1
         ui.Label(sprintf "Clicked: %i" buttonCounter)
@@ -49,7 +59,10 @@ module Main =
 
         ui.Label("We filled all the row, so new line here", Center, backgroundColor = "#34495e" )
 
-        ui.Window(500., 50., 400., 285.)
+        ui.Label("Should be displayed", backgroundColor = "#8e44ad")
+        ui.Label("Should not be displayed", backgroundColor = "#8e44ad")
+
+        ui.Window(window2, "#e74c3c")
         ui.Label("Here we have a new window")
         ui.Label("Here we have a new window")
         ui.Label("Here we have a new window")
@@ -58,23 +71,22 @@ module Main =
         ui.Label("1/4", backgroundColor = "#27ae60")
         ui.Label("1/4", backgroundColor = "#8e44ad")
 
-        // if ui.Button("plp", "Click me !", 20., 20., 120.) then
-        //     buttonCounter <- buttonCounter + 1
-
-        // ui.Label(sprintf "You clicked: %i" buttonCounter, 150., 30.)
-
-        // ui.Checkbox("checkbox", isChecked, 20., 80.) |> ignore
-        // ui.Label(
-        //     sprintf "Clicked: %b" isChecked.Value,
-        //     60., 83.)
-
-        // ui.Switch("switch", switchValue, 20., 130.) |> ignore
-        // ui.Label(
-        //     sprintf "Switch: %b" switchValue.Value,
-        //     100., 135.
-        // )
-
         ui.Finish()
+
+
+
+        // ui.Context.fillStyle <- !^"blue"
+        // ui.Context.fillRect(10., 10., 100., 100.)
+
+        // ui.Context.globalCompositeOperation <- "destination-over"
+
+        // ui.Context.fillStyle <- !^"red"
+        // ui.Context.fillRect(50., 50., 100., 100.)
+
+        // ui.Context.globalCompositeOperation <- "source-over"
+
+        // ui.Context.fillStyle <- !^"green"
+        // ui.Context.fillRect(75., 75., 100., 100.)
 
         #if DEBUG
         stats.``end``() |> ignore
