@@ -33,16 +33,14 @@ module Gui =
           mutable Y : float
           mutable Width : float
           mutable Height : float
-          mutable Layout : Layout
-          mutable HasFocus : bool }
+          mutable Layout : Layout }
 
         static member Default = // TODO: Use theme ?
             { X = 0.
               Y = 0.
               Width = 100.
               Height = 200.
-              Layout = Vertical
-              HasFocus = false }
+              Layout = Vertical }
 
     type Row =
         { mutable Ratios : float []
@@ -65,8 +63,6 @@ module Gui =
           mutable IsCursorStyled : bool
           mutable CurrentWindow : WindowInfo option
           mutable LastReferenceTick : DateTime
-          /// Store if the current Window gain focus during his rendering time
-          mutable HasGainFocus : bool
           mutable Delta : TimeSpan }
 
         static member Create (canvas : Browser.HTMLCanvasElement, ?fontSize, ?theme) =
@@ -94,7 +90,6 @@ module Gui =
                   Height = 0. }
               CurrentWindow = None
               RowInfo = None
-              HasGainFocus = false
               LastReferenceTick = DateTime.Now
               Delta = TimeSpan.Zero }
 
@@ -184,13 +179,13 @@ module Gui =
                 this.Cursor.X <- this.Cursor.Width + this.Theme.Element.SeparatorSize
 
         member this.EndWindow() =
-            // if this.CurrentWindow.Value.HasFocus then
-            //     this.Context.globalCompositeOperation <- "destination-over"
-            this.HasGainFocus <- false
             this.CurrentWindow <- None
             // TODO: Handle scroll + save window position
 
         member this.Window(windowInfo : WindowInfo, ?backgroundColor) =
+            if this.CurrentWindow.IsSome then
+                this.EndWindow()
+
             this.CurrentWindow <- Some windowInfo
 
             this.Cursor.X <- this.CurrentWindow.Value.X

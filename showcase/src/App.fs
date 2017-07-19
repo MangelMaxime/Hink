@@ -23,13 +23,12 @@ module Main =
     #endif
 
     let window1 = { WindowInfo.Default with X = 10.
-                                            Y = 300.
+                                            Y = 10.
                                             Width = 400.
-                                            Height = 300.
-                                            HasFocus = true }
+                                            Height = 300. }
 
-    let window2 = { WindowInfo.Default with X = 300.
-                                            Y = 300.
+    let window2 = { WindowInfo.Default with X = 500.
+                                            Y = 50.
                                             Width = 400.
                                             Height = 285. }
 
@@ -63,8 +62,6 @@ module Main =
         ui.Label("Should not be displayed", backgroundColor = "#8e44ad")
 
         ui.Window(window2, "#e74c3c")
-        ui.Label("Here we have a new window")
-        ui.Label("Here we have a new window")
         ui.Label("Here we have a new window")
         ui.Row([|1./2.; 1./4.; 1./4.|])
         ui.Label("1/2", backgroundColor = "#f39c12")
