@@ -14,8 +14,8 @@ module rec Theme =
           Switch : SwitchTheme
           Window : WindowTheme }
 
-        member this.FormatFontString _ =
-            sprintf this.FontString this.FontSize
+        member this.FormatFontString =
+            sprintf this.FontString
 
         member this.ButtonOffsetY =
             (this.Element.Height - this.Button.Height) / 2.
@@ -79,7 +79,8 @@ module rec Theme =
     type WindowHeader =
         { Color : string
           Height : float
-          SymbolOffset : float }
+          SymbolOffset : float
+          OverSymbolColor : string }
 
     let darkTheme : Theme =
         { FontSize = 16.
@@ -128,4 +129,5 @@ module rec Theme =
               Header =
                 { Color = "#34495e"
                   Height = 24.
-                  SymbolOffset = 6. } } }
+                  SymbolOffset = 6.
+                  OverSymbolColor = "#e74c3c" } } }

@@ -221,13 +221,32 @@ module Gui =
                 )
 
                 if this.CurrentWindow.Value.Closable then
-                    this.Context.fillStyle <- !^this.Theme.Text.Color
+                    this.Context.font <- this.Theme.FormatFontString this.Theme.FontSmallSize
+
                     let textSize = this.Context.measureText("\u2715")
-                    this.Context.fillText(
-                        "\u2715",
-                        this.Cursor.X + this.Cursor.Width - textSize.width - this.Theme.Window.Header.SymbolOffset,
-                        this.Cursor.Y - this.Theme.Window.Header.Height + this.Theme.Window.Header.SymbolOffset
-                    )
+                    let textX = this.Cursor.X + this.Cursor.Width - textSize.width - this.Theme.Window.Header.SymbolOffset
+                    let textY = this.Cursor.Y - this.Theme.Window.Header.Height + this.Theme.Window.Header.SymbolOffset
+
+
+
+                    // Custom IsHover check has we don't follow auto layout management for the header symbol
+                    let hover = this.Mouse.X >= textX && this.Mouse.X < (textX + textSize.width) &&
+                                this.Mouse.Y >= textY && this.Mouse.Y < (textY + this.Theme.FontSize)
+
+                    // Draw symbol background
+                    if hover then
+                        this.Context.fillStyle <- !^this.Theme.Window.Header.OverSymbolColor
+                        this.Context.fillRect(
+                            textX - this.Theme.Window.Header.SymbolOffset,
+                            this.Cursor.Y - this.Theme.Window.Header.Height,
+                            textSize.width + this.Theme.Window.Header.SymbolOffset * 2.,
+                            textY + this.Theme.FontSize
+                        )
+
+                    // Draw symbol
+                    this.Context.fillStyle <- !^this.Theme.Text.Color
+                    this.Context.fillText("\u2715",textX, textY)
+
 
 
                 // Draw Window background
@@ -344,7 +363,7 @@ module Gui =
 
             // TODO: Check max chars
             this.Context.fillStyle <- !^this.Theme.Text.Color
-            this.Context.font <- sprintf this.Theme.FontString this.Theme.FontSmallSize
+            this.Context.font <- this.Theme.FormatFontString this.Theme.FontSmallSize
             this.Context.fillText(
                 text,
                 this.Cursor.X + offsetX,

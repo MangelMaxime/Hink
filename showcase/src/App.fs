@@ -53,9 +53,9 @@ module Main =
         ui.Label("Row demo", Center, backgroundColor = "#34495e")
 
         ui.Row([|1./2.; 1./4.; 1./4.|])
-        ui.Label("1/2", backgroundColor = "#f39c12")
-        ui.Label("1/4", backgroundColor = "#27ae60")
-        ui.Label("1/4", backgroundColor = "#8e44ad")
+        ui.Label("1/2", Center, "#f39c12")
+        ui.Label("1/4", Center, "#27ae60")
+        ui.Label("1/4", Center, "#8e44ad")
 
         ui.Label("We filled all the row, so new line here", Center, backgroundColor = "#34495e" )
 
@@ -71,20 +71,6 @@ module Main =
 
         ui.Finish()
 
-
-
-        // ui.Context.fillStyle <- !^"blue"
-        // ui.Context.fillRect(10., 10., 100., 100.)
-
-        // ui.Context.globalCompositeOperation <- "destination-over"
-
-        // ui.Context.fillStyle <- !^"red"
-        // ui.Context.fillRect(50., 50., 100., 100.)
-
-        // ui.Context.globalCompositeOperation <- "source-over"
-
-        // ui.Context.fillStyle <- !^"green"
-        // ui.Context.fillRect(75., 75., 100., 100.)
 
         #if DEBUG
         stats.``end``() |> ignore
