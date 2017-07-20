@@ -25,13 +25,14 @@ module Main =
     let window1 = { WindowInfo.Default with X = 10.
                                             Y = 10.
                                             Width = 400.
-                                            Height = 300. }
+                                            Height = 260. }
 
     let window2 = { WindowInfo.Default with X = 500.
                                             Y = 50.
                                             Width = 400.
                                             Height = 285.
-                                            Closable = true }
+                                            Closable = true
+                                            Title = Some "Closable and Draggable" }
 
     let rec render _ =
         ui.Context.clearRect(0., 0., ui.Canvas.width, ui.Canvas.height)
@@ -46,9 +47,7 @@ module Main =
         ui.Window(window1)
         if ui.Button("Click me") then
             buttonCounter <- buttonCounter + 1
-        ui.Label(sprintf "Clicked: %i" buttonCounter)
         ui.Label(sprintf "Clicked: %i" buttonCounter, Center)
-        ui.Label(sprintf "Clicked: %i" buttonCounter, Right)
 
         ui.Label("Row demo", Center, backgroundColor = "#34495e")
 
@@ -59,9 +58,13 @@ module Main =
 
         ui.Label("We filled all the row, so new line here", Center, backgroundColor = "#34495e" )
 
+        ui.Empty()
+        ui.Row([|1./4.; 1./2.; 1./4.|])
+
+        ui.Empty()
         if ui.Button("Open second Window") then
             window2.Closed <- false
-        ui.Label("Should not be displayed", backgroundColor = "#8e44ad")
+        ui.Empty()
 
         ui.Window(window2, "#e74c3c")
         ui.Label("Here we have a new window")

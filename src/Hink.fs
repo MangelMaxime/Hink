@@ -36,7 +36,8 @@ module Gui =
           mutable Layout : Layout
           mutable Draggable : bool
           mutable Closable : bool
-          mutable Closed : bool }
+          mutable Closed : bool
+          mutable Title : string option }
 
         static member Default = // TODO: Use theme ?
             { X = 0.
@@ -46,7 +47,8 @@ module Gui =
               Layout = Vertical
               Draggable = false
               Closable = false
-              Closed = false }
+              Closed = false
+              Title = None }
 
     type Row =
         { mutable Ratios : float []
@@ -221,18 +223,31 @@ module Gui =
                     this.Theme.Window.Header.Height
                 )
 
+                // Set the text font for the header
+                this.Context.font <- this.Theme.FormatFontString this.Theme.FontSmallSize
+                // Common Y position for the title and the symbol
+                let headerTextY = this.Cursor.Y - this.Theme.Window.Header.Height + this.Theme.Window.Header.SymbolOffset
+
+                match this.CurrentWindow.Value.Title with
+                | None -> () // Nothing todo
+                | Some title ->
+                    let textSize = this.Context.measureText(title)
+                    this.Context.fillStyle <- !^this.Theme.Text.Color
+                    this.Context.fillText(
+                        title,
+                        this.Cursor.X + this.Theme.Window.Header.SymbolOffset,
+                        headerTextY
+                    )
+
                 if this.CurrentWindow.Value.Closable then
-                    this.Context.font <- this.Theme.FormatFontString this.Theme.FontSmallSize
+
 
                     let textSize = this.Context.measureText("\u2715")
                     let textX = this.Cursor.X + this.Cursor.Width - textSize.width - this.Theme.Window.Header.SymbolOffset
-                    let textY = this.Cursor.Y - this.Theme.Window.Header.Height + this.Theme.Window.Header.SymbolOffset
-
-
 
                     // Custom IsHover check has we don't follow auto layout management for the header symbol
                     let hover = this.Mouse.X >= textX && this.Mouse.X < (textX + textSize.width) &&
-                                this.Mouse.Y >= textY && this.Mouse.Y < (textY + this.Theme.FontSize)
+                                this.Mouse.Y >= headerTextY && this.Mouse.Y < (headerTextY + this.Theme.FontSize)
 
                     // Draw symbol background
                     if hover then
@@ -241,14 +256,14 @@ module Gui =
                             textX - this.Theme.Window.Header.SymbolOffset,
                             this.Cursor.Y - this.Theme.Window.Header.Height,
                             textSize.width + this.Theme.Window.Header.SymbolOffset * 2.,
-                            textY + this.Theme.FontSize
+                            headerTextY + this.Theme.FontSize
                         )
                         if this.Mouse.JustReleased then
                             this.ShouldCloseWindow <- true
 
                     // Draw symbol
                     this.Context.fillStyle <- !^this.Theme.Text.Color
-                    this.Context.fillText("\u2715",textX, textY)
+                    this.Context.fillText("\u2715",textX, headerTextY)
 
 
 
@@ -279,6 +294,9 @@ module Gui =
 
                 this.FillSmallString(text, align = align)
                 this.EndElement()
+
+        member this.Empty() =
+            this.EndElement()
 
         member this.Button (text, ?align : Align) =
             if not (this.IsVisibile(this.Theme.Element.Height)) then
