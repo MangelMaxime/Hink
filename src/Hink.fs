@@ -33,14 +33,20 @@ module Gui =
           mutable Y : float
           mutable Width : float
           mutable Height : float
-          mutable Layout : Layout }
+          mutable Layout : Layout
+          mutable Draggable : bool
+          mutable Closable : bool
+          mutable Closed : bool }
 
         static member Default = // TODO: Use theme ?
             { X = 0.
               Y = 0.
               Width = 100.
               Height = 200.
-              Layout = Vertical }
+              Layout = Vertical
+              Draggable = false
+              Closable = false
+              Closed = false }
 
     type Row =
         { mutable Ratios : float []
@@ -61,6 +67,8 @@ module Gui =
           mutable Cursor : Cursor
           /// Store if the cursor has been styled in the last loop. Ex: Hover
           mutable IsCursorStyled : bool
+          /// Store if the window should be closed
+          mutable ShouldCloseWindow : bool
           mutable CurrentWindow : WindowInfo option
           mutable LastReferenceTick : DateTime
           mutable Delta : TimeSpan }
@@ -89,6 +97,7 @@ module Gui =
                   Width = 0.
                   Height = 0. }
               CurrentWindow = None
+              ShouldCloseWindow = false
               RowInfo = None
               LastReferenceTick = DateTime.Now
               Delta = TimeSpan.Zero }
@@ -133,8 +142,10 @@ module Gui =
         member this.IsVisibile(elementH) =
             match this.CurrentWindow with
             | None -> true
+            | Some { Closed = true } ->
+                false
             | Some window ->
-                this.Cursor.Y + elementH > 0. && this.Cursor.Y < window.Y + window.Height - elementH
+                this.Cursor.Y + elementH > 0. && this.Cursor.Y < window.Y + this.Theme.Window.Header.Height + window.Height - elementH
 
         member this.IsHover(?elementH) =
             let elementH = defaultArg elementH this.Theme.Element.Height
@@ -179,27 +190,55 @@ module Gui =
                 this.Cursor.X <- this.Cursor.Width + this.Theme.Element.SeparatorSize
 
         member this.EndWindow() =
+            // Set if the window has been closed during this loop
+            this.CurrentWindow.Value.Closed <- this.ShouldCloseWindow
+            this.ShouldCloseWindow <- false
+            // Remove the window to end it
             this.CurrentWindow <- None
             // TODO: Handle scroll + save window position
 
-        member this.Window(windowInfo : WindowInfo, ?backgroundColor) =
+        member this.Window(windowInfo : WindowInfo, ?backgroundColor, ?headerColor) =
             if this.CurrentWindow.IsSome then
                 this.EndWindow()
 
             this.CurrentWindow <- Some windowInfo
 
-            this.Cursor.X <- this.CurrentWindow.Value.X
-            this.Cursor.Y <- this.CurrentWindow.Value.Y  // TODO: handle scroll
-            this.Cursor.Width <- windowInfo.Width
-            this.Cursor.Height <- windowInfo.Height
+            // If the Window is not closed draw it
+            if not this.CurrentWindow.Value.Closed then
 
-            this.Context.fillStyle <- !^(defaultArg backgroundColor this.Theme.Window.Background)
-            this.Context.fillRect(
-                this.Cursor.X,
-                this.Cursor.Y, // TODO: handle scroll
-                this.Cursor.Width, // TODO: lastMaxX (auto size calculation)
-                this.Cursor.Height // TODO: lastMaxX (auto size calculation)
-            )
+                this.Cursor.X <- this.CurrentWindow.Value.X
+                this.Cursor.Y <- this.CurrentWindow.Value.Y + this.Theme.Window.Header.Height  // TODO: handle scroll
+                this.Cursor.Width <- windowInfo.Width
+                this.Cursor.Height <- windowInfo.Height
+
+                // Draw Window header
+                this.Context.fillStyle <- !^(defaultArg headerColor this.Theme.Window.Header.Color)
+                this.Context.fillRect(
+                    this.Cursor.X,
+                    this.Cursor.Y - this.Theme.Window.Header.Height,
+                    this.Cursor.Width,
+                    this.Theme.Window.Header.Height
+                )
+
+                if this.CurrentWindow.Value.Closable then
+                    this.Context.fillStyle <- !^this.Theme.Text.Color
+                    let textSize = this.Context.measureText("\u2715")
+                    this.Context.fillText(
+                        "\u2715",
+                        this.Cursor.X + this.Cursor.Width - textSize.width - this.Theme.Window.Header.SymbolOffset,
+                        this.Cursor.Y - this.Theme.Window.Header.Height + this.Theme.Window.Header.SymbolOffset
+                    )
+
+
+                // Draw Window background
+                this.Context.fillStyle <- !^(defaultArg backgroundColor this.Theme.Window.Background)
+
+                this.Context.fillRect(
+                    this.Cursor.X,
+                    this.Cursor.Y, // TODO: handle scroll
+                    this.Cursor.Width, // TODO: lastMaxX (auto size calculation)
+                    this.Cursor.Height // TODO: lastMaxX (auto size calculation)
+                )
 
         member this.Label (text, ?align : Align, ?backgroundColor : string) =
             if not (this.IsVisibile(this.Theme.Element.Height)) then

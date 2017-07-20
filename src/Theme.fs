@@ -73,7 +73,13 @@ module rec Theme =
           Color : string }
 
     type WindowTheme =
-        { Background : string }
+        { Background : string
+          Header : WindowHeader }
+
+    type WindowHeader =
+        { Color : string
+          Height : float
+          SymbolOffset : float }
 
     let darkTheme : Theme =
         { FontSize = 16.
@@ -118,4 +124,8 @@ module rec Theme =
                     { Active = Color.rgb 255 255 255
                       Default = Color.rgb 26 188 156 } } }
           Window =
-            { Background = "#bdc3c7" } }
+            { Background = "#bdc3c7"
+              Header =
+                { Color = "#34495e"
+                  Height = 24.
+                  SymbolOffset = 6. } } }

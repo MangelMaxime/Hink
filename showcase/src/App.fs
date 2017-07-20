@@ -30,7 +30,8 @@ module Main =
     let window2 = { WindowInfo.Default with X = 500.
                                             Y = 50.
                                             Width = 400.
-                                            Height = 285. }
+                                            Height = 285.
+                                            Closable = true }
 
     let rec render _ =
         ui.Context.clearRect(0., 0., ui.Canvas.width, ui.Canvas.height)
