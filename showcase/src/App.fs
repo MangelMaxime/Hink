@@ -59,7 +59,8 @@ module Main =
 
         ui.Label("We filled all the row, so new line here", Center, backgroundColor = "#34495e" )
 
-        ui.Label("Should be displayed", backgroundColor = "#8e44ad")
+        if ui.Button("Open second Window") then
+            window2.Closed <- false
         ui.Label("Should not be displayed", backgroundColor = "#8e44ad")
 
         ui.Window(window2, "#e74c3c")

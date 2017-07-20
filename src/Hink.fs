@@ -190,9 +190,10 @@ module Gui =
                 this.Cursor.X <- this.Cursor.Width + this.Theme.Element.SeparatorSize
 
         member this.EndWindow() =
-            // Set if the window has been closed during this loop
-            this.CurrentWindow.Value.Closed <- this.ShouldCloseWindow
-            this.ShouldCloseWindow <- false
+            if not this.CurrentWindow.Value.Closed then
+                // Set if the window has been closed during this loop
+                this.CurrentWindow.Value.Closed <- this.ShouldCloseWindow
+                this.ShouldCloseWindow <- false
             // Remove the window to end it
             this.CurrentWindow <- None
             // TODO: Handle scroll + save window position
@@ -242,6 +243,8 @@ module Gui =
                             textSize.width + this.Theme.Window.Header.SymbolOffset * 2.,
                             textY + this.Theme.FontSize
                         )
+                        if this.Mouse.JustReleased then
+                            this.ShouldCloseWindow <- true
 
                     // Draw symbol
                     this.Context.fillStyle <- !^this.Theme.Text.Color
