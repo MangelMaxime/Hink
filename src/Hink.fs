@@ -28,6 +28,10 @@ module Gui =
           mutable Width : float
           mutable Height : float }
 
+    type DragInfo =
+        { OriginX : float
+          OriginY : float }
+
     type WindowInfo =
         { mutable X : float
           mutable Y : float
@@ -37,7 +41,10 @@ module Gui =
           mutable Draggable : bool
           mutable Closable : bool
           mutable Closed : bool
-          mutable Title : string option }
+          mutable Title : string option
+          mutable DragXOrigin : float
+          mutable DragYOrigin : float
+          mutable IsDragging : bool }
 
         static member Default = // TODO: Use theme ?
             { X = 0.
@@ -48,7 +55,24 @@ module Gui =
               Draggable = false
               Closable = false
               Closed = false
-              Title = None }
+              Title = None
+              DragXOrigin = 0.
+              DragYOrigin = 0.
+              IsDragging = false }
+
+        member this.RealPositionX
+            with get () =
+                if this.IsDragging then
+                    this.X + (Mouse.Manager.X - this.DragXOrigin)
+                else
+                    this.X
+
+        member this.RealPositionY
+            with get () =
+                if this.IsDragging then
+                    this.Y + (Mouse.Manager.Y - this.DragYOrigin)
+                else
+                    this.Y
 
     type Row =
         { mutable Ratios : float []
@@ -56,8 +80,8 @@ module Gui =
           mutable SplitX : float
           mutable SplitWidth : float }
 
-        member this.GetCurrentRatio () =
-            this.Ratios.[this.CurrentRatio]
+        member this.ActiveRatio
+            with get () = this.Ratios.[this.CurrentRatio]
 
     type Hink =
         { Canvas : Browser.HTMLCanvasElement
@@ -121,6 +145,7 @@ module Gui =
         member this.Finish () =
             // TODO: Don't reset every time
             this.Mouse.ResetReleased ()
+            this.Mouse.ResetDragInfo ()
             // Reset the cursor style if not styled
             if not this.IsCursorStyled then
                 this.Mouse.ResetCursor ()
@@ -186,7 +211,7 @@ module Gui =
                     else // Row
                         rowInfo.CurrentRatio <- rowInfo.CurrentRatio + 1
                         this.Cursor.X <- this.Cursor.X + this.Cursor.Width
-                        this.Cursor.Width <- rowInfo.SplitWidth * rowInfo.GetCurrentRatio()
+                        this.Cursor.Width <- rowInfo.SplitWidth * rowInfo.ActiveRatio
 
             | Some { Layout = Horizontal } ->
                 this.Cursor.X <- this.Cursor.Width + this.Theme.Element.SeparatorSize
@@ -206,11 +231,19 @@ module Gui =
 
             this.CurrentWindow <- Some windowInfo
 
+            // Browser.console.log this.CurrentWindow.Value.DragX
+
+            // if this.CurrentWindow.Value.IsDragging then
+            //     this.CurrentWindow.Value.X <- this.CurrentWindow.Value.X + this.CurrentWindow.Value.DragX
+            //     this.CurrentWindow.Value.Y <- this.CurrentWindow.Value.Y + this.CurrentWindow.Value.DragY
+
+            // Browser.console.log(this.CurrentWindow.Value.DragX)
+
             // If the Window is not closed draw it
             if not this.CurrentWindow.Value.Closed then
 
-                this.Cursor.X <- this.CurrentWindow.Value.X
-                this.Cursor.Y <- this.CurrentWindow.Value.Y + this.Theme.Window.Header.Height  // TODO: handle scroll
+                this.Cursor.X <- this.CurrentWindow.Value.RealPositionX
+                this.Cursor.Y <- this.CurrentWindow.Value.RealPositionY + this.Theme.Window.Header.Height  // TODO: handle scroll
                 this.Cursor.Width <- windowInfo.Width
                 this.Cursor.Height <- windowInfo.Height
 
@@ -239,18 +272,38 @@ module Gui =
                         headerTextY
                     )
 
+                if this.CurrentWindow.Value.Draggable then
+                    let headerOriginY = this.Cursor.Y - this.Theme.Window.Header.Height
+                    let hoverHeader = this.Mouse.X >= this.Cursor.X && this.Mouse.X < (this.Cursor.X + this.Cursor.Width) && this.Mouse.Y >= headerOriginY && this.Mouse.Y < (headerOriginY + this.Theme.Window.Header.Height)
+
+                    // If hover the header and left mouse button is pressed
+                    if hoverHeader then
+                        if this.Mouse.Left then
+                            if not this.CurrentWindow.Value.IsDragging then
+                                this.CurrentWindow.Value.DragXOrigin <- this.Mouse.X
+                                this.CurrentWindow.Value.DragYOrigin <- this.Mouse.Y
+                            // Memorise that we started to drag
+                            this.CurrentWindow.Value.IsDragging <- true
+
+                    if this.Mouse.JustReleased && this.CurrentWindow.Value.IsDragging then
+                        // Store new X, Y position
+                        this.CurrentWindow.Value.X <- this.CurrentWindow.Value.RealPositionX
+                        this.CurrentWindow.Value.Y <- this.CurrentWindow.Value.RealPositionY
+                        // Reset drag info
+                        this.CurrentWindow.Value.IsDragging <- false
+                        this.CurrentWindow.Value.DragXOrigin <- 0.
+                        this.CurrentWindow.Value.DragYOrigin <- 0.
+
                 if this.CurrentWindow.Value.Closable then
-
-
                     let textSize = this.Context.measureText("\u2715")
                     let textX = this.Cursor.X + this.Cursor.Width - textSize.width - this.Theme.Window.Header.SymbolOffset
 
                     // Custom IsHover check has we don't follow auto layout management for the header symbol
-                    let hover = this.Mouse.X >= textX && this.Mouse.X < (textX + textSize.width) &&
-                                this.Mouse.Y >= headerTextY && this.Mouse.Y < (headerTextY + this.Theme.FontSize)
+                    let hoverSymbol = this.Mouse.X >= textX && this.Mouse.X < (textX + textSize.width) &&
+                                      this.Mouse.Y >= headerTextY && this.Mouse.Y < (headerTextY + this.Theme.FontSize)
 
                     // Draw symbol background
-                    if hover then
+                    if hoverSymbol then
                         this.Context.fillStyle <- !^this.Theme.Window.Header.OverSymbolColor
                         this.Context.fillRect(
                             textX - this.Theme.Window.Header.SymbolOffset,
@@ -298,7 +351,7 @@ module Gui =
         member this.Empty() =
             this.EndElement()
 
-        member this.Button (text, ?align : Align) =
+        member this.Button (text, ?align : Align, ?pressedColor, ?hoverColor, ?defaultColor) =
             if not (this.IsVisibile(this.Theme.Element.Height)) then
                 this.EndElement()
                 false
@@ -312,11 +365,11 @@ module Gui =
 
                 this.Context.fillStyle <-
                     if pressed then
-                        !^this.Theme.Button.Background.Pressed
+                        !^(defaultArg pressedColor this.Theme.Button.Background.Pressed)
                     elif hover then
-                        !^this.Theme.Button.Background.Hover
+                        !^(defaultArg hoverColor this.Theme.Button.Background.Hover)
                     else
-                        !^this.Theme.Button.Background.Default
+                        !^(defaultArg defaultColor this.Theme.Button.Background.Default)
 
                 if hover then
                     this.SetCursor Mouse.Cursor.Pointer
@@ -342,31 +395,7 @@ module Gui =
                                    SplitX = this.Cursor.X
                                    SplitWidth = this.Cursor.Width }
 
-            this.Cursor.Width <- this.Cursor.Width * this.RowInfo.Value.GetCurrentRatio()
-
-            // // Set the color
-            // if this.ActiveItem = id then
-            //     this.Context.fillStyle <- !^theme.ActiveColor
-            // elif this.HotItem = id then
-            //     this.Context.fillStyle <- !^theme.HotColor
-            // else
-            //     this.Context.fillStyle <- !^theme.Color
-
-            // // Draw button "background"
-            // this.Context.RoundedRect(x, y, w, h, theme.CornerRadius)
-
-            // this.Context.fillStyle <- !^theme.TextColor
-            // this.Context.font <- this.Theme.FormatFontString ()
-
-            // let textSize = this.Context.measureText(text)
-            // let textX = x + (w / 2.) - (textSize.width / 2.)
-            // let textY = y + (h / 2.) - (this.Theme.FontSize  / 2.)
-
-            // this.Context.fillText(text, textX, textY)
-
-            // let mutable out = false
-
-            // out || (not this.Mouse.Left) && this.HotItem = id && this.ActiveItem = id
+            this.Cursor.Width <- this.Cursor.Width * this.RowInfo.Value.ActiveRatio
 
         member this.FillSmallString (text, ?offsetX, ?offsetY, ?align : Align) =
             let offsetY = defaultArg offsetY 0.

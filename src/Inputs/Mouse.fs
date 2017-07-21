@@ -58,6 +58,8 @@ module Mouse =
           mutable Right : ButtonState
           mutable Middle : ButtonState
           mutable IsDragging : bool
+          mutable DragOriginX : float
+          mutable DragOriginY : float
           mutable HasBeenInitiated : bool
           mutable Element : HTMLElement
           mutable JustReleased : bool }
@@ -70,6 +72,8 @@ module Mouse =
               Right = false
               Middle = false
               IsDragging = false
+              DragOriginX = 0.
+              DragOriginY = 0.
               HasBeenInitiated = false
               Element = window.document.body
               JustReleased = false }
@@ -80,6 +84,18 @@ module Mouse =
 
         member this.ResetReleased () =
             this.JustReleased <- false
+
+        member this.ResetDragInfo () =
+            this.DragOriginX <- this.X
+            this.DragOriginY <- this.Y
+
+        member this.DragDeltaX
+            with get () =
+                if this.IsDragging then this.X - this.DragOriginX else 0.
+
+        member this.DragDeltaY
+            with get () =
+                if this.IsDragging then this.Y - this.DragOriginY else 0.
 
     /// Variable used to access current Mouse state
     let Manager = Record.Initial
@@ -104,6 +120,8 @@ module Mouse =
                 | 1. ->
                     Manager.Left <- false
                     Manager.IsDragging <- false
+                    Manager.DragOriginX <- 0.
+                    Manager.DragOriginY <- 0.
                     Manager.JustReleased <- true
                 | 2. -> Manager.Middle <- false
                 | 3. -> Manager.Right <- false
@@ -115,7 +133,13 @@ module Mouse =
                 Manager.X <- ev.offsetX
                 Manager.Y <- ev.offsetY
                 // Update dragging state
-                if Manager.Left then Manager.IsDragging <- true
+                if Manager.Left then
+                    // Start dragging
+                    if not Manager.IsDragging then
+                        Manager.DragOriginX <- Manager.X
+                        Manager.DragOriginY <- Manager.Y
+                    Manager.IsDragging <- true
+
                 null))
             // Tag that event listener has been set
             Manager.HasBeenInitiated <- true
