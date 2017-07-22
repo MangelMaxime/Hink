@@ -172,7 +172,7 @@ module Gui =
             | Some { Closed = true } ->
                 false
             | Some window ->
-                this.Cursor.Y + elementH > 0. && this.Cursor.Y < window.Y + this.Theme.Window.Header.Height + window.Height - elementH
+                this.Cursor.Y + elementH > 0. && this.Cursor.Y < window.RealPositionY + this.Theme.Window.Header.Height + window.Height - elementH
 
         member this.IsHover(?elementH) =
             let elementH = defaultArg elementH this.Theme.Element.Height
@@ -231,17 +231,11 @@ module Gui =
 
             this.CurrentWindow <- Some windowInfo
 
-            // Browser.console.log this.CurrentWindow.Value.DragX
-
-            // if this.CurrentWindow.Value.IsDragging then
-            //     this.CurrentWindow.Value.X <- this.CurrentWindow.Value.X + this.CurrentWindow.Value.DragX
-            //     this.CurrentWindow.Value.Y <- this.CurrentWindow.Value.Y + this.CurrentWindow.Value.DragY
-
-            // Browser.console.log(this.CurrentWindow.Value.DragX)
-
-            // If the Window is not closed draw it
-            if not this.CurrentWindow.Value.Closed then
-
+            // If the Window is closed don't draw it
+            if this.CurrentWindow.Value.Closed then
+                this.EndWindow()
+                false
+            else
                 this.Cursor.X <- this.CurrentWindow.Value.RealPositionX
                 this.Cursor.Y <- this.CurrentWindow.Value.RealPositionY + this.Theme.Window.Header.Height  // TODO: handle scroll
                 this.Cursor.Width <- windowInfo.Width
@@ -329,6 +323,7 @@ module Gui =
                     this.Cursor.Width, // TODO: lastMaxX (auto size calculation)
                     this.Cursor.Height // TODO: lastMaxX (auto size calculation)
                 )
+                true
 
         member this.Label (text, ?align : Align, ?backgroundColor : string) =
             if not (this.IsVisibile(this.Theme.Element.Height)) then

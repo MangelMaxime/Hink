@@ -48,50 +48,47 @@ module Main =
         ui.Context.clearRect(0., 0., ui.Canvas.width, ui.Canvas.height)
         ui.Context.fillStyle <- !^"#fff"
 
-        // Browser.console.log(ui.Mouse.DragOriginX)
-        Browser.console.log(sprintf "DragDeltaX: %f" ui.Mouse.DragDeltaX)
-
         #if DEBUG
         stats.``begin``()
         #endif
 
         ui.Prepare()
 
-        ui.Window(window1)
-        if ui.Button("Click me") then
-            buttonCounter <- buttonCounter + 1
-        ui.Label(sprintf "Clicked: %i times" buttonCounter, Center)
+        if ui.Window(window1) then
+            if ui.Button("Click me") then
+                buttonCounter <- buttonCounter + 1
+            ui.Label(sprintf "Clicked: %i times" buttonCounter, Center)
 
-        ui.Label("Row layout demo", Center, backgroundColor = "#34495e")
+            ui.Label("Row layout demo", Center, backgroundColor = "#34495e")
 
-        ui.Row([|1./2.; 1./4.; 1./4.|])
-        ui.Label("1/2", Center, "#f39c12")
-        ui.Label("1/4", Center, "#27ae60")
-        ui.Label("1/4", Center, "#8e44ad")
+            ui.Row([|1./2.; 1./4.; 1./4.|])
+            ui.Label("1/2", Center, "#f39c12")
+            ui.Label("1/4", Center, "#27ae60")
+            ui.Label("1/4", Center, "#8e44ad")
 
-        ui.Label("We filled all the row, so new line here", Center, backgroundColor = "#34495e" )
+            ui.Label("We filled all the row, so new line here", Center, backgroundColor = "#34495e" )
 
-        ui.Empty()
-        ui.Row([|1./4.; 1./2.; 1./4.|])
+            ui.Empty()
+            ui.Row([|1./4.; 1./2.; 1./4.|])
 
-        ui.Empty()
-        if ui.Button("Open second Window") then
-            window2.Closed <- false
-        ui.Empty()
+            ui.Empty()
+            if ui.Button("Open second Window") then
+                window2.Closed <- false
+            ui.Empty()
 
-        ui.Window(window2, headerColor = window2BackgroundColor)
-        ui.Label("Click to change window header", Center)
-        ui.Row([|1./3.; 1./3.; 1./3.|])
+        if ui.Window(window2, headerColor = window2BackgroundColor) then
+            ui.Label("Click to change window header", Center)
+            ui.Row([|1./3.; 1./3.; 1./3.|])
 
 
-        if ui.Button("Emerald", defaultColor = Emerald) then
-            window2BackgroundColor <- Emerald
+            if ui.Button("Emerald", defaultColor = Emerald) then
+                window2BackgroundColor <- Emerald
 
-        if ui.Button("Amethyst", defaultColor = Amethyst) then
-            window2BackgroundColor <- Amethyst
+            if ui.Button("Amethyst", defaultColor = Amethyst) then
+                window2BackgroundColor <- Amethyst
 
-        if ui.Button("Carrot", defaultColor = Carrot) then
-            window2BackgroundColor <- Carrot
+            if ui.Button("Carrot", defaultColor = Carrot) then
+                window2BackgroundColor <- Carrot
 
         ui.Finish()
 
