@@ -25,7 +25,7 @@ module Main =
     let window1 = { WindowInfo.Default with X = 10.
                                             Y = 10.
                                             Width = 400.
-                                            Height = 260. }
+                                            Height = 280. }
 
     let window2 = { WindowInfo.Default with X = 500.
                                             Y = 50.
@@ -68,7 +68,8 @@ module Main =
 
             ui.Label("We filled all the row, so new line here", Center, backgroundColor = "#34495e" )
 
-            ui.Empty()
+            ui.Label("Text truncated because it's too long from here")
+
             ui.Row([|1./4.; 1./2.; 1./4.|])
 
             ui.Empty()

@@ -395,9 +395,9 @@ module Gui =
         member this.FillSmallString (text, ?offsetX, ?offsetY, ?align : Align) =
             let offsetY = defaultArg offsetY 0.
             let align = defaultArg align Left
+            let textSize = this.Context.measureText(text)
 
             let offsetX =
-                let textSize = this.Context.measureText(text)
                 match align with
                 | Left ->
                     defaultArg offsetX this.Theme.Text.OffsetX
@@ -405,6 +405,14 @@ module Gui =
                     (this.Cursor.Width / 2.) - (textSize.width / 2.)
                 | Right ->
                     this.Cursor.Width - textSize.width - this.Theme.Text.OffsetX
+
+            let text =
+                if textSize.width > this.Cursor.Width then
+                    let charSize = this.Context.measureText(" ") // We assume to use a monospace font
+                    let maxChar = (this.Cursor.Width - this.Theme.Text.OffsetX) / charSize.width
+                    text.Substring(0, int (maxChar - 2.)) + ".."
+                else
+                    text
 
             // TODO: Check max chars
             this.Context.fillStyle <- !^this.Theme.Text.Color
