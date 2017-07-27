@@ -12,16 +12,29 @@ module rec Theme =
           Element : ElementTheme
           Label : LabelTheme
           Switch : SwitchTheme
-          Window : WindowTheme }
+          Window : WindowTheme
+          Combo : ComboTheme
+          Arrow : ArrowTheme }
 
-        member this.FormatFontString =
-            sprintf this.FontString
+        member this.FormatFontString
+            with get () = sprintf this.FontString
 
-        member this.ButtonOffsetY =
-            (this.Element.Height - this.Button.Height) / 2.
+        member this.ButtonOffsetY
+            with get () = (this.Element.Height - this.Button.Height) / 2.
 
-        member this.FontSmallOffsetY =
-            (this.Element.Height - this.FontSize) / 2.
+        member this.FontSmallOffsetY
+            with get () = (this.Element.Height - this.FontSize) / 2.
+
+        member this.ArrowOffsetY
+            with get () = (this.Element.Height - this.Arrow.Height) / 2.
+
+        member this.ArrowOffsetX
+            with get () = (this.Element.Height - this.Arrow.Width) / 2.
+
+    type ArrowTheme =
+        { Height : float
+          Width : float
+          Color : string }
 
     type ButtonTheme =
         { Width : float
@@ -82,10 +95,23 @@ module rec Theme =
           SymbolOffset : float
           OverSymbolColor : string }
 
+    type ComboTheme =
+        { Background : ComboBackground
+          CornerRadius : float }
+
+    type ComboBackground =
+        { Default : string
+          Hover : string
+          Pressed : string }
+
     let darkTheme : Theme =
         { FontSize = 16.
           FontSmallSize = 16.
           FontString = "%fpx \"Lucia Console\", Monaco, monospace"
+          Arrow =
+            { Width = 15.
+              Height = 11.
+              Color = "#fff" }
           Text =
             { OffsetX = 8.
               Color = "#fff" }
@@ -130,4 +156,10 @@ module rec Theme =
                 { Color = "#34495e"
                   Height = 24.
                   SymbolOffset = 6.
-                  OverSymbolColor = "#e74c3c" } } }
+                  OverSymbolColor = "#e74c3c" } }
+          Combo =
+            { Background =
+                { Pressed = Color.rgb 22 160 133
+                  Hover = Color.rgb 72 201 176
+                  Default = Color.rgb 26 188 156 }
+              CornerRadius = 4. } }

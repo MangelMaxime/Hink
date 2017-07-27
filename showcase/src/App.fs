@@ -81,7 +81,6 @@ module Main =
             ui.Label("Click to change window header", Center)
             ui.Row([|1./3.; 1./3.; 1./3.|])
 
-
             if ui.Button("Emerald", defaultColor = Emerald) then
                 window2BackgroundColor <- Emerald
 
@@ -90,6 +89,9 @@ module Main =
 
             if ui.Button("Carrot", defaultColor = Carrot) then
                 window2BackgroundColor <- Carrot
+
+            let combo1 = ComboInfo.Default
+            ui.Combo(combo1, [], Some "Default", labelAlign = Center) |> ignore
 
         ui.Finish()
 

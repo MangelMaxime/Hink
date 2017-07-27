@@ -28,17 +28,17 @@ module Helpers =
         | StrokeAndFill
 
     type Fable.Import.Browser.CanvasRenderingContext2D with
-        member self.RoundedRect (x, y, width, height, radius, ?action) =
+        member this.RoundedRect (x, y, width, height, radius, ?action) =
             let action = defaultArg action Fill
-            self.save()
-            self.beginPath()
+            this.save()
+            this.beginPath()
 
             // Draw top side and top right corners
-            self.moveTo(
+            this.moveTo(
                 x + radius,
                 y
             )
-            self.arcTo(
+            this.arcTo(
                 x + width,
                 y,
                 x + width,
@@ -47,7 +47,7 @@ module Helpers =
             )
 
             // Draw Right side and bottom right corner
-            self.arcTo(
+            this.arcTo(
                 x + width,
                 y + height,
                 x + width - radius,
@@ -56,7 +56,7 @@ module Helpers =
             )
 
             // Draw bottom and bottom left corner
-            self.arcTo(
+            this.arcTo(
                 x,
                 y + height,
                 x,
@@ -65,7 +65,7 @@ module Helpers =
             )
 
             // Draw left and top left corner
-            self.arcTo(
+            this.arcTo(
                 x,
                 y,
                 x + radius,
@@ -75,14 +75,23 @@ module Helpers =
 
             match action with
             | Stroke ->
-                self.stroke()
+                this.stroke()
             | Fill ->
-                self.fill()
+                this.fill()
             | StrokeAndFill ->
-                self.fill()
-                self.stroke()
+                this.fill()
+                this.stroke()
 
-            self.restore()
+            this.restore()
+
+        member this.Triangle(x, y, x1, y1, x2, y2) =
+            this.save()
+            this.beginPath()
+            this.moveTo(x, y)
+            this.lineTo(x1, y1)
+            this.lineTo(x2, y2)
+            this.fill()
+            this.restore()
 
     type String with
         member self.FindOccurence(c) =
