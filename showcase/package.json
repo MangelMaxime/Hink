@@ -3,9 +3,8 @@
   "version": "1.0.0",
   "description": "Simple Fable App",
   "scripts": {
-    "build": "webpack",
-    "start": "rollup -c rollup-config.js -w --environment BUILD:development",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "watch": "rollup -c rollup-config.js -w --environment BUILD:development",
+    "build": "rollup -c rollup-config.js --environment BUILD:production"
   },
   "keywords": [],
   "author": "",

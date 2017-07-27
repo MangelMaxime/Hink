@@ -11,7 +11,7 @@ open Fake.Git
 open Fake.YarnHelper
 
 
-let dotnetcliVersion = "1.0.1"
+let dotnetcliVersion = "1.0.4"
 let mutable dotnetExePath = "dotnet"
 
 
@@ -55,10 +55,14 @@ Target "QuickBuild" (fun _ ->
 )
 
 Target "YarnInstall" (fun _ ->
-    Yarn (fun p ->
-    { p with
-        Command = Install Standard
-    })
+    !!"**/yarn.lock"
+    |> Seq.iter (fun lockFile ->
+        Yarn (fun p ->
+            { p with
+                Command = Install Standard
+                WorkingDirectory = IO.Path.GetDirectoryName lockFile
+            })
+    )
 )
 
 let release = LoadReleaseNotes "RELEASE_NOTES.md"
@@ -82,27 +86,25 @@ Target "Meta" (fun _ ->
 // --------------------------------------------------------------------------------------
 // Docs targets
 
-Target "InstallDocs" (fun _ ->
-    !! "docs/**.fsproj"
+Target "InstallShowcase" (fun _ ->
+    !! "showcase/**.fsproj"
     |> Seq.iter(fun s ->
         let dir = IO.Path.GetDirectoryName s
         runDotnet dir "restore")
 )
 
-let watchDocs _ =
-    let runDotnetNoTimeout workingDir =
-        DotNetCli.RunCommand (fun p -> { p with ToolPath = dotnetExePath
-                                                WorkingDir = workingDir
-                                                TimeOut =  TimeSpan.FromDays 1. } ) // Really big timeout as we use a watcher
+let runDotnetNoTimeout workingDir cmd =
+    DotNetCli.RunCommand (fun p -> { p with ToolPath = dotnetExePath
+                                            WorkingDir = workingDir
+                                            TimeOut =  TimeSpan.FromDays 1. }) // Really big timeout as we use a watcher
+                         cmd
 
-    runDotnetNoTimeout "docs" """fable shell-run "..\node_modules\.bin\rollup -c rollup-config.js -w" """
+Target "WatchShowcase" (fun _ ->
+    runDotnetNoTimeout "showcase" "fable yarn-watch"
+)
 
-Target "WatchDocs" watchDocs
-
-Target "QuickWatchDocs" watchDocs
-
-Target "BuildDocs" (fun _ ->
-    runDotnet "docs" """fable shell-run "..\node_modules\.bin\rollup -c rollup-config.js" """
+Target "QuickWatchShowcase" (fun _ ->
+    runDotnetNoTimeout "showcase" "fable yarn-watch"
 )
 
 // --------------------------------------------------------------------------------------
@@ -166,19 +168,12 @@ Target "Publish" DoNothing
     ==> "Install"
     ==> "Build"
     ==> "Package"
-
-"Publish"
-    <== [ "Build"
-          "PublishNuget" ]
-"Build"
-    ==> "YarnInstall"
-    ==> "InstallDocs"
-    ==> "WatchDocs"
+    ==> "PublishNuget"
 
 "Build"
     ==> "YarnInstall"
-    ==> "InstallDocs"
-    ==> "BuildDocs"
+    ==> "InstallShowcase"
+    ==> "WatchShowcase"
 
 // start build
 RunTargetOrDefault "Build"

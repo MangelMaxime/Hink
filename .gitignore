@@ -43,3 +43,5 @@ node_modules/
 npm/
 dist/
 paket-files/
+
+Meta\.props
