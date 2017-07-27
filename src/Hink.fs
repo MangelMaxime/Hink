@@ -74,6 +74,24 @@ module Gui =
                 else
                     this.Y
 
+    type CheckboxInfo =
+        { mutable Value : bool }
+
+        static member Default =
+            { Value = false }
+
+    type ComboState =
+        | Extended
+        | Closed
+
+    type ComboInfo =
+        { mutable SelectedIndex : int option
+          mutable State : ComboState }
+
+        static member Default =
+            { SelectedIndex = None
+              State = Closed }
+
     type Row =
         { mutable Ratios : float []
           mutable CurrentRatio : int
@@ -384,6 +402,67 @@ module Gui =
 
                 released
 
+        member this.Combo(comboInfo : ComboInfo, texts : string list, label : string option, ?labelAlign) =
+            if not (this.IsVisibile(this.Theme.Element.Height)) then
+                this.EndElement()
+                false
+            else
+                let hover = this.IsHover()
+                let released = this.IsReleased()
+                let pressed = this.IsPressed()
+
+                this.Context.fillStyle <-
+                    if pressed then
+                        !^this.Theme.Combo.Background.Pressed
+                    elif hover then
+                        !^this.Theme.Combo.Background.Hover
+                    else
+                        !^this.Theme.Combo.Background.Default
+
+                this.Context.RoundedRect(
+                    this.Cursor.X + this.Theme.ButtonOffsetY,
+                    this.Cursor.Y + this.Theme.ButtonOffsetY,
+                    this.Cursor.Width - this.Theme.ButtonOffsetY * 2.,
+                    this.Theme.Element.Height,
+                    this.Theme.Combo.CornerRadius
+                )
+
+                let offsetX = this.Cursor.X + this.Cursor.Width - (this.Theme.Arrow.Width + this.Theme.ArrowOffsetX * 2.)
+                let offsetY = this.Cursor.Y + this.Theme.ArrowOffsetY
+
+                match label with
+                | Some text ->
+                    this.FillSmallString(
+                        text,
+                        align = defaultArg labelAlign Left
+                    )
+                | None -> ()
+
+                this.Context.fillStyle <- !^this.Theme.Arrow.Color
+                this.Context.Triangle(
+                    offsetX, offsetY,
+                    offsetX + this.Theme.Arrow.Width, offsetY,
+                    offsetX + this.Theme.Arrow.Width / 2., offsetY + this.Theme.Arrow.Height
+                )
+
+                true
+
+        member this.DrawArrow(selected, hover) =
+            let x = this.Cursor.X + this.Theme.ArrowOffsetX
+            let y = this.Cursor.Y + this.Theme.ArrowOffsetY
+            this.Context.fillStyle <- !^this.Theme.Arrow.Color
+            match selected with
+            | true ->
+                this.Context.Triangle(
+                    x, y,
+                    x + this.Theme.Arrow.Width, y,
+                    x + this.Theme.Arrow.Width / 2., y + this.Theme.Arrow.Height)
+            | false ->
+                this.Context.Triangle(
+                    x, y,
+                    x, y + this.Theme.Arrow.Height,
+                    x + this.Theme.Arrow.Width, y + this.Theme.Arrow.Height / 2.)
+
         member this.Row (ratios) =
             this.RowInfo <- Some { Ratios = ratios
                                    CurrentRatio = 0
@@ -422,6 +501,13 @@ module Gui =
                 this.Cursor.X + offsetX,
                 this.Cursor.Y + this.Theme.FontSmallOffsetY + offsetY
             )
+
+        member this.Checkbox(checkboxInfo : CheckboxInfo, values : string list) =
+            if not (this.IsVisibile(this.Theme.Element.Height)) then
+                this.EndElement()
+                false
+            else
+                true
 
         // member this.Checkbox(id, value: bool ref, x, y, ?theme) =
         //     let theme = defaultArg theme this.Theme.Checkbox
