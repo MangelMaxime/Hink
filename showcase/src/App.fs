@@ -27,7 +27,7 @@ module Main =
                                             Width = 400.
                                             Height = 280. }
 
-    let window2 = { WindowInfo.Default with X = 500.
+    let window2 = { WindowInfo.Default with X = 450.
                                             Y = 50.
                                             Width = 400.
                                             Height = 285.
@@ -43,6 +43,7 @@ module Main =
     let Amethyst = "#9b59b6"
     let Wisteria = "#8e44ad"
 
+    let combo1 = ComboInfo.Default
 
     let rec render (_: float) =
         ui.Context.clearRect(0., 0., ui.Canvas.width, ui.Canvas.height)
@@ -90,11 +91,9 @@ module Main =
             if ui.Button("Carrot", defaultColor = Carrot) then
                 window2BackgroundColor <- Carrot
 
-            let combo1 = ComboInfo.Default
-            ui.Combo(combo1, [], Some "Default", labelAlign = Center) |> ignore
+            ui.Combo(combo1, ["Fable"; "Elm"; "Haxe"], Some "Default", labelAlign = Center) |> ignore
 
         ui.Finish()
-
 
         #if DEBUG
         stats.``end``() |> ignore

@@ -82,15 +82,29 @@ module Gui =
 
     type ComboState =
         | Extended
+        | JustExtended
         | Closed
 
     type ComboInfo =
         { mutable SelectedIndex : int option
-          mutable State : ComboState }
+          mutable State : ComboState
+          Guid : Guid }
 
-        static member Default =
-            { SelectedIndex = None
-              State = Closed }
+        static member Default
+            with get () =
+                { SelectedIndex = None
+                  State = Closed
+                  Guid = Guid.NewGuid() }
+
+    /// Type used to stored combo information for drawing when Finish the loop
+    type ComboMemory =
+        { Info : ComboInfo
+          X : float
+          Y : float
+          Width : float
+          Height : float
+          Values : string list
+          Reference : ComboInfo }
 
     type Row =
         { mutable Ratios : float []
@@ -114,6 +128,7 @@ module Gui =
           /// Store if the window should be closed
           mutable ShouldCloseWindow : bool
           mutable CurrentWindow : WindowInfo option
+          mutable CurrentCombo : ComboMemory option
           mutable LastReferenceTick : DateTime
           mutable Delta : TimeSpan }
 
@@ -144,7 +159,8 @@ module Gui =
               ShouldCloseWindow = false
               RowInfo = None
               LastReferenceTick = DateTime.Now
-              Delta = TimeSpan.Zero }
+              Delta = TimeSpan.Zero
+              CurrentCombo = None }
 
         /// Reset the state of Hot Item
         /// Need to be called before drawing UI
@@ -161,6 +177,47 @@ module Gui =
         /// Reset Active item
         /// Need to be called after drawing UI
         member this.Finish () =
+            // Close current window
+            if this.CurrentWindow.IsSome then
+                this.EndWindow()
+            this.CurrentWindow <- None
+            this.RowInfo <- None
+
+            match this.CurrentCombo with
+            | Some comboInfo ->
+                match comboInfo.Reference.State with
+                | Closed -> () // Nothing to do
+                | Extended | JustExtended ->
+                    // Draw the combo
+                    // Generate a pseudo layout to
+                    // this.CurrentWindow <- Some { WindowInfo.Default with Width = comboInfo.Width
+                    //                                                      Height = comboInfo.Height }
+                    this.Cursor.X <- comboInfo.X
+                    this.Cursor.Y <- comboInfo.Y
+                    this.Cursor.Width <- comboInfo.Width
+
+                    let elementSize = this.Theme.Element.Height + this.Theme.Element.SeparatorSize
+                    let boxHeight = float comboInfo.Values.Length * elementSize
+                    this.Context.fillStyle <- !^this.Theme.Combo.Box.Default.Background
+                    this.Context.fillRect(this.Cursor.X, this.Cursor.Y, this.Cursor.Width, boxHeight)
+
+                    for index = 0 to comboInfo.Values.Length - 1 do
+                        if this.Button(comboInfo.Values.[index],
+                                       pressedColor = this.Theme.Combo.Box.Default.Background,
+                                       hoverColor = this.Theme.Combo.Box.Hover.Background,
+                                       defaultColor = this.Theme.Combo.Box.Default.Background,
+                                       textPressed = this.Theme.Combo.Box.Default.Text,
+                                       textHover = this.Theme.Combo.Box.Hover.Text,
+                                       textDefault = this.Theme.Combo.Box.Default.Text) then
+                            comboInfo.Reference.SelectedIndex <- Some index
+                            comboInfo.Reference.State <- Closed
+                            this.CurrentCombo <- None
+
+                    // if this.Mouse.Left && not (this.IsHover(boxHeight)) then
+                    //     comboInfo.Reference.State <- Closed
+                    //     this.CurrentCombo <- None
+
+            | None -> () // Nothing to do
             // TODO: Don't reset every time
             this.Mouse.ResetReleased ()
             this.Mouse.ResetDragInfo ()
@@ -171,12 +228,6 @@ module Gui =
             // Set value to false
             // Help detecting if the mouse cursor need to be reset on the next loop
             this.IsCursorStyled <- false
-
-            // Close current window
-            if this.CurrentWindow.IsSome then
-                this.EndWindow()
-            this.CurrentWindow <- None
-            this.RowInfo <- None
 
             this.Keyboard.ClearLastKey()
 
@@ -358,13 +409,14 @@ module Gui =
                         this.Theme.Button.Height
                     )
 
+                this.Context.fillStyle <- !^this.Theme.Text.Color
                 this.FillSmallString(text, align = align)
                 this.EndElement()
 
         member this.Empty() =
             this.EndElement()
 
-        member this.Button (text, ?align : Align, ?pressedColor, ?hoverColor, ?defaultColor) =
+        member this.Button (text, ?align : Align, ?pressedColor, ?hoverColor, ?defaultColor, ?textPressed, ?textHover, ?textDefault) =
             if not (this.IsVisibile(this.Theme.Element.Height)) then
                 this.EndElement()
                 false
@@ -395,7 +447,14 @@ module Gui =
                     this.Theme.Button.CornerRadius
                 )
 
-                this.Context.fillStyle <- !^this.Theme.Text.Color
+                this.Context.fillStyle <-
+                    if pressed then
+                        !^(defaultArg textPressed this.Theme.Text.Color)
+                    elif hover then
+                        !^(defaultArg textHover this.Theme.Text.Color)
+                    else
+                        !^(defaultArg textDefault this.Theme.Text.Color)
+
                 this.FillSmallString(text, align = align)
 
                 this.EndElement()
@@ -419,6 +478,36 @@ module Gui =
                     else
                         !^this.Theme.Combo.Background.Default
 
+                let storeCombo () =
+                    { Info = comboInfo
+                      Values = texts
+                      X = this.Cursor.X
+                      Y = this.Cursor.Y + this.Theme.Element.Height + this.Theme.Element.SeparatorSize
+                      Width = this.Cursor.Width
+                      Height = this.Cursor.Height
+                      Reference = comboInfo }
+
+                if pressed then
+                    if comboInfo.State = Closed then
+                        this.CurrentCombo <- storeCombo() |> Some
+                        comboInfo.State <- JustExtended
+
+                if released then
+                    match comboInfo.State with
+                    | JustExtended ->
+                        comboInfo.State <- Extended
+                    | Extended ->
+                        comboInfo.State <- Closed
+                    | Closed -> () // Nothing to do
+
+                match comboInfo.State with
+                | Extended | JustExtended -> // Update the position. Help handle window drag
+                    this.CurrentCombo <- storeCombo() |> Some
+                | Closed -> () // Nothing to do
+
+                // if released && this.CurrentCombo.IsSome then//
+                //     this.CurrentCombo.Value.Reference.State <- Closed
+
                 this.Context.RoundedRect(
                     this.Cursor.X + this.Theme.ButtonOffsetY,
                     this.Cursor.Y + this.Theme.ButtonOffsetY,
@@ -430,20 +519,40 @@ module Gui =
                 let offsetX = this.Cursor.X + this.Cursor.Width - (this.Theme.Arrow.Width + this.Theme.ArrowOffsetX * 2.)
                 let offsetY = this.Cursor.Y + this.Theme.ArrowOffsetY
 
-                match label with
-                | Some text ->
+                this.Context.fillStyle <- !^this.Theme.Text.Color
+
+                match comboInfo.SelectedIndex with
+                | Some index ->
                     this.FillSmallString(
-                        text,
+                        texts.[index],
                         align = defaultArg labelAlign Left
                     )
-                | None -> ()
+                | None ->
+                    match label with
+                    | Some text ->
+                        this.FillSmallString(
+                            text,
+                            align = defaultArg labelAlign Left
+                        )
+                    | None -> ()
 
                 this.Context.fillStyle <- !^this.Theme.Arrow.Color
-                this.Context.Triangle(
-                    offsetX, offsetY,
-                    offsetX + this.Theme.Arrow.Width, offsetY,
-                    offsetX + this.Theme.Arrow.Width / 2., offsetY + this.Theme.Arrow.Height
-                )
+                match comboInfo.State with
+                | Closed ->
+                    // Triangle down
+                    this.Context.Triangle(
+                        offsetX, offsetY,
+                        offsetX + this.Theme.Arrow.Width, offsetY,
+                        offsetX + this.Theme.Arrow.Width / 2., offsetY + this.Theme.Arrow.Height
+                    )
+
+                | Extended | JustExtended ->
+                    // Triangle Up
+                    this.Context.Triangle(
+                        offsetX + this.Theme.Arrow.Width / 2., offsetY,
+                        offsetX + this.Theme.Arrow.Width, offsetY + this.Theme.Arrow.Height,
+                        offsetX, offsetY + this.Theme.Arrow.Height
+                    )
 
                 true
 
@@ -494,7 +603,7 @@ module Gui =
                     text
 
             // TODO: Check max chars
-            this.Context.fillStyle <- !^this.Theme.Text.Color
+            // this.Context.fillStyle <- !^this.Theme.Text.Color
             this.Context.font <- this.Theme.FormatFontString this.Theme.FontSmallSize
             this.Context.fillText(
                 text,

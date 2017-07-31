@@ -97,12 +97,22 @@ module rec Theme =
 
     type ComboTheme =
         { Background : ComboBackground
-          CornerRadius : float }
+          CornerRadius : float
+          Box : ComboBox }
 
     type ComboBackground =
         { Default : string
           Hover : string
           Pressed : string }
+
+    type ComboBox =
+        { Default : ComboBoxColors
+          Hover : ComboBoxColors
+          Selected : ComboBoxColors }
+
+    type ComboBoxColors =
+        { Background : string
+          Text : string }
 
     let darkTheme : Theme =
         { FontSize = 16.
@@ -162,4 +172,14 @@ module rec Theme =
                 { Pressed = Color.rgb 22 160 133
                   Hover = Color.rgb 72 201 176
                   Default = Color.rgb 26 188 156 }
-              CornerRadius = 4. } }
+              CornerRadius = 4.
+              Box =
+                { Default =
+                    { Background = "#ecf0f1"
+                      Text = "#34495e" }
+                  Hover =
+                    { Background = "#bdc3c7"
+                      Text = "#34495e" }
+                  Selected =
+                    { Background = "#1abc9c"
+                      Text = "#fff" } } } }
