@@ -100,11 +100,11 @@ let runDotnetNoTimeout workingDir cmd =
                          cmd
 
 Target "WatchShowcase" (fun _ ->
-    runDotnetNoTimeout "showcase" "fable yarn-watch"
+    runDotnetNoTimeout "showcase" "fable yarn-watch --port free"
 )
 
 Target "QuickWatchShowcase" (fun _ ->
-    runDotnetNoTimeout "showcase" "fable yarn-watch"
+    runDotnetNoTimeout "showcase" "fable yarn-watch --port free"
 )
 
 // --------------------------------------------------------------------------------------
