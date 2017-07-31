@@ -374,8 +374,9 @@ module Gui =
                     let textX = this.Cursor.X + this.Cursor.Width - textSize.width - this.Theme.Window.Header.SymbolOffset
 
                     // Custom IsHover check has we don't follow auto layout management for the header symbol
-                    let hoverSymbol = this.Mouse.X >= textX && this.Mouse.X < (textX + textSize.width) &&
-                                      this.Mouse.Y >= headerTextY && this.Mouse.Y < (headerTextY + this.Theme.FontSize)
+                    let hoverX = this.Cursor.X + this.Cursor.Width - textSize.width - this.Theme.Window.Header.SymbolOffset * 2.
+                    let hoverSymbol = this.Mouse.X >= hoverX && this.Mouse.X < (this.Cursor.X + this.Cursor.Width) &&
+                                      this.Mouse.Y >= (this.Cursor.Y - this.Theme.Window.Header.Height) && this.Mouse.Y < this.Cursor.Y
 
                     // Draw symbol background
                     if hoverSymbol then
