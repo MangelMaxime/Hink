@@ -45,3 +45,5 @@ dist/
 paket-files/
 
 Meta\.props
+
+\.paket/paket\.exe
