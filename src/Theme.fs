@@ -22,8 +22,14 @@ module rec Theme =
         member this.ButtonOffsetY
             with get () = (this.Element.Height - this.Button.Height) / 2.
 
+        member this.CheckboxOffsetX
+            with get () = (this.Element.Height - this.Checkbox.Height) / 2.
+
+        member this.CheckboxOffsetY
+            with get () = this.CheckboxOffsetX
+
         member this.FontSmallOffsetY
-            with get () = (this.Element.Height - this.FontSize) / 2.
+            with get () = this.Element.Height / 2.
 
         member this.ArrowOffsetY
             with get () = (this.Element.Height - this.Arrow.Height) / 2.
@@ -137,8 +143,8 @@ module rec Theme =
             { Width = 22.
               Height = 22.
               CornerRadius = 3.
-              ActiveColor = Color.rgb 189 195 199
-              Color = Color.rgb 26 188 156
+              ActiveColor = Color.rgb 26 188 156
+              Color = Color.rgb 189 195 199
               TickColor = "#fff" }
           Element =
             { Height = 34.
@@ -161,9 +167,9 @@ module rec Theme =
                     { Active = Color.rgb 255 255 255
                       Default = Color.rgb 26 188 156 } } }
           Window =
-            { Background = "#bdc3c7"
+            { Background = "#34495e"
               Header =
-                { Color = "#34495e"
+                { Color = "#1abc9c"
                   Height = 24.
                   SymbolOffset = 6.
                   OverSymbolColor = "#e74c3c" } }

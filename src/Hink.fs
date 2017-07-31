@@ -46,7 +46,7 @@ module Gui =
           mutable DragYOrigin : float
           mutable IsDragging : bool }
 
-        static member Default = // TODO: Use theme ?
+        static member Default =
             { X = 0.
               Y = 0.
               Width = 100.
@@ -137,7 +137,7 @@ module Gui =
             canvas.setAttribute ("tabindex", "1")
             // Init the context
             let context = canvas.getContext_2d()
-            context.textBaseline <- "top"
+            context.textBaseline <- "middle"
             canvas.focus()
 
             // Init input manager
@@ -230,7 +230,7 @@ module Gui =
                     //     this.CurrentCombo <- None
 
             | None -> () // Nothing to do
-            // TODO: Don't reset every time
+
             this.Mouse.ResetReleased ()
             this.Mouse.ResetDragInfo ()
             // Reset the cursor style if not styled
@@ -304,7 +304,7 @@ module Gui =
                 this.ShouldCloseWindow <- false
             // Remove the window to end it
             this.CurrentWindow <- None
-            // TODO: Handle scroll + save window position
+            // TODO: Handle scroll
 
         member this.Window(windowInfo : WindowInfo, ?backgroundColor, ?headerColor) =
             if this.CurrentWindow.IsSome then
@@ -334,7 +334,7 @@ module Gui =
                 // Set the text font for the header
                 this.Context.font <- this.Theme.FormatFontString this.Theme.FontSmallSize
                 // Common Y position for the title and the symbol
-                let headerTextY = this.Cursor.Y - this.Theme.Window.Header.Height + this.Theme.Window.Header.SymbolOffset
+                let headerTextY = this.Cursor.Y - this.Theme.Window.Header.Height / 2.
 
                 match this.CurrentWindow.Value.Title with
                 | None -> () // Nothing todo
@@ -566,6 +566,7 @@ module Gui =
                         offsetX, offsetY + this.Theme.Arrow.Height
                     )
 
+                this.EndElement()
                 true
 
         member this.DrawArrow(selected, hover) =
@@ -606,6 +607,8 @@ module Gui =
                 | Right ->
                     this.Cursor.Width - textSize.width - this.Theme.Text.OffsetX
 
+            this.Context.font <- this.Theme.FormatFontString this.Theme.FontSmallSize
+
             let text =
                 if textSize.width > this.Cursor.Width then
                     let charSize = this.Context.measureText(" ") // We assume to use a monospace font
@@ -614,51 +617,55 @@ module Gui =
                 else
                     text
 
-            // TODO: Check max chars
-            // this.Context.fillStyle <- !^this.Theme.Text.Color
-            this.Context.font <- this.Theme.FormatFontString this.Theme.FontSmallSize
             this.Context.fillText(
                 text,
                 this.Cursor.X + offsetX,
                 this.Cursor.Y + this.Theme.FontSmallOffsetY + offsetY
             )
 
-        member this.Checkbox(checkboxInfo : CheckboxInfo, values : string list) =
+        member this.Checkbox(checkboxInfo : CheckboxInfo, label) =
             if not (this.IsVisibile(this.Theme.Element.Height)) then
                 this.EndElement()
                 false
             else
-                true
+                let hover = this.IsHover()
+                let released = this.IsReleased()
 
-        // member this.Checkbox(id, value: bool ref, x, y, ?theme) =
-        //     let theme = defaultArg theme this.Theme.Checkbox
+                this.Context.fillStyle <-
+                    if checkboxInfo.Value then
+                        !^this.Theme.Checkbox.ActiveColor
+                    else
+                        !^this.Theme.Checkbox.Color
 
-        //     if this.Mouse.HitRegion(x, y, theme.Width, theme.Height) then
-        //         this.HotItem <- id
-        //         this.Mouse.SetCursor Mouse.Cursor.Pointer
-        //         if this.HotItem = id && this.Mouse.Left then
-        //             this.ActiveItem <- id
+                this.Context.RoundedRect(
+                    this.Cursor.X + this.Theme.CheckboxOffsetX,
+                    this.Cursor.Y + this.Theme.CheckboxOffsetY,
+                    this.Theme.Checkbox.Width,
+                    this.Theme.Checkbox.Height,
+                    this.Theme.Checkbox.CornerRadius
+                )
 
-        //     if !value then
-        //         this.Context.fillStyle <- !^theme.Color
-        //     else
-        //         this.Context.fillStyle <- !^theme.ActiveColor
+                if hover && (not checkboxInfo.Value) || checkboxInfo.Value then
+                    this.Context.fillStyle <- !^this.Theme.Checkbox.TickColor
+                    this.Context.font <- this.Theme.FormatFontString 20.
+                    this.Context.fillText(
+                        "\u2713",
+                        this.Cursor.X + this.Theme.Checkbox.Width / 2.,
+                        this.Cursor.Y + this.Theme.Element.Height / 2.
+                    )
 
-        //     this.Context.RoundedRect(x, y, theme.Width, theme.Height, theme.CornerRadius)
+                // Label section
+                this.Context.fillStyle <- !^this.Theme.Text.Color
+                this.FillSmallString(
+                    label,
+                    this.Theme.Checkbox.Width + this.Theme.CheckboxOffsetX * 2.
+                )
 
-        //     /// Draw the tick if the value is true
-        //     /// Or if the value is not true and widget is the hot one
-        //     if !value || not !value && this.HotItem = id then
-        //         this.Context.fillStyle <- !^theme.TickColor
-        //         this.Context.font <- this.Theme.FormatFontString ()
-        //         this.Context.fillText("\u2713", x + 5., y + 4.)
+                if released then
+                    checkboxInfo.Value <- not checkboxInfo.Value
 
-        //     let clicked = (not this.Mouse.Left) && this.HotItem = id && this.ActiveItem = id
-
-        //     if clicked then
-        //         value := not !value
-
-        //     clicked
+                this.EndElement()
+                checkboxInfo.Value
 
         // member this.Switch (id, value: bool ref, x, y, ?theme) =
         //     let theme = defaultArg theme this.Theme.Switch

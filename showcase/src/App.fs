@@ -45,6 +45,8 @@ module Main =
 
     let combo1 = ComboInfo.Default
 
+    let checkbox1 = CheckboxInfo.Default
+
     let rec render (_: float) =
         ui.Context.clearRect(0., 0., ui.Canvas.width, ui.Canvas.height)
         ui.Context.fillStyle <- !^"#fff"
@@ -56,9 +58,9 @@ module Main =
         ui.Prepare()
 
         if ui.Window(window1) then
+            ui.Label(sprintf "Clicked: %i times" buttonCounter, Center)
             if ui.Button("Click me") then
                 buttonCounter <- buttonCounter + 1
-            ui.Label(sprintf "Clicked: %i times" buttonCounter, Center)
 
             ui.Label("Row layout demo", Center, backgroundColor = "#34495e")
 
@@ -92,6 +94,8 @@ module Main =
                 window2BackgroundColor <- Carrot
 
             ui.Combo(combo1, ["Fable"; "Elm"; "Haxe"], Some "Default", labelAlign = Center) |> ignore
+
+            ui.Checkbox(checkbox1, "Remember me") |> ignore
 
         ui.Finish()
 
