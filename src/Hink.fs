@@ -785,7 +785,7 @@ module Gui =
                 )
 
                 // Cursor
-                if this.Delta < TimeSpan.FromMilliseconds(500.) then
+                if info.IsActive && this.Delta < TimeSpan.FromMilliseconds(500.) then
 
                     this.Context.fillStyle <- !^"#000"
                     this.Context.font <- this.Theme.FormatFontString this.Theme.FontSmallSize
@@ -831,6 +831,16 @@ module Gui =
                                         | (false, _) ->
                                             if info.CursorOffset > 0 then
                                                 info.CursorOffset <- info.CursorOffset - 1
+                                                info.Value <- info.Value.Remove(info.CursorOffset, 1)
+                                | Keyboard.Keys.Delete ->
+                                    if info.Value.Length > 0 then
+                                        match oldSelection with
+                                        | (true, selection) ->
+                                            info.Value <- info.Value.Remove(selection.Start, selection.Length)
+                                            if info.CursorOffset = selection.End then
+                                                info.CursorOffset <- Math.Max(info.CursorOffset - selection.Length, 0)
+                                        | (false, _) ->
+                                            if info.CursorOffset < info.Value.Length then
                                                 info.Value <- info.Value.Remove(info.CursorOffset, 1)
                                 | Keyboard.Keys.ArrowLeft ->
                                     match oldSelection with

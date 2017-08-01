@@ -47,8 +47,7 @@ module Main =
 
     let checkbox1 = CheckboxInfo.Default
     let input1 = { InputInfo.Default with Value = "Some text here"
-                                          Selection = Some { Start = 5
-                                                             End = 6 } }
+                                          Selection = None }
 
     let rec render (_: float) =
         ui.Context.clearRect(0., 0., ui.Canvas.width, ui.Canvas.height)
