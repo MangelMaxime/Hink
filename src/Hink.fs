@@ -28,6 +28,29 @@ module Gui =
           mutable Width : float
           mutable Height : float }
 
+    type SelectionArea =
+        { Start: int
+          End: int }
+
+        member this.Length =
+            this.End - this.Start
+
+
+        ///**Description**
+        /// Return true is the selection encapsulate the given size
+        ///**Parameters**
+        ///  * `size` - parameter of type `int` - Size to encapsulate
+        ///
+        ///**Output Type**
+        ///  * `bool`
+        ///
+        member this.Edging size =
+            this.Start = 0 && this.End = size && this.Start <> this.End
+
+        static member Create (start, ``end``) =
+            { Start = start
+              End = ``end`` }
+
     type DragInfo =
         { OriginX : float
           OriginY : float }
@@ -114,6 +137,24 @@ module Gui =
 
         member this.ActiveRatio
             with get () = this.Ratios.[this.CurrentRatio]
+
+    type InputInfo =
+        { mutable IsActive : bool
+          mutable Value : string
+          mutable Selection : SelectionArea option
+          // Positive offset of the cursor.
+          // Offset of 0 = start of the input
+          // Offset of 2 = cursor place after the second char of the input
+          mutable CursorOffset : int }
+
+        member this.ClearSelection () =
+            this.Selection <- None
+
+        static member Default
+            with get () = { IsActive = false
+                            Value = ""
+                            Selection = None
+                            CursorOffset = 0 }
 
     type Hink =
         { Canvas : Browser.HTMLCanvasElement
@@ -667,6 +708,164 @@ module Gui =
 
                 this.EndElement()
                 checkboxInfo.Value
+
+        member this.Input(info: InputInfo) =
+            if not (this.IsVisibile(this.Theme.Element.Height)) then
+                this.EndElement()
+                false
+            else
+                let hover = this.IsHover()
+                let pressed = this.IsPressed()
+
+                if hover then
+                    this.SetCursor Mouse.Cursor.Text
+
+                if pressed then
+                    info.IsActive <- true
+
+                this.Context.strokeStyle <-
+                    if info.IsActive then
+                        !^this.Theme.Input.Border.Active
+                    else
+                        !^this.Theme.Input.Border.Default
+
+                this.Context.fillStyle <-
+                    if info.IsActive then
+                        !^this.Theme.Input.Background.Active
+                    else
+                        !^this.Theme.Input.Background.Default
+
+                this.Context.lineWidth <- 2.
+
+                this.Context.RoundedRect(
+                    this.Cursor.X + this.Theme.ButtonOffsetY,
+                    this.Cursor.Y + this.Theme.ButtonOffsetY,
+                    this.Cursor.Width - this.Theme.ButtonOffsetY * 2.,
+                    this.Theme.Element.Height,
+                    this.Theme.Element.CornerRadius,
+                    StrokeAndFill
+                )
+
+                match info.Selection with
+                | Some selection ->
+                    let selectionSize =
+                        info.Value.Substring(
+                            selection.Start,
+                            selection.Length
+                        )
+                        |> this.Context.measureText
+
+                    let startX =
+                        // If the selection is from the beginning of the line. Nothing to change
+                        if selection.Start = 0 then
+                            this.Cursor.X
+                        else
+                            // If the selection is offset, calculate the offset and draw the selection from it
+                            let leftSize =
+                                info.Value.Substring(0, selection.Start)
+                                |> this.Context.measureText
+                            this.Cursor.X + leftSize.width
+
+                    let selectionHeight =
+                        this.Theme.FontSmallSize * 1.5
+
+                    this.Context.fillStyle <- !^this.Theme.Input.SelectionColor
+                    this.Context.fillRect(
+                        startX + this.Theme.Text.OffsetX,
+                        this.Cursor.Y + (this.Theme.Element.Height - selectionHeight) / 2.,
+                        selectionSize.width,
+                        selectionHeight
+                    )
+                | None -> () // Nothing to do
+
+                // Draw text
+                this.Context.fillStyle <- !^this.Theme.Input.TextColor
+                this.FillSmallString(
+                    info.Value
+                )
+
+                // Cursor
+                if this.Delta < TimeSpan.FromMilliseconds(500.) then
+
+                    this.Context.fillStyle <- !^"#000"
+                    this.Context.font <- this.Theme.FormatFontString this.Theme.FontSmallSize
+
+                    let cursorMetrics = this.Context.measureText("|")
+                    let textMetrics = this.Context.measureText(info.Value)
+                    let cursorOffsetMetrics =
+                      info.Value.Substring(info.CursorOffset)
+                      |> this.Context.measureText
+
+                    this.FillSmallString(
+                        "|",
+                        textMetrics.width - cursorMetrics.width / 2. - cursorOffsetMetrics.width + this.Theme.Text.OffsetX
+                    )
+
+                if info.IsActive then
+                    if this.Keyboard.LastKeyCode <> -1 then
+                        // Memorise if we capture the keystroke
+                        // Example: Ctrl, Arrows are capture. Letters are not
+                        let isCapture =
+                            let mutable res = true
+                            // First we resolve the action depending on modifiers
+                            match this.Keyboard.Modifiers with
+                            | { Control = true } ->
+                                info.ClearSelection()
+                                match this.Keyboard.LastKey with
+                                | Keyboard.Keys.ArrowLeft -> ()
+                                | _ -> res <- false // Not captured
+                            | _ ->
+                                let oldSelection =
+                                    if info.Selection.IsSome then
+                                        true, info.Selection.Value
+                                    else
+                                        false, SelectionArea.Create(0, 0)
+                                match this.Keyboard.LastKey with
+                                | Keyboard.Keys.Backspace ->
+                                    if info.Value.Length > 0 then
+                                        match oldSelection with
+                                        | (true, selection) ->
+                                            info.Value <- info.Value.Remove(selection.Start, selection.Length)
+                                            if info.CursorOffset = selection.End then
+                                                info.CursorOffset <- Math.Max(info.CursorOffset - selection.Length, 0)
+                                        | (false, _) ->
+                                            if info.CursorOffset > 0 then
+                                                info.CursorOffset <- info.CursorOffset - 1
+                                                info.Value <- info.Value.Remove(info.CursorOffset, 1)
+                                | Keyboard.Keys.ArrowLeft ->
+                                    match oldSelection with
+                                    | (true, selection) ->
+                                        if selection.Edging info.Value.Length then
+                                            info.CursorOffset <- 0
+                                        else
+                                            info.CursorOffset <- Math.Max(0, info.CursorOffset - 1)
+                                    | (false, _) ->
+                                        info.CursorOffset <- Math.Max(0, info.CursorOffset - 1)
+
+                                | Keyboard.Keys.ArrowRight ->
+                                    match oldSelection with
+                                    | (true, selection) ->
+                                        if selection.Edging info.Value.Length then
+                                            info.CursorOffset <- info.Value.Length
+                                        else
+                                            info.CursorOffset <- Math.Min(info.CursorOffset + 1, info.Value.Length)
+                                    | (false, _) ->
+                                        info.CursorOffset <- Math.Min(info.CursorOffset + 1, info.Value.Length)
+                                | Keyboard.Keys.Home ->
+                                    info.CursorOffset <- 0
+                                | Keyboard.Keys.End ->
+                                    info.CursorOffset <- info.Value.Length
+                                | Keyboard.Keys.Escape ->
+                                    info.ClearSelection()
+                                | _ -> res <- false // Not captured
+                            res
+                        if not isCapture && this.Keyboard.LastKeyIsPrintable then
+                            info.Value <- info.Value.Insert(info.CursorOffset, this.Keyboard.LastKeyValue)
+                            info.CursorOffset <- info.CursorOffset + 1
+                            info.ClearSelection()
+
+                this.EndElement()
+                true
 
         // member this.Switch (id, value: bool ref, x, y, ?theme) =
         //     let theme = defaultArg theme this.Theme.Switch

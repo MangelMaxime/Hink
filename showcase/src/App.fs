@@ -46,6 +46,9 @@ module Main =
     let combo1 = ComboInfo.Default
 
     let checkbox1 = CheckboxInfo.Default
+    let input1 = { InputInfo.Default with Value = "Some text here"
+                                          Selection = Some { Start = 5
+                                                             End = 6 } }
 
     let rec render (_: float) =
         ui.Context.clearRect(0., 0., ui.Canvas.width, ui.Canvas.height)
@@ -96,6 +99,8 @@ module Main =
             ui.Combo(combo1, ["Fable"; "Elm"; "Haxe"], Some "Default", labelAlign = Center) |> ignore
 
             ui.Checkbox(checkbox1, "Remember me") |> ignore
+
+            ui.Input(input1) |> ignore
 
         ui.Finish()
 

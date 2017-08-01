@@ -12,6 +12,7 @@ module rec Theme =
           Element : ElementTheme
           Label : LabelTheme
           Switch : SwitchTheme
+          Input : InputTheme
           Window : WindowTheme
           Combo : ComboTheme
           Arrow : ArrowTheme }
@@ -48,6 +49,16 @@ module rec Theme =
           CornerRadius : float
           Background : ButtonBackground }
 
+    type InputTheme =
+        { TextColor : string
+          Border : InputColorByState
+          Background : InputColorByState
+          SelectionColor : string }
+
+    type InputColorByState =
+        { Default : string
+          Active : string }
+
     type ButtonBackground =
         { Pressed : string
           Hover : string
@@ -56,7 +67,8 @@ module rec Theme =
     type ElementTheme =
         { Height : float
           Width : float
-          SeparatorSize : float }
+          SeparatorSize : float
+          CornerRadius : float }
 
     type CheckboxTheme =
         { Width : float
@@ -149,7 +161,8 @@ module rec Theme =
           Element =
             { Height = 34.
               Width = 100.
-              SeparatorSize = 2. }
+              SeparatorSize = 2.
+              CornerRadius = 4. }
           Label =
             { TextColor = Color.rgb 52 73 94 }
           Switch =
@@ -188,4 +201,13 @@ module rec Theme =
                       Text = "#34495e" }
                   Selected =
                     { Background = "#1abc9c"
-                      Text = "#fff" } } } }
+                      Text = "#fff" } } }
+          Input =
+            { TextColor = "#34495e"
+              Border =
+                { Default = "#bdc3c7"
+                  Active = "#1abc9c" }
+              Background =
+                { Default = "#ecf0f1"
+                  Active = "#ecf0f1" }
+              SelectionColor = "#3498db" } }
