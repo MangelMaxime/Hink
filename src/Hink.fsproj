@@ -1,0 +1,13 @@
+﻿<Project Sdk="FSharp.NET.Sdk;Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard1.6</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Inputs\Mouse.fs" />
+    <Compile Include="Inputs\Keyboard.fs" />
+    <Compile Include="Helpers.fs" />
+    <Compile Include="Theme.fs" />
+    <Compile Include="Hink.fs" />
+  </ItemGroup>
+  <Import Project="..\.paket\Paket.Restore.targets" />
+</Project>

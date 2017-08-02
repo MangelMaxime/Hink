@@ -1,0 +1,17 @@
+source https://www.nuget.org/api/v2
+
+nuget FSharp.Core
+nuget Fable.Core
+nuget Fable.Import.Browser
+nuget FSharp.NET.Sdk
+
+clitool dotnet-fable
+
+group Build
+framework: net46
+
+    source https://nuget.org/api/v2
+    nuget FSharp.Core  redirects:force, content:none
+    nuget FAKE
+
+    github fsharp/FAKE modules/Octokit/Octokit.fsx

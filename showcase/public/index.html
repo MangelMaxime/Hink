@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+    <title>Hink • Showcase</title>
+</head>
+
+<body>
+    <style>
+        #application {
+            width: 900px;
+            height: 600px;
+            background: white;
+            z-index: 1000;
+        }
+
+        html,
+        body {
+            background: lightblue;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            margin: 0;
+        }
+
+        .parent {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+    </style>
+
+    <div class="parent">
+        <canvas id="application" width="900" height="600" tabindex="1"></canvas>
+    </div>
+
+    <script src="libs/stats.js"></script>
+    <script src="dist/js/bundle.js"></script>
+</body>
+
+</html>

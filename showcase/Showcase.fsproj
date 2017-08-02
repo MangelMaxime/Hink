@@ -1,0 +1,13 @@
+<Project Sdk="FSharp.NET.Sdk;Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard1.6</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="src/Libs/Stats.fs" />
+    <Compile Include="src/App.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../src/Hink.fsproj"/>
+  </ItemGroup>
+  <Import Project="..\.paket\Paket.Restore.targets" />
+</Project>

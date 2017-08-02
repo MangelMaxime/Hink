@@ -42,3 +42,8 @@ Thumbs.db
 node_modules/
 npm/
 dist/
+paket-files/
+
+Meta\.props
+
+\.fake/
