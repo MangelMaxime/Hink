@@ -943,6 +943,17 @@ module Gui =
                                 | Keyboard.Keys.Escape ->
                                     info.ClearSelection()
                                 | _ -> res <- false // Not captured
+
+                            // Neutralize the selection (prevent visual bugs)
+                            match info.Selection with
+                            | Some selection ->
+                                // If the selection is "void" then remove it
+                                if selection.Start = selection.End then
+                                    info.Selection <- None
+                                elif selection.Start > selection.End then
+                                    info.Selection <- Some (SelectionArea.Create(selection.End, selection.Start))
+                            | None -> () // Nothing to do
+
                             res
                         if not isCapture && this.Keyboard.LastKeyIsPrintable then
                             info.Value <- info.Value.Insert(info.CursorOffset, this.Keyboard.LastKeyValue)
