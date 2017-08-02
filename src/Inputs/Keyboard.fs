@@ -31,6 +31,7 @@ module Keyboard =
             | ArrowRight
             | ArrowDown
             | Delete
+            | OS
             | F1
             | F2
             | F3
@@ -64,6 +65,7 @@ module Keyboard =
         | "arrowright" -> Keys.ArrowRight
         | "arrowdown" -> Keys.ArrowDown
         | "delete" -> Keys.Delete
+        | "os" -> Keys.OS
         | "f1" -> Keys.F1
         | "f2" -> Keys.F2
         | "f3" -> Keys.F3
@@ -141,13 +143,14 @@ module Keyboard =
             // * '^^' = '^' + '^'
             // * '^p' = '^' + 'p'
             // We also have to make sure the key is not F1..F12 so we exclude keycode range: [112,123]
-            let isFunctionKey =
+            let isPrintableKey =
                 match key with
                 | Keys.F1 | Keys.F2 | Keys.F3 | Keys.F4 | Keys.F5 | Keys.F6
-                | Keys.F7 | Keys.F8 | Keys.F9 | Keys.F10 | Keys.F11 | Keys.F12  -> true
-                | _ -> false
+                | Keys.F7 | Keys.F8 | Keys.F9 | Keys.F10 | Keys.F11 | Keys.F12
+                | Keys.OS -> false
+                | _ -> true
 
-            Manager.LastKeyIsPrintable <- 1 <= e.key.Length && e.key.Length <= 2 && not isFunctionKey
+            Manager.LastKeyIsPrintable <- 1 <= e.key.Length && e.key.Length <= 2 && isPrintableKey
             Manager.LastKey <- key
             Manager.KeysPressed <- Set.add key Manager.KeysPressed
             // Update the Modifiers state
