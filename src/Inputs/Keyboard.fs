@@ -31,31 +31,57 @@ module Keyboard =
             | ArrowRight
             | ArrowDown
             | Delete
+            | F1
+            | F2
+            | F3
+            | F4
+            | F5
+            | F6
+            | F7
+            | F8
+            | F9
+            | F10
+            | F11
+            | F12
             | A
             | B
             | C
             | R
+            | Slash
 
-    let resolveKeyFromCode keycode =
-        match keycode with
-        | 8 -> Keys.Backspace
-        | 9 -> Keys.Tab
-        | 13 -> Keys.Enter
-        | 17 -> Keys.Control
-        | 27 -> Keys.Escape
-        | 32 -> Keys.Space
-        | 35 -> Keys.End
-        | 36 -> Keys.Home
-        | 37 -> Keys.ArrowLeft
-        | 38 -> Keys.ArrowUp
-        | 39 -> Keys.ArrowRight
-        | 40 -> Keys.ArrowDown
-        | 46 -> Keys.Delete
-        | 65 -> Keys.A
-        | 66 -> Keys.B
-        | 67 -> Keys.C
-        | 82 -> Keys.R
-        | _ -> Keys.Dead keycode
+    let resolveKeyFromKey (key: string) =
+        match key.ToLower() with
+        | "backspace" -> Keys.Backspace
+        | "tab" -> Keys.Tab
+        | "enter" -> Keys.Enter
+        | "control" -> Keys.Control
+        | "escape" -> Keys.Escape
+        | "space" -> Keys.Space
+        | "end" -> Keys.End
+        | "home" -> Keys.Home
+        | "arrowleft" -> Keys.ArrowLeft
+        | "arrowup" -> Keys.ArrowUp
+        | "arrowright" -> Keys.ArrowRight
+        | "arrowdown" -> Keys.ArrowDown
+        | "delete" -> Keys.Delete
+        | "f1" -> Keys.F1
+        | "f2" -> Keys.F2
+        | "f3" -> Keys.F3
+        | "f4" -> Keys.F4
+        | "f5" -> Keys.F5
+        | "f6" -> Keys.F6
+        | "f7" -> Keys.F7
+        | "f8" -> Keys.F8
+        | "f9" -> Keys.F9
+        | "f10" -> Keys.F10
+        | "f11" -> Keys.F11
+        | "f12" -> Keys.F12
+        | "/" -> Keys.Slash
+        | "a" -> Keys.A
+        | "b" -> Keys.B
+        | "c" -> Keys.C
+        | "r" -> Keys.R
+        | _ -> Keys.Dead -1
 
     type Modifiers =
         { mutable Shift : bool
@@ -72,15 +98,16 @@ module Keyboard =
 
     type Record =
         { mutable KeysPressed : Set<Keys>
-          mutable LastKeyCode : int
           mutable LastKeyValue : string
           mutable LastKeyIsPrintable : bool
           mutable LastKey : Keys
           Modifiers : Modifiers }
 
+        member this.HasNewKeyStroke () =
+            this.LastKeyValue <> ""
+
         static member Initial =
             { KeysPressed = Set.empty
-              LastKeyCode = -1
               LastKeyValue = ""
               LastKeyIsPrintable = false
               LastKey = Keys.Dead -1
@@ -88,7 +115,6 @@ module Keyboard =
 
         member self.IsPress key = self.KeysPressed.Contains(key)
         member self.ClearLastKey() =
-            self.LastKeyCode <- -1
             self.LastKeyValue <- ""
             self.LastKeyIsPrintable <- false
             self.LastKey <- Keys.Dead -1
@@ -103,10 +129,8 @@ module Keyboard =
             Manager.Modifiers.CommandLeft <- e.keyCode = 224.
             Manager.Modifiers.CommandRight <- e.keyCode = 224.
         element.addEventListener_keydown (fun e ->
-            let code = int e.keyCode
-            let key = resolveKeyFromCode code
+            let key = resolveKeyFromKey e.key
             Manager.LastKeyValue <- e.key
-            Manager.LastKeyCode <- code
             // Here we try to determine if the key is printable or not
             // Should not be "Dead". Exemple first press on '^' is Dead
             // And the value should be of size [1,2] because we can add:
@@ -117,7 +141,13 @@ module Keyboard =
             // * '^^' = '^' + '^'
             // * '^p' = '^' + 'p'
             // We also have to make sure the key is not F1..F12 so we exclude keycode range: [112,123]
-            Manager.LastKeyIsPrintable <- 1 <= e.key.Length && e.key.Length <= 2 && (code < 112 || code > 123)
+            let isFunctionKey =
+                match key with
+                | Keys.F1 | Keys.F2 | Keys.F3 | Keys.F4 | Keys.F5 | Keys.F6
+                | Keys.F7 | Keys.F8 | Keys.F9 | Keys.F10 | Keys.F11 | Keys.F12  -> true
+                | _ -> false
+
+            Manager.LastKeyIsPrintable <- 1 <= e.key.Length && e.key.Length <= 2 && not isFunctionKey
             Manager.LastKey <- key
             Manager.KeysPressed <- Set.add key Manager.KeysPressed
             // Update the Modifiers state
@@ -125,23 +155,34 @@ module Keyboard =
             null)
         element.addEventListener_keyup (fun e ->
             let code = int e.keyCode
-            Manager.KeysPressed <- Set.remove (resolveKeyFromCode code) Manager.KeysPressed
+            Manager.KeysPressed <- Set.remove (resolveKeyFromKey e.key) Manager.KeysPressed
             // Update the Modifiers state
             updateModifiers e
             null)
         // If the user ask to prevent tab unloosing focus
         if preventDefault then
             element.addEventListener_keydown (fun e ->
-                let code = int e.keyCode
-
                 let shouldPreventFromCtrl =
                     if e.ctrlKey then
-                        match resolveKeyFromCode code with
+                        match resolveKeyFromKey e.key with
                         | Keys.A -> true
                         | _ -> false
                     else false
-                // If we pressed tab then preventDefault to not loose the focus
-                if code = 9 || code = 8 || shouldPreventFromCtrl then
+
+                let shouldPreventFromShift =
+                    if e.shiftKey then
+                        match resolveKeyFromKey e.key with
+                        | Keys.Slash -> true
+                        | _ -> false
+                    else false
+
+                let shouldPreventNoModifier =
+                    match resolveKeyFromKey e.key with
+                    | Keys.Tab -> true
+                    | Keys.Backspace -> true
+                    | _ -> false
+
+                if shouldPreventNoModifier || shouldPreventFromCtrl || shouldPreventFromShift then
                     e.preventDefault()
                     unbox false
                 else null)

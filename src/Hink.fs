@@ -150,6 +150,9 @@ module Gui =
         member this.ClearSelection () =
             this.Selection <- None
 
+        member this.SetSelection (value) =
+            this.Selection <- Some value
+
         static member Default
             with get () = { IsActive = false
                             Value = ""
@@ -785,7 +788,7 @@ module Gui =
                 )
 
                 // Cursor
-                if info.IsActive && this.Delta < TimeSpan.FromMilliseconds(500.) then
+                if info.IsActive && this.Delta < TimeSpan.FromMilliseconds(500.) && info.Selection.IsNone then
 
                     this.Context.fillStyle <- !^"#000"
                     this.Context.font <- this.Theme.FormatFontString this.Theme.FontSmallSize
@@ -801,18 +804,89 @@ module Gui =
                         textMetrics.width - cursorMetrics.width / 2. - cursorOffsetMetrics.width + this.Theme.Text.OffsetX
                     )
 
+                let handleBackwardSelection newCursorOffset =
+                    if info.Value.Length > 0 then
+                        let oldCursorOffset = info.CursorOffset
+                        info.CursorOffset <- newCursorOffset
+                        match info.Selection with
+                        | Some selection ->
+                            if oldCursorOffset = selection.Start then
+                                { selection with Start = info.CursorOffset }
+                            else
+                                { selection with End = newCursorOffset }
+                        | None ->
+                            SelectionArea.Create(
+                                info.CursorOffset,
+                                oldCursorOffset
+                            )
+                        |> info.SetSelection
+
+                let handleForwardSelection newCursorOffset =
+                    if info.Value.Length > 0 then
+                        let oldCursorOffset = info.CursorOffset
+                        info.CursorOffset <- newCursorOffset
+                        match info.Selection with
+                        | Some selection ->
+                            if selection.End = oldCursorOffset then
+                                { selection with End = info.CursorOffset }
+                            else
+                                { selection with Start = newCursorOffset }
+                        | None ->
+                            SelectionArea.Create(
+                                oldCursorOffset,
+                                info.CursorOffset
+                            )
+                        |> info.SetSelection
+
                 if info.IsActive then
-                    if this.Keyboard.LastKeyCode <> -1 then
+                    if this.Keyboard.HasNewKeyStroke() then
                         // Memorise if we capture the keystroke
                         // Example: Ctrl, Arrows are capture. Letters are not
                         let isCapture =
                             let mutable res = true
                             // First we resolve the action depending on modifiers
                             match this.Keyboard.Modifiers with
+                            | { Control = true; Shift = true } ->
+                                match this.Keyboard.LastKey with
+                                | Keyboard.Keys.ArrowLeft ->
+                                    NextIndexBackward(info.Value, ' ', info.CursorOffset)
+                                    |> handleBackwardSelection
+                                | Keyboard.Keys.ArrowRight ->
+                                    NextIndexForward(info.Value, ' ', info.CursorOffset)
+                                    |> handleForwardSelection
+                                | _ -> res <- false // Not captured
                             | { Control = true } ->
                                 info.ClearSelection()
                                 match this.Keyboard.LastKey with
-                                | Keyboard.Keys.ArrowLeft -> ()
+                                | Keyboard.Keys.ArrowLeft ->
+                                    if info.Value.Length > 0 then
+                                        info.CursorOffset <- NextIndexBackward(info.Value, ' ', info.CursorOffset)
+                                | Keyboard.Keys.ArrowRight ->
+                                    if info.Value.Length > 0 then
+                                        info.CursorOffset <- NextIndexForward(info.Value, ' ', info.CursorOffset)
+                                | Keyboard.Keys.Backspace ->
+                                    if info.Value.Length > 0 then
+                                        let index = NextIndexBackward(info.Value, ' ', info.CursorOffset)
+                                        let delta = info.CursorOffset - index
+                                        info.Value <- info.Value.Remove(index, delta)
+                                        info.CursorOffset <- info.CursorOffset - delta
+                                | Keyboard.Keys.Delete ->
+                                    if info.Value.Length > 0 then
+                                        let index = NextIndexForward(info.Value, ' ', info.CursorOffset)
+                                        info.Value <- info.Value.Remove(info.CursorOffset, index - info.CursorOffset)
+                                | Keyboard.Keys.A ->
+                                    if info.Value.Length > 0 then
+                                        info.Selection <- Some (SelectionArea.Create(0, info.Value.Length))
+                                        info.CursorOffset <- info.Value.Length
+                                | _ -> res <- false // Not captured
+                            | { Shift = true } ->
+                                match this.Keyboard.LastKey with
+                                | Keyboard.Keys.ArrowLeft ->
+                                    Math.Max(0, info.CursorOffset - 1)
+                                    |> handleBackwardSelection
+                                | Keyboard.Keys.ArrowRight ->
+                                    Math.Min(info.CursorOffset + 1, info.Value.Length)
+                                    |> handleForwardSelection
                                 | _ -> res <- false // Not captured
                             | _ ->
                                 let oldSelection =
@@ -820,6 +894,7 @@ module Gui =
                                         true, info.Selection.Value
                                     else
                                         false, SelectionArea.Create(0, 0)
+                                info.ClearSelection()
                                 match this.Keyboard.LastKey with
                                 | Keyboard.Keys.Backspace ->
                                     if info.Value.Length > 0 then
