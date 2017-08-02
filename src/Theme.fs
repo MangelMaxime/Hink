@@ -101,6 +101,7 @@ module rec Theme =
 
     type TextTheme =
         { OffsetX : float
+          OffsetY : float
           Color : string }
 
     type WindowTheme =
@@ -110,7 +111,8 @@ module rec Theme =
     type WindowHeader =
         { Color : string
           Height : float
-          SymbolOffset : float
+          SymbolOffsetX : float
+          SymbolOffsetY : float
           OverSymbolColor : string }
 
     type ComboTheme =
@@ -142,6 +144,7 @@ module rec Theme =
               Color = "#fff" }
           Text =
             { OffsetX = 8.
+              OffsetY = 2.
               Color = "#fff" }
           Button =
             { Width = 80.
@@ -184,7 +187,8 @@ module rec Theme =
               Header =
                 { Color = "#1abc9c"
                   Height = 24.
-                  SymbolOffset = 6.
+                  SymbolOffsetX = 6.
+                  SymbolOffsetY = 1.
                   OverSymbolColor = "#e74c3c" } }
           Combo =
             { Background =

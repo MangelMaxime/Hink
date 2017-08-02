@@ -387,8 +387,8 @@ module Gui =
                     this.Context.fillStyle <- !^this.Theme.Text.Color
                     this.Context.fillText(
                         title,
-                        this.Cursor.X + this.Theme.Window.Header.SymbolOffset,
-                        headerTextY
+                        this.Cursor.X + this.Theme.Window.Header.SymbolOffsetX,
+                        headerTextY + this.Theme.Text.OffsetY
                     )
 
                 if this.CurrentWindow.Value.Draggable then
@@ -415,10 +415,10 @@ module Gui =
 
                 if this.CurrentWindow.Value.Closable then
                     let textSize = this.Context.measureText("\u2715")
-                    let textX = this.Cursor.X + this.Cursor.Width - textSize.width - this.Theme.Window.Header.SymbolOffset
+                    let textX = this.Cursor.X + this.Cursor.Width - textSize.width - this.Theme.Window.Header.SymbolOffsetX
 
                     // Custom IsHover check has we don't follow auto layout management for the header symbol
-                    let hoverX = this.Cursor.X + this.Cursor.Width - textSize.width - this.Theme.Window.Header.SymbolOffset * 2.
+                    let hoverX = this.Cursor.X + this.Cursor.Width - textSize.width - this.Theme.Window.Header.SymbolOffsetX * 2.
                     let hoverSymbol = this.Mouse.X >= hoverX && this.Mouse.X < (this.Cursor.X + this.Cursor.Width) &&
                                       this.Mouse.Y >= (this.Cursor.Y - this.Theme.Window.Header.Height) && this.Mouse.Y < this.Cursor.Y
 
@@ -426,9 +426,9 @@ module Gui =
                     if hoverSymbol then
                         this.Context.fillStyle <- !^this.Theme.Window.Header.OverSymbolColor
                         this.Context.fillRect(
-                            textX - this.Theme.Window.Header.SymbolOffset,
+                            textX - this.Theme.Window.Header.SymbolOffsetX,
                             this.Cursor.Y - this.Theme.Window.Header.Height,
-                            textSize.width + this.Theme.Window.Header.SymbolOffset * 2.,
+                            textSize.width + this.Theme.Window.Header.SymbolOffsetX * 2.,
                             headerTextY + this.Theme.FontSize
                         )
                         if this.Mouse.JustReleased then
@@ -436,9 +436,7 @@ module Gui =
 
                     // Draw symbol
                     this.Context.fillStyle <- !^this.Theme.Text.Color
-                    this.Context.fillText("\u2715",textX, headerTextY)
-
-
+                    this.Context.fillText("\u2715", textX, headerTextY + this.Theme.Window.Header.SymbolOffsetY)
 
                 // Draw Window background
                 this.Context.fillStyle <- !^(defaultArg backgroundColor this.Theme.Window.Background)
@@ -639,7 +637,7 @@ module Gui =
             this.Cursor.Width <- this.Cursor.Width * this.RowInfo.Value.ActiveRatio
 
         member this.FillSmallString (text, ?offsetX, ?offsetY, ?align : Align) =
-            let offsetY = defaultArg offsetY 0.
+            let offsetY = defaultArg offsetY this.Theme.Text.OffsetY
             let align = defaultArg align Left
             let textSize = this.Context.measureText(text)
 
