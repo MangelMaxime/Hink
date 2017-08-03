@@ -12,12 +12,14 @@ module Keyboard =
             | Alt
             | Control
             | Shift
-            | None
+            | NoMod
 
     [<AutoOpen>]
     module Keys =
         type Keys =
-            | Dead of int
+            | Unkown of string
+            | Dead
+            | Ampersand
             | Backspace
             | Enter
             | Control
@@ -47,11 +49,34 @@ module Keyboard =
             | A
             | B
             | C
+            | D
+            | E
+            | F
+            | G
+            | H
+            | I
+            | J
+            | K
+            | L
+            | M
+            | N
+            | O
+            | P
+            | Q
             | R
+            | S
+            | T
+            | U
+            | V
+            | W
+            | X
+            | Y
+            | Z
             | Slash
 
     let resolveKeyFromKey (key: string) =
         match key.ToLower() with
+        | "&" -> Keys.Ampersand
         | "backspace" -> Keys.Backspace
         | "tab" -> Keys.Tab
         | "enter" -> Keys.Enter
@@ -82,8 +107,30 @@ module Keyboard =
         | "a" -> Keys.A
         | "b" -> Keys.B
         | "c" -> Keys.C
+        | "d" -> Keys.D
+        | "e" -> Keys.E
+        | "f" -> Keys.F
+        | "g" -> Keys.G
+        | "h" -> Keys.H
+        | "i" -> Keys.I
+        | "j" -> Keys.J
+        | "k" -> Keys.K
+        | "l" -> Keys.L
+        | "m" -> Keys.M
+        | "n" -> Keys.N
+        | "o" -> Keys.O
+        | "p" -> Keys.P
+        | "q" -> Keys.Q
         | "r" -> Keys.R
-        | _ -> Keys.Dead -1
+        | "s" -> Keys.S
+        | "t" -> Keys.T
+        | "u" -> Keys.U
+        | "v" -> Keys.V
+        | "w" -> Keys.W
+        | "x" -> Keys.X
+        | "y" -> Keys.Y
+        | "z" -> Keys.Z
+        | _ -> Keys.Unkown key
 
     type Modifiers =
         { mutable Shift : bool
@@ -112,18 +159,20 @@ module Keyboard =
             { KeysPressed = Set.empty
               LastKeyValue = ""
               LastKeyIsPrintable = false
-              LastKey = Keys.Dead -1
+              LastKey = Keys.Unkown ""
               Modifiers = Modifiers.Initial }
 
         member self.IsPress key = self.KeysPressed.Contains(key)
         member self.ClearLastKey() =
             self.LastKeyValue <- ""
             self.LastKeyIsPrintable <- false
-            self.LastKey <- Keys.Dead -1
+            self.LastKey <- Keys.Unkown ""
 
     let Manager = Record.Initial
 
-    let init (element : HTMLElement) preventDefault =
+    type PreventHandler = (KeyboardEvent -> bool)
+
+    let init (element : HTMLElement) preventDefault (userPreventHandler : PreventHandler option) =
         let updateModifiers (e : KeyboardEvent) =
             Manager.Modifiers.Alt <- e.altKey
             Manager.Modifiers.Shift <- e.shiftKey
@@ -189,3 +238,13 @@ module Keyboard =
                     e.preventDefault()
                     unbox false
                 else null)
+
+        match userPreventHandler with
+        | Some handler ->
+            element.addEventListener_keydown (fun e ->
+                if handler e then
+                    e.preventDefault()
+                    unbox false
+                else
+                    null )
+        | None -> () // Nothing to do

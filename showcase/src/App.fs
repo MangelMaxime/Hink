@@ -4,12 +4,12 @@ open Fable.Core
 open Fable.Core.JsInterop
 open Fable.Import
 open Hink.Gui
+open Hink.Inputs
 
 
 module Main =
     // Application code
     let canvas = Browser.document.getElementById "application" :?> Browser.HTMLCanvasElement
-    let ui = Hink.Create(canvas)
 
     let mutable buttonCounter = 0
     let isChecked = ref false
@@ -25,16 +25,16 @@ module Main =
     let window1 = { WindowInfo.Default with X = 10.
                                             Y = 10.
                                             Width = 400.
-                                            Height = 280. }
+                                            Height = 320. }
 
     let window2 = { WindowInfo.Default with X = 450.
                                             Y = 50.
                                             Width = 400.
                                             Height = 285.
                                             Closable = true
+                                            Closed = true
                                             Draggable = true
                                             Title = Some "You can close me" }
-    let mutable window2BackgroundColor = ui.Theme.Window.Header.Color
 
     let Emerald = "#2ecc71"
     let Nephritis = "#27ae60"
@@ -48,6 +48,37 @@ module Main =
     let checkbox1 = CheckboxInfo.Default
     let input1 = { InputInfo.Default with Value = "Some text here"
                                           Selection = None }
+
+    let keyboardPreventHandler (e: Browser.KeyboardEvent) =
+        let shouldPreventFromCtrl =
+            if e.ctrlKey then
+                match Keyboard.resolveKeyFromKey e.key with
+                | Keyboard.Keys.D -> true
+                | Keyboard.Keys.O -> true
+                | _ -> false
+            else false
+
+        shouldPreventFromCtrl
+
+    let keyboardCaptureHandler (keyboard: Keyboard.Record) =
+        match keyboard.Modifiers with
+        | { Control = true } ->
+            match keyboard.LastKey with
+            | Keyboard.Keys.O ->
+                window2.Closed <- false
+                true // Key has been captured
+            | _ -> false
+        | _ ->
+            match keyboard.LastKey with
+            | Keyboard.Keys.Escape ->
+                if not window2.Closed then
+                    window2.Closed <- true
+                true // Key has been captured
+            | _ -> false
+
+    let ui = Hink.Create(canvas, keyboardCaptureHandler = keyboardCaptureHandler, keyboardPreventHandler = keyboardPreventHandler)
+
+    let mutable window2BackgroundColor = ui.Theme.Window.Header.Color
 
     let rec render (_: float) =
         ui.Context.clearRect(0., 0., ui.Canvas.width, ui.Canvas.height)
@@ -82,6 +113,8 @@ module Main =
                 window2.Closed <- false
             ui.Empty()
 
+            ui.Label("Use Ctrl+O to open the second Window", Center)
+
         if ui.Window(window2, headerColor = window2BackgroundColor) then
             ui.Label("Click to change window header", Center)
             ui.Row([|1./3.; 1./3.; 1./3.|])
@@ -100,6 +133,10 @@ module Main =
             ui.Checkbox(checkbox1, "Remember me") |> ignore
 
             ui.Input(input1) |> ignore
+
+            ui.Empty()
+
+            ui.Label("Close me by pressing Espace", Center)
 
         ui.Finish()
 

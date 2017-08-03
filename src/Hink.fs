@@ -164,6 +164,8 @@ module Gui =
           Context : Browser.CanvasRenderingContext2D
           Mouse : Mouse.Record
           Keyboard : Keyboard.Record
+          KeyboardCaptureHandler : (Keyboard.Record -> bool) option
+          mutable KeyboadHasBeenCapture : bool
           Theme : Theme
           mutable RowInfo : Row option
           mutable Cursor : Cursor
@@ -176,7 +178,7 @@ module Gui =
           mutable LastReferenceTick : DateTime
           mutable Delta : TimeSpan }
 
-        static member Create (canvas : Browser.HTMLCanvasElement, ?fontSize, ?theme) =
+        static member Create (canvas : Browser.HTMLCanvasElement, ?fontSize, ?theme, ?keyboardPreventHandler, ?keyboardCaptureHandler) =
             // Allow canvas interaction
             canvas.setAttribute ("tabindex", "1")
             // Init the context
@@ -186,12 +188,14 @@ module Gui =
 
             // Init input manager
             Mouse.init canvas
-            Keyboard.init canvas true
+            Keyboard.init canvas true keyboardPreventHandler
 
             { Canvas = canvas
               Context = context
               Mouse = Mouse.Manager
               Keyboard = Keyboard.Manager
+              KeyboardCaptureHandler = keyboardCaptureHandler
+              KeyboadHasBeenCapture = false
               IsCursorStyled = false
               Theme = defaultArg theme darkTheme
               Cursor =
@@ -212,7 +216,10 @@ module Gui =
             let now = DateTime.Now
             this.Delta <- now - this.LastReferenceTick
 
-            this.Context.globalCompositeOperation <- "source-over"
+            match this.KeyboardCaptureHandler with
+            | Some handler ->
+                this.KeyboadHasBeenCapture <- handler this.Keyboard
+            | None -> () // Do nothing
 
             if this.Delta > oneSecond then
                 this.LastReferenceTick <- now
@@ -285,6 +292,7 @@ module Gui =
             // Help detecting if the mouse cursor need to be reset on the next loop
             this.IsCursorStyled <- false
 
+            this.KeyboadHasBeenCapture <- false
             this.Keyboard.ClearLastKey()
 
         member this.SetCursor cursor =
@@ -951,6 +959,9 @@ module Gui =
                                 elif selection.Start > selection.End then
                                     info.Selection <- Some (SelectionArea.Create(selection.End, selection.Start))
                             | None -> () // Nothing to do
+
+                            if not res then
+                                res <- this.KeyboadHasBeenCapture
 
                             res
                         if not isCapture && this.Keyboard.LastKeyIsPrintable then
