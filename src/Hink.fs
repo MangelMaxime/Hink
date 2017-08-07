@@ -145,7 +145,11 @@ module Gui =
           // Positive offset of the cursor.
           // Offset of 0 = start of the input
           // Offset of 2 = cursor place after the second char of the input
-          mutable CursorOffset : int }
+          mutable CursorOffset : int
+          // Start origin of the text to display
+          // 0 = Start of the text
+          // 2 = Start of the text after the 2 first chars
+          mutable TextStartOrigin : int }
 
         member this.ClearSelection () =
             this.Selection <- None
@@ -157,7 +161,8 @@ module Gui =
             with get () = { IsActive = false
                             Value = ""
                             Selection = None
-                            CursorOffset = 0 }
+                            CursorOffset = 0
+                            TextStartOrigin = 0 }
 
     type Hink =
         { Canvas : Browser.HTMLCanvasElement
@@ -661,10 +666,10 @@ module Gui =
             this.Context.font <- this.Theme.FormatFontString this.Theme.FontSmallSize
 
             let text =
-                if textSize.width > this.Cursor.Width then
+                if textSize.width > this.Cursor.Width - this.Theme.Text.OffsetX then
                     let charSize = this.Context.measureText(" ") // We assume to use a monospace font
-                    let maxChar = (this.Cursor.Width - this.Theme.Text.OffsetX) / charSize.width
-                    text.Substring(0, int (maxChar - 2.)) + ".."
+                    let maxChar = (this.Cursor.Width - this.Theme.Text.OffsetX) / charSize.width |> int
+                    text.Substring(0, maxChar - 2) + ".."
                 else
                     text
 
@@ -787,22 +792,38 @@ module Gui =
                     )
                 | None -> () // Nothing to do
 
-                // Draw text
+                // Custom way to draw text because we need to handle text offset when being larger than the input
                 this.Context.fillStyle <- !^this.Theme.Input.TextColor
-                this.FillSmallString(
-                    info.Value
+                this.Context.font <- this.Theme.FormatFontString this.Theme.FontSmallSize
+
+                let offsetY = this.Theme.Text.OffsetY
+                let textSize = this.Context.measureText(info.Value)
+                let offsetX = this.Theme.Text.OffsetX
+
+                let charSize = this.Context.measureText(" ") // We assume to use a monospace font
+                let maxChar = (this.Cursor.Width - this.Theme.Text.OffsetX * 2.) / charSize.width |> int
+
+                let text =
+                    if textSize.width > this.Cursor.Width - this.Theme.Text.OffsetX * 2. then
+                        info.Value.Substring(info.TextStartOrigin , maxChar)
+                    else
+                        info.Value
+
+                this.Context.fillText(
+                    text,
+                    this.Cursor.X + offsetX,
+                    this.Cursor.Y + this.Theme.FontSmallOffsetY + offsetY
                 )
 
                 // Cursor
                 if info.IsActive && this.Delta < TimeSpan.FromMilliseconds(500.) && info.Selection.IsNone then
 
                     this.Context.fillStyle <- !^"#000"
-                    this.Context.font <- this.Theme.FormatFontString this.Theme.FontSmallSize
 
                     let cursorMetrics = this.Context.measureText("|")
                     let textMetrics = this.Context.measureText(info.Value)
                     let cursorOffsetMetrics =
-                      info.Value.Substring(info.CursorOffset)
+                      info.Value.Substring(Math.Min(info.CursorOffset, maxChar))
                       |> this.Context.measureText
 
                     this.FillSmallString(
@@ -866,7 +887,13 @@ module Gui =
                                 match this.Keyboard.LastKey with
                                 | Keyboard.Keys.ArrowLeft ->
                                     if info.Value.Length > 0 then
+                                        let oldCursorOffset = info.CursorOffset
                                         info.CursorOffset <- NextIndexBackward(info.Value, ' ', info.CursorOffset)
+                                        // let delta = oldCursorOffset - info.CursorOffset
+                                        // if info.CursorOffset = 0 then
+                                        //     info.TextStartOrigin <- info.TextStartOrigin - (oldCursorOffset - info.CursorOffset)
+                                        //     if info.TextStartOrigin < 0 then
+                                        //         info.TextStartOrigin <- 0
                                 | Keyboard.Keys.ArrowRight ->
                                     if info.Value.Length > 0 then
                                         info.CursorOffset <- NextIndexForward(info.Value, ' ', info.CursorOffset)
@@ -928,20 +955,29 @@ module Gui =
                                     | (true, selection) ->
                                         if selection.Edging info.Value.Length then
                                             info.CursorOffset <- 0
+                                            info.TextStartOrigin <- 0
                                         else
                                             info.CursorOffset <- Math.Max(0, info.CursorOffset - 1)
                                     | (false, _) ->
                                         info.CursorOffset <- Math.Max(0, info.CursorOffset - 1)
 
+                                    if info.CursorOffset = 0 then
+                                        if info.TextStartOrigin >= 1 then
+                                            info.TextStartOrigin <- info.TextStartOrigin - 1
+                                        else
+                                            info.TextStartOrigin <- 0
                                 | Keyboard.Keys.ArrowRight ->
                                     match oldSelection with
                                     | (true, selection) ->
                                         if selection.Edging info.Value.Length then
                                             info.CursorOffset <- info.Value.Length
                                         else
-                                            info.CursorOffset <- Math.Min(info.CursorOffset + 1, info.Value.Length)
+                                            info.CursorOffset <- Math.Min(info.CursorOffset + 1, Math.Min(maxChar, info.Value.Length))
                                     | (false, _) ->
-                                        info.CursorOffset <- Math.Min(info.CursorOffset + 1, info.Value.Length)
+                                        info.CursorOffset <- Math.Min(info.CursorOffset + 1, Math.Min(maxChar, info.Value.Length))
+
+                                    if info.CursorOffset >= maxChar then
+                                        info.TextStartOrigin <- Math.Min(info.Value.Length - maxChar, info.TextStartOrigin + 1)
                                 | Keyboard.Keys.Home ->
                                     info.CursorOffset <- 0
                                 | Keyboard.Keys.End ->
@@ -953,7 +989,7 @@ module Gui =
                             // Neutralize the selection (prevent visual bugs)
                             match info.Selection with
                             | Some selection ->
-                                // If the selection is "void" then remove it
+                                // If the selection is "empty" then remove it
                                 if selection.Start = selection.End then
                                     info.Selection <- None
                                 elif selection.Start > selection.End then
@@ -964,6 +1000,7 @@ module Gui =
                                 res <- this.KeyboadHasBeenCapture
 
                             res
+
                         if not isCapture && this.Keyboard.LastKeyIsPrintable then
                             info.Value <- info.Value.Insert(info.CursorOffset, this.Keyboard.LastKeyValue)
                             info.CursorOffset <- info.CursorOffset + 1
