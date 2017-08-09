@@ -72,6 +72,7 @@ module Keyboard =
             | X
             | Y
             | Z
+            | SingleQuote
             | Slash
 
     let resolveKeyFromKey (key: string) =
@@ -104,6 +105,7 @@ module Keyboard =
         | "f11" -> Keys.F11
         | "f12" -> Keys.F12
         | "/" -> Keys.Slash
+        | "'" -> Keys.SingleQuote
         | "a" -> Keys.A
         | "b" -> Keys.B
         | "c" -> Keys.C
@@ -232,6 +234,7 @@ module Keyboard =
                     match resolveKeyFromKey e.key with
                     | Keys.Tab -> true
                     | Keys.Backspace -> true
+                    | Keys.SingleQuote -> true
                     | _ -> false
 
                 if shouldPreventNoModifier || shouldPreventFromCtrl || shouldPreventFromShift then
