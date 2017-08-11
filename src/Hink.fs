@@ -984,6 +984,7 @@ module Gui =
 
                                     if info.CursorOffset >= maxChar then
                                         info.TextStartOrigin <- Math.Min(info.Value.Length - maxChar, info.TextStartOrigin + 1)
+                                        info.CursorOffset <- maxChar
                                 | Keyboard.Keys.Home ->
                                     info.CursorOffset <- 0
                                     info.TextStartOrigin <- 0

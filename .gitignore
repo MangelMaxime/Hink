@@ -47,3 +47,6 @@ paket-files/
 Meta\.props
 
 \.fake/
+
+docs/.sass-cache/
+docs/_*/
