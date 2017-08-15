@@ -27,4 +27,4 @@ let generate (siteModel : SiteModel) (mdl : Model) (posts : Post list) (content 
             yield! psts
         ]
 
-    Default.defaultPage siteModel mdl.title [ctn]
+    Default.defaultPage siteModel mdl.title ctn

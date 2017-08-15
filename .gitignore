@@ -49,4 +49,4 @@ Meta\.props
 \.fake/
 
 docs/.sass-cache/
-docs/_*/
+docs/_public/
