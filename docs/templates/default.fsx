@@ -20,7 +20,7 @@ hljs.initHighlightingOnLoad();
 //     var suffix = pageTitle.innerText.toLowerCase();
 //     var activeTab = document.getElementById("tab-" + suffix);
 //     activeTab.classList.add("is-active");
-// } else 
+// } else
 //     document.getElementById("tab-home").classList.add("is-active");
     """
 
@@ -37,9 +37,9 @@ type ComponentInfo =
       Title : string }
 
 let defaultPage (siteModel : SiteModel) pageTitle content =
-    let components = 
+    let components =
         getComponents ()
-        |> List.map (fun p -> 
+        |> List.map (fun p ->
                         let info : Dictionary<string, string> = new Dictionary<string, string>()
                         let content = File.ReadAllText p
                         let config = ContentParser.getConfig content
@@ -49,7 +49,7 @@ let defaultPage (siteModel : SiteModel) pageTitle content =
                             info.Add(kv.[0], kv.[1])
                         )
                         let title = ref ""
-                        
+
                         if info.TryGetValue("title", title) then
                             { Link = p.Replace(projectRoot, "")
                                       .Replace("md", "html")
@@ -68,20 +68,20 @@ let defaultPage (siteModel : SiteModel) pageTitle content =
             // Highlight.js
             link [ Rel "stylesheet"; Type "text/css"; Href "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-dark.min.css" ]
             script [ Src "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js" ] [ ]
-            script [ Src "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/fsharp.min.js" ] [ ]            
+            script [ Src "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/fsharp.min.js" ] [ ]
             link [ Rel "stylesheet"; Type "text/css"; Href "/css/style.css" ]
         ]
         body []
-            [ section [ Class "hero is-fable-blue" ]            
-                      [ div [ Class "hero-body" ] 
+            [ section [ Class "hero is-fable-blue" ]
+                      [ div [ Class "hero-body" ]
                             [ div [ Class "container" ]
                                   [ div [ Class "columns is-vcentered" ]
-                                        [ div [ Class "column is-4 is-offset-4 has-text-centered" ] 
-                                              [ p [ Class "title" ] 
-                                                  [ !!"Fable Powerpack" ]
+                                        [ div [ Class "column is-4 is-offset-4 has-text-centered" ]
+                                              [ p [ Class "title" ]
+                                                  [ !!"Hink" ]
                                                 p [ Class "subtitle" ]
-                                                  [ !!"Utilities for your Fable apps" ] ] ] ] ] ]
-                        
+                                                  [ !!"Hinky way to write GUI application" ] ] ] ] ] ]
+
               section [ Class "section" ]
                       [ div [ Class "container" ]
                             [ content ] ]
