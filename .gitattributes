@@ -1,2 +1,2 @@
-*.* text eol=crlf
+*.* text eol=lf
 *.exe binary
