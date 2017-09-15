@@ -494,6 +494,7 @@ module Gui =
                 // Check visibility
                 let hover = this.IsHover()
                 let pressed = this.IsPressed()
+                let released = this.IsReleased()
 
                 this.Context.fillStyle <-
                     if pressed then
@@ -525,8 +526,7 @@ module Gui =
                 this.FillSmallString(text, align = align)
 
                 this.EndElement()
-
-                this.IsReleased()
+                released
 
         member this.Combo(comboInfo : ComboInfo, texts : string list, label : string option, ?labelAlign) =
             if not (this.IsVisibile(this.Theme.Element.Height)) then
