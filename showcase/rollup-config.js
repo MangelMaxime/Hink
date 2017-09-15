@@ -3,13 +3,20 @@ import livereload from 'rollup-plugin-livereload';
 import serve from 'rollup-plugin-serve';
 import cjs from 'rollup-plugin-commonjs';
 import nodeResolve from 'rollup-plugin-node-resolve';
-
+import path from 'path';
 
 const isProduction = process.env.BUID == "production";
 
+function resolve(filePath) {
+    return path.resolve(__dirname, filePath)
+}
+
 export default {
-    entry: './Showcase.fsproj',
-    dest: './public/dist/js/bundle.js',
+    input: resolve('./Showcase.fsproj'),
+    output: {
+        file: resolve('./public/dist/js/bundle.js'),
+        format: 'iife'
+    },
     plugins: [
         fable({
             define: isProduction ? [] : ["DEBUG"]
@@ -20,7 +27,7 @@ export default {
             port: 8081
         }),
         cjs({
-            include: './node_modules/**',
+            include: resolve('./node_modules/**'),
             namedExports: {
             }
         }),
@@ -30,6 +37,5 @@ export default {
     globals: {
         'stats.js': 'Stats'
     },
-    format: 'iife',
-    moduleName: 'hinkShowcase'
+    name: 'hinkShowcase'
 };
