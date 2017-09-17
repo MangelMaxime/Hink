@@ -20,13 +20,13 @@ module.exports = {
     entry: resolve('./Showcase.fsproj'),
     output: {
         filename: 'dist/js/bundle.js',
-        path: resolve('./public'),
+        path: resolve('./dist'),
     },
     resolve: {
         modules: [resolve("./node_modules/")]
     },
     devServer: {
-        contentBase: resolve('./public'),
+        contentBase: resolve('./dist'),
         port: 8081
     },
     module: {

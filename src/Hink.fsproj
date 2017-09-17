@@ -8,6 +8,14 @@
     <Compile Include="Helpers.fs" />
     <Compile Include="Theme.fs" />
     <Compile Include="Hink.fs" />
+    <Compile Include="Widgets/Button.fs" />
+    <Compile Include="Widgets/Checkbox.fs" />
+    <Compile Include="Widgets/Combo.fs" />
+    <Compile Include="Widgets/Input.fs" />
+    <Compile Include="Widgets/Label.fs" />
+    <Compile Include="Widgets/Row.fs" />
+    <Compile Include="Widgets/Window.fs" />
+    <Compile Include="Widgets/LifeCycle.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

@@ -5,7 +5,7 @@ open Fable.Core.JsInterop
 open Fable.Import
 open Hink.Gui
 open Hink.Inputs
-
+open Hink.Widgets
 
 module Main =
     // Application code
