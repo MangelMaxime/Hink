@@ -67,7 +67,9 @@ module Gui =
           mutable Title : string option
           mutable DragXOrigin : float
           mutable DragYOrigin : float
-          mutable IsDragging : bool }
+          mutable IsDragging : bool
+          mutable _Canvas : Browser.HTMLCanvasElement option
+          mutable _Context : Browser.CanvasRenderingContext2D option }
 
         static member Default =
             { X = 0.
@@ -81,7 +83,9 @@ module Gui =
               Title = None
               DragXOrigin = 0.
               DragYOrigin = 0.
-              IsDragging = false }
+              IsDragging = false
+              _Canvas = None
+              _Context = None }
 
         member this.RealPositionX
             with get () =
@@ -96,6 +100,19 @@ module Gui =
                     this.Y + (Mouse.Manager.Y - this.DragYOrigin)
                 else
                     this.Y
+
+        member this.EnsureContext () =
+            if this._Canvas.IsNone then
+                let canvas = Browser.document.createElement_canvas()
+                canvas.width <- this.Width
+                canvas.height <- this.Height
+                canvas.style.width <- string this.Width + "px"
+                canvas.style.height <- string this.Height + "px"
+
+                this._Canvas <- Some canvas
+                this._Context <- canvas.getContext_2d() |> Some
+                this._Context.Value.textBaseline <- "middle"
+                Browser.document.body.appendChild(canvas) |> ignore
 
     type CheckboxInfo =
         { mutable Value : bool }
@@ -166,7 +183,7 @@ module Gui =
 
     type Hink =
         { Canvas : Browser.HTMLCanvasElement
-          Context : Browser.CanvasRenderingContext2D
+          ApplicationContext : Browser.CanvasRenderingContext2D
           Mouse : Mouse.Record
           Keyboard : Keyboard.Record
           KeyboardCaptureHandler : (Keyboard.Record -> bool) option
@@ -196,7 +213,7 @@ module Gui =
             Keyboard.init canvas true keyboardPreventHandler
 
             { Canvas = canvas
-              Context = context
+              ApplicationContext = context
               Mouse = Mouse.Manager
               Keyboard = Keyboard.Manager
               KeyboardCaptureHandler = keyboardCaptureHandler
@@ -214,6 +231,14 @@ module Gui =
               LastReferenceTick = DateTime.Now
               Delta = TimeSpan.Zero
               CurrentCombo = None }
+
+        member this.CursorPosX
+            with get () =
+                this.Cursor.X + this.CurrentWindow.Value.X
+
+        member this.CursorPosY
+            with get () =
+                this.Cursor.Y + this.CurrentWindow.Value.Y
 
         /// Reset the state of Hot Item
         /// Need to be called before drawing UI
@@ -254,8 +279,8 @@ module Gui =
 
                     let elementSize = this.Theme.Element.Height + this.Theme.Element.SeparatorSize
                     let boxHeight = float comboInfo.Values.Length * elementSize
-                    this.Context.fillStyle <- !^this.Theme.Combo.Box.Default.Background
-                    this.Context.fillRect(this.Cursor.X, this.Cursor.Y, this.Cursor.Width, boxHeight)
+                    this.CurrentContext.fillStyle <- !^this.Theme.Combo.Box.Default.Background
+                    this.CurrentContext.fillRect(this.Cursor.X, this.Cursor.Y, this.Cursor.Width, boxHeight)
 
                     for index = 0 to comboInfo.Values.Length - 1 do
                         if comboInfo.Reference.SelectedIndex.IsSome && index = comboInfo.Reference.SelectedIndex.Value then
@@ -300,6 +325,14 @@ module Gui =
             this.KeyboadHasBeenCapture <- false
             this.Keyboard.ClearLastKey()
 
+        member this.CurrentContext
+            with get () : Browser.CanvasRenderingContext2D =
+                if this.CurrentWindow.IsSome then
+                    this.CurrentWindow.Value._Context.Value
+                else
+                    failwith "Widgets need to be draw inside a Window for now"
+                    //this.ApplicationContext
+
         member this.SetCursor cursor =
             this.Mouse.SetCursor cursor
             this.IsCursorStyled <- true
@@ -314,8 +347,8 @@ module Gui =
 
         member this.IsHover(?elementH) =
             let elementH = defaultArg elementH this.Theme.Element.Height
-            this.Mouse.X >= this.Cursor.X && this.Mouse.X < (this.Cursor.X + this.Cursor.Width) &&
-            this.Mouse.Y >= this.Cursor.Y && this.Mouse.Y < (this.Cursor.Y + elementH)
+            this.Mouse.X >= this.CursorPosX && this.Mouse.X < (this.CursorPosX + this.Cursor.Width) &&
+            this.Mouse.Y >= this.CursorPosY && this.Mouse.Y < (this.CursorPosY + elementH)
 
         member this.IsPressed(?elementH) =
             let elementH = defaultArg elementH this.Theme.Element.Height
@@ -359,6 +392,13 @@ module Gui =
                 // Set if the window has been closed during this loop
                 this.CurrentWindow.Value.Closed <- this.ShouldCloseWindow
                 this.ShouldCloseWindow <- false
+
+            if not (isNull this.CurrentContext) then
+                this.ApplicationContext.drawImage(
+                    !^this.CurrentContext.canvas,
+                    this.CurrentWindow.Value.X,
+                    this.CurrentWindow.Value.Y
+                )
             // Remove the window to end it
             this.CurrentWindow <- None
             // TODO: Handle scroll
@@ -374,14 +414,19 @@ module Gui =
                 this.EndWindow()
                 false
             else
-                this.Cursor.X <- this.CurrentWindow.Value.RealPositionX
-                this.Cursor.Y <- this.CurrentWindow.Value.RealPositionY + this.Theme.Window.Header.Height  // TODO: handle scroll
+                // Make sure we have the Window context initialized
+                this.CurrentWindow.Value.EnsureContext()
+
+                // TODO: Clear the window background if mouse is over it
+
+                this.Cursor.X <- 0.// this.CurrentWindow.Value.RealPositionX
+                this.Cursor.Y <- this.Theme.Window.Header.Height// this.CurrentWindow.Value.RealPositionY + this.Theme.Window.Header.Height  // TODO: handle scroll
                 this.Cursor.Width <- windowInfo.Width
                 this.Cursor.Height <- windowInfo.Height
 
                 // Draw Window header
-                this.Context.fillStyle <- !^(defaultArg headerColor this.Theme.Window.Header.Color)
-                this.Context.fillRect(
+                this.CurrentContext.fillStyle <- !^(defaultArg headerColor this.Theme.Window.Header.Color)
+                this.CurrentContext.fillRect(
                     this.Cursor.X,
                     this.Cursor.Y - this.Theme.Window.Header.Height,
                     this.Cursor.Width,
@@ -389,16 +434,16 @@ module Gui =
                 )
 
                 // Set the text font for the header
-                this.Context.font <- this.Theme.FormatFontString this.Theme.FontSmallSize
+                this.CurrentContext.font <- this.Theme.FormatFontString this.Theme.FontSmallSize
                 // Common Y position for the title and the symbol
                 let headerTextY = this.Cursor.Y - this.Theme.Window.Header.Height / 2.
 
                 match this.CurrentWindow.Value.Title with
                 | None -> () // Nothing todo
                 | Some title ->
-                    let textSize = this.Context.measureText(title)
-                    this.Context.fillStyle <- !^this.Theme.Text.Color
-                    this.Context.fillText(
+                    let textSize = this.CurrentContext.measureText(title)
+                    this.CurrentContext.fillStyle <- !^this.Theme.Text.Color
+                    this.CurrentContext.fillText(
                         title,
                         this.Cursor.X + this.Theme.Window.Header.SymbolOffsetX,
                         headerTextY + this.Theme.Text.OffsetY
@@ -406,7 +451,7 @@ module Gui =
 
                 if this.CurrentWindow.Value.Draggable then
                     let headerOriginY = this.Cursor.Y - this.Theme.Window.Header.Height
-                    let hoverHeader = this.Mouse.X >= this.Cursor.X && this.Mouse.X < (this.Cursor.X + this.Cursor.Width) && this.Mouse.Y >= headerOriginY && this.Mouse.Y < (headerOriginY + this.Theme.Window.Header.Height)
+                    let hoverHeader = this.Mouse.X >= this.CursorPosX && this.Mouse.X < (this.CursorPosX + this.Cursor.Width) && this.Mouse.Y >= headerOriginY && this.Mouse.Y < (headerOriginY + this.Theme.Window.Header.Height)
 
                     // If hover the header and left mouse button is pressed
                     if hoverHeader then
@@ -427,18 +472,18 @@ module Gui =
                         this.CurrentWindow.Value.DragYOrigin <- 0.
 
                 if this.CurrentWindow.Value.Closable then
-                    let textSize = this.Context.measureText("\u2715")
+                    let textSize = this.CurrentContext.measureText("\u2715")
                     let textX = this.Cursor.X + this.Cursor.Width - textSize.width - this.Theme.Window.Header.SymbolOffsetX
 
                     // Custom IsHover check has we don't follow auto layout management for the header symbol
-                    let hoverX = this.Cursor.X + this.Cursor.Width - textSize.width - this.Theme.Window.Header.SymbolOffsetX * 2.
-                    let hoverSymbol = this.Mouse.X >= hoverX && this.Mouse.X < (this.Cursor.X + this.Cursor.Width) &&
-                                      this.Mouse.Y >= (this.Cursor.Y - this.Theme.Window.Header.Height) && this.Mouse.Y < this.Cursor.Y
+                    let hoverX = this.CursorPosX + this.Cursor.Width - textSize.width - this.Theme.Window.Header.SymbolOffsetX * 2.
+                    let hoverSymbol = this.Mouse.X >= hoverX && this.Mouse.X < (this.CursorPosX + this.Cursor.Width) &&
+                                      this.Mouse.Y >= (this.CursorPosY - this.Theme.Window.Header.Height) && this.Mouse.Y < this.CursorPosY
 
                     // Draw symbol background
                     if hoverSymbol then
-                        this.Context.fillStyle <- !^this.Theme.Window.Header.OverSymbolColor
-                        this.Context.fillRect(
+                        this.CurrentContext.fillStyle <- !^this.Theme.Window.Header.OverSymbolColor
+                        this.CurrentContext.fillRect(
                             textX - this.Theme.Window.Header.SymbolOffsetX,
                             this.Cursor.Y - this.Theme.Window.Header.Height,
                             textSize.width + this.Theme.Window.Header.SymbolOffsetX * 2.,
@@ -448,13 +493,13 @@ module Gui =
                             this.ShouldCloseWindow <- true
 
                     // Draw symbol
-                    this.Context.fillStyle <- !^this.Theme.Text.Color
-                    this.Context.fillText("\u2715", textX, headerTextY + this.Theme.Window.Header.SymbolOffsetY)
+                    this.CurrentContext.fillStyle <- !^this.Theme.Text.Color
+                    this.CurrentContext.fillText("\u2715", textX, headerTextY + this.Theme.Window.Header.SymbolOffsetY)
 
                 // Draw Window background
-                this.Context.fillStyle <- !^(defaultArg backgroundColor this.Theme.Window.Background)
+                this.CurrentContext.fillStyle <- !^(defaultArg backgroundColor this.Theme.Window.Background)
 
-                this.Context.fillRect(
+                this.CurrentContext.fillRect(
                     this.Cursor.X,
                     this.Cursor.Y, // TODO: handle scroll
                     this.Cursor.Width, // TODO: lastMaxX (auto size calculation)
@@ -469,15 +514,15 @@ module Gui =
                 let align = defaultArg align Left
 
                 if backgroundColor.IsSome then
-                    this.Context.fillStyle <- !^backgroundColor.Value
-                    this.Context.fillRect(
+                    this.CurrentContext.fillStyle <- !^backgroundColor.Value
+                    this.CurrentContext.fillRect(
                         this.Cursor.X + this.Theme.ButtonOffsetY,
                         this.Cursor.Y + this.Theme.ButtonOffsetY,
                         this.Cursor.Width - this.Theme.ButtonOffsetY * 2.,
                         this.Theme.Button.Height
                     )
 
-                this.Context.fillStyle <- !^this.Theme.Text.Color
+                this.CurrentContext.fillStyle <- !^this.Theme.Text.Color
                 this.FillSmallString(text, align = align)
                 this.EndElement()
 
@@ -496,7 +541,7 @@ module Gui =
                 let pressed = this.IsPressed()
                 let released = this.IsReleased()
 
-                this.Context.fillStyle <-
+                this.CurrentContext.fillStyle <-
                     if pressed then
                         !^(defaultArg pressedColor this.Theme.Button.Background.Pressed)
                     elif hover then
@@ -507,7 +552,7 @@ module Gui =
                 if hover then
                     this.SetCursor Mouse.Cursor.Pointer
 
-                this.Context.RoundedRect(
+                this.CurrentContext.RoundedRect(
                     this.Cursor.X + this.Theme.ButtonOffsetY,
                     this.Cursor.Y + this.Theme.ButtonOffsetY,
                     this.Cursor.Width - this.Theme.ButtonOffsetY * 2.,
@@ -515,7 +560,7 @@ module Gui =
                     this.Theme.Button.CornerRadius
                 )
 
-                this.Context.fillStyle <-
+                this.CurrentContext.fillStyle <-
                     if pressed then
                         !^(defaultArg textPressed this.Theme.Text.Color)
                     elif hover then
@@ -537,7 +582,7 @@ module Gui =
                 let released = this.IsReleased()
                 let pressed = this.IsPressed()
 
-                this.Context.fillStyle <-
+                this.CurrentContext.fillStyle <-
                     if pressed then
                         !^this.Theme.Combo.Background.Pressed
                     elif hover then
@@ -575,7 +620,7 @@ module Gui =
                 // if released && this.CurrentCombo.IsSome then//
                 //     this.CurrentCombo.Value.Reference.State <- Closed
 
-                this.Context.RoundedRect(
+                this.CurrentContext.RoundedRect(
                     this.Cursor.X + this.Theme.ButtonOffsetY,
                     this.Cursor.Y + this.Theme.ButtonOffsetY,
                     this.Cursor.Width - this.Theme.ButtonOffsetY * 2.,
@@ -586,7 +631,7 @@ module Gui =
                 let offsetX = this.Cursor.X + this.Cursor.Width - (this.Theme.Arrow.Width + this.Theme.ArrowOffsetX * 2.)
                 let offsetY = this.Cursor.Y + this.Theme.ArrowOffsetY
 
-                this.Context.fillStyle <- !^this.Theme.Text.Color
+                this.CurrentContext.fillStyle <- !^this.Theme.Text.Color
 
                 match comboInfo.SelectedIndex with
                 | Some index ->
@@ -603,11 +648,11 @@ module Gui =
                         )
                     | None -> ()
 
-                this.Context.fillStyle <- !^this.Theme.Arrow.Color
+                this.CurrentContext.fillStyle <- !^this.Theme.Arrow.Color
                 match comboInfo.State with
                 | Closed ->
                     // Triangle down
-                    this.Context.Triangle(
+                    this.CurrentContext.Triangle(
                         offsetX, offsetY,
                         offsetX + this.Theme.Arrow.Width, offsetY,
                         offsetX + this.Theme.Arrow.Width / 2., offsetY + this.Theme.Arrow.Height
@@ -615,7 +660,7 @@ module Gui =
 
                 | Extended | JustExtended ->
                     // Triangle Up
-                    this.Context.Triangle(
+                    this.CurrentContext.Triangle(
                         offsetX + this.Theme.Arrow.Width / 2., offsetY,
                         offsetX + this.Theme.Arrow.Width, offsetY + this.Theme.Arrow.Height,
                         offsetX, offsetY + this.Theme.Arrow.Height
@@ -627,15 +672,15 @@ module Gui =
         member this.DrawArrow(selected, hover) =
             let x = this.Cursor.X + this.Theme.ArrowOffsetX
             let y = this.Cursor.Y + this.Theme.ArrowOffsetY
-            this.Context.fillStyle <- !^this.Theme.Arrow.Color
+            this.CurrentContext.fillStyle <- !^this.Theme.Arrow.Color
             match selected with
             | true ->
-                this.Context.Triangle(
+                this.CurrentContext.Triangle(
                     x, y,
                     x + this.Theme.Arrow.Width, y,
                     x + this.Theme.Arrow.Width / 2., y + this.Theme.Arrow.Height)
             | false ->
-                this.Context.Triangle(
+                this.CurrentContext.Triangle(
                     x, y,
                     x, y + this.Theme.Arrow.Height,
                     x + this.Theme.Arrow.Width, y + this.Theme.Arrow.Height / 2.)
@@ -651,7 +696,7 @@ module Gui =
         member this.FillSmallString (text, ?offsetX, ?offsetY, ?align : Align) =
             let offsetY = defaultArg offsetY this.Theme.Text.OffsetY
             let align = defaultArg align Left
-            let textSize = this.Context.measureText(text)
+            let textSize = this.CurrentContext.measureText(text)
 
             let offsetX =
                 match align with
@@ -662,17 +707,17 @@ module Gui =
                 | Right ->
                     this.Cursor.Width - textSize.width - this.Theme.Text.OffsetX
 
-            this.Context.font <- this.Theme.FormatFontString this.Theme.FontSmallSize
+            this.CurrentContext.font <- this.Theme.FormatFontString this.Theme.FontSmallSize
 
             let text =
                 if textSize.width > this.Cursor.Width - this.Theme.Text.OffsetX then
-                    let charSize = this.Context.measureText(" ") // We assume to use a monospace font
+                    let charSize = this.CurrentContext.measureText(" ") // We assume to use a monospace font
                     let maxChar = (this.Cursor.Width - this.Theme.Text.OffsetX) / charSize.width |> int
                     text.Substring(0, maxChar - 2) + ".."
                 else
                     text
 
-            this.Context.fillText(
+            this.CurrentContext.fillText(
                 text,
                 this.Cursor.X + offsetX,
                 this.Cursor.Y + this.Theme.FontSmallOffsetY + offsetY
@@ -686,13 +731,13 @@ module Gui =
                 let hover = this.IsHover()
                 let released = this.IsReleased()
 
-                this.Context.fillStyle <-
+                this.CurrentContext.fillStyle <-
                     if checkboxInfo.Value then
                         !^this.Theme.Checkbox.ActiveColor
                     else
                         !^this.Theme.Checkbox.Color
 
-                this.Context.RoundedRect(
+                this.CurrentContext.RoundedRect(
                     this.Cursor.X + this.Theme.CheckboxOffsetX,
                     this.Cursor.Y + this.Theme.CheckboxOffsetY,
                     this.Theme.Checkbox.Width,
@@ -701,16 +746,16 @@ module Gui =
                 )
 
                 if hover && (not checkboxInfo.Value) || checkboxInfo.Value then
-                    this.Context.fillStyle <- !^this.Theme.Checkbox.TickColor
-                    this.Context.font <- this.Theme.FormatFontString 20.
-                    this.Context.fillText(
+                    this.CurrentContext.fillStyle <- !^this.Theme.Checkbox.TickColor
+                    this.CurrentContext.font <- this.Theme.FormatFontString 20.
+                    this.CurrentContext.fillText(
                         "\u2713",
                         this.Cursor.X + this.Theme.Checkbox.Width / 2.,
                         this.Cursor.Y + this.Theme.Element.Height / 2.
                     )
 
                 // Label section
-                this.Context.fillStyle <- !^this.Theme.Text.Color
+                this.CurrentContext.fillStyle <- !^this.Theme.Text.Color
                 this.FillSmallString(
                     label,
                     this.Theme.Checkbox.Width + this.Theme.CheckboxOffsetX * 2.
@@ -736,21 +781,21 @@ module Gui =
                 if pressed then
                     info.IsActive <- true
 
-                this.Context.strokeStyle <-
+                this.CurrentContext.strokeStyle <-
                     if info.IsActive then
                         !^this.Theme.Input.Border.Active
                     else
                         !^this.Theme.Input.Border.Default
 
-                this.Context.fillStyle <-
+                this.CurrentContext.fillStyle <-
                     if info.IsActive then
                         !^this.Theme.Input.Background.Active
                     else
                         !^this.Theme.Input.Background.Default
 
-                this.Context.lineWidth <- 2.
+                this.CurrentContext.lineWidth <- 2.
 
-                this.Context.RoundedRect(
+                this.CurrentContext.RoundedRect(
                     this.Cursor.X + this.Theme.ButtonOffsetY,
                     this.Cursor.Y + this.Theme.ButtonOffsetY,
                     this.Cursor.Width - this.Theme.ButtonOffsetY * 2.,
@@ -760,13 +805,13 @@ module Gui =
                 )
 
                 // Custom way to draw text because we need to handle text offset when being larger than the input
-                this.Context.font <- this.Theme.FormatFontString this.Theme.FontSmallSize
+                this.CurrentContext.font <- this.Theme.FormatFontString this.Theme.FontSmallSize
 
                 let offsetY = this.Theme.Text.OffsetY
-                let textSize = this.Context.measureText(info.Value)
+                let textSize = this.CurrentContext.measureText(info.Value)
                 let offsetX = this.Theme.Text.OffsetX
 
-                let charSize = this.Context.measureText(" ") // We assume to use a monospace font
+                let charSize = this.CurrentContext.measureText(" ") // We assume to use a monospace font
                 let maxChar = (this.Cursor.Width - this.Theme.Text.OffsetX * 2.) / charSize.width |> int
 
                 let text =
@@ -783,7 +828,7 @@ module Gui =
                             selection.Start,
                             selection.Length
                         )
-                        |> this.Context.measureText
+                        |> this.CurrentContext.measureText
 
                     let startX =
                         // If the selection is from the beginning of the line. Nothing to change
@@ -793,14 +838,14 @@ module Gui =
                             // If the selection is offset, calculate the offset and draw the selection from it
                             let leftSize =
                                 info.Value.Substring(0, selection.Start)
-                                |> this.Context.measureText
+                                |> this.CurrentContext.measureText
                             this.Cursor.X + leftSize.width
 
                     let selectionHeight =
                         this.Theme.FontSmallSize * 1.5
 
-                    this.Context.fillStyle <- !^this.Theme.Input.SelectionColor
-                    this.Context.fillRect(
+                    this.CurrentContext.fillStyle <- !^this.Theme.Input.SelectionColor
+                    this.CurrentContext.fillRect(
                         startX + this.Theme.Text.OffsetX,
                         this.Cursor.Y + (this.Theme.Element.Height - selectionHeight) / 2.,
                         Math.Min(selectionSize.width, charSize.width * float maxChar),
@@ -809,8 +854,8 @@ module Gui =
                 | None -> () // Nothing to do
 
                 // Draw text after the selection.
-                this.Context.fillStyle <- !^this.Theme.Input.TextColor
-                this.Context.fillText(
+                this.CurrentContext.fillStyle <- !^this.Theme.Input.TextColor
+                this.CurrentContext.fillText(
                     text,
                     this.Cursor.X + offsetX,
                     this.Cursor.Y + this.Theme.FontSmallOffsetY + offsetY
@@ -819,13 +864,13 @@ module Gui =
                 // Cursor
                 if info.IsActive && this.Delta < TimeSpan.FromMilliseconds(500.) && info.Selection.IsNone then
 
-                    this.Context.fillStyle <- !^"#000"
+                    this.CurrentContext.fillStyle <- !^"#000"
 
-                    let cursorMetrics = this.Context.measureText("|")
-                    let textMetrics = this.Context.measureText(info.Value)
+                    let cursorMetrics = this.CurrentContext.measureText("|")
+                    let textMetrics = this.CurrentContext.measureText(info.Value)
                     let cursorOffsetMetrics =
                       info.Value.Substring(Math.Min(info.CursorOffset, maxChar))
-                      |> this.Context.measureText
+                      |> this.CurrentContext.measureText
 
                     this.FillSmallString(
                         "|",

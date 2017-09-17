@@ -27,7 +27,7 @@ module Main =
                                             Width = 400.
                                             Height = 320. }
 
-    let window2 = { WindowInfo.Default with X = 450.
+    let window2 = { WindowInfo.Default with X = 100.
                                             Y = 50.
                                             Width = 400.
                                             Height = 285.
@@ -81,8 +81,8 @@ module Main =
     let mutable window2BackgroundColor = ui.Theme.Window.Header.Color
 
     let rec render (_: float) =
-        ui.Context.clearRect(0., 0., ui.Canvas.width, ui.Canvas.height)
-        ui.Context.fillStyle <- !^"#fff"
+        ui.ApplicationContext.clearRect(0., 0., ui.Canvas.width, ui.Canvas.height)
+        ui.ApplicationContext.fillStyle <- !^"#fff"
 
         #if DEBUG
         stats.``begin``()
