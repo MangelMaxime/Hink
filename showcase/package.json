@@ -10,7 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "babel-runtime": "^6.26.0"
+    "babel-runtime": "^6.26.0",
+    "stats.js": "^0.17.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
