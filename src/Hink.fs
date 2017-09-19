@@ -235,11 +235,11 @@ module Gui =
 
         member this.CursorPosX
             with get () =
-                this.Cursor.X + this.CurrentWindow.Value.X
+                this.Cursor.X + this.CurrentWindow.Value.RealPositionX
 
         member this.CursorPosY
             with get () =
-                this.Cursor.Y + this.CurrentWindow.Value.Y
+                this.Cursor.Y + this.CurrentWindow.Value.RealPositionY
 
         member this.CurrentContext
             with get () : Browser.CanvasRenderingContext2D =

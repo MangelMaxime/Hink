@@ -19,8 +19,8 @@ module Window =
             if not (isNull this.CurrentContext) then
                 this.ApplicationContext.drawImage(
                     !^this.CurrentContext.canvas,
-                    this.CurrentWindow.Value.X,
-                    this.CurrentWindow.Value.Y
+                    this.CurrentWindow.Value.RealPositionX,
+                    this.CurrentWindow.Value.RealPositionY
                 )
 
             this.CurrentWindow.Value.ShouldRedraw <- false
@@ -41,16 +41,20 @@ module Window =
                 false
             else
                 this.Cursor.X <- 0.// this.CurrentWindow.Value.RealPositionX
-                this.Cursor.Y <- this.Theme.Window.Header.Height// this.CurrentWindow.Value.RealPositionY + this.Theme.Window.Header.Height  // TODO: handle scroll
+                this.Cursor.Y <- 0.// this.CurrentWindow.Value.RealPositionY + this.Theme.Window.Header.Height  // TODO: handle scroll
                 this.Cursor.Width <- windowInfo.Width
                 this.Cursor.Height <- windowInfo.Height
 
-                if not (this.IsHover(windowInfo.Height - this.Theme.Window.Header.Height) || windowInfo.ShouldRedraw) then
+                if not (this.IsHover(windowInfo.Height) || windowInfo.ShouldRedraw || windowInfo.IsDragging) then
                     false // Don't need to draw the window the mouse isn't hover it
                 else
                     // Make sure we have the Window context initialized
                     this.CurrentWindow.Value.EnsureContext()
 
+                    // Offset the cursor by the header height
+                    // We need to do it after checking if we need to redraw the window
+                    // otherwise the header is ignored in the isHover function
+                    this.Cursor.Y <- this.Theme.Window.Header.Height
 
                     // Clear the window context for the new frame
                     this.CurrentContext.clearRect(
@@ -86,7 +90,7 @@ module Window =
                         )
 
                     if this.CurrentWindow.Value.Draggable then
-                        let headerOriginY = this.Cursor.Y - this.Theme.Window.Header.Height
+                        let headerOriginY = this.CursorPosY - this.Theme.Window.Header.Height
                         let hoverHeader = this.Mouse.X >= this.CursorPosX && this.Mouse.X < (this.CursorPosX + this.Cursor.Width) && this.Mouse.Y >= headerOriginY && this.Mouse.Y < (headerOriginY + this.Theme.Window.Header.Height)
 
                         // If hover the header and left mouse button is pressed
@@ -115,6 +119,9 @@ module Window =
                         let hoverX = this.CursorPosX + this.Cursor.Width - textSize.width - this.Theme.Window.Header.SymbolOffsetX * 2.
                         let hoverSymbol = this.Mouse.X >= hoverX && this.Mouse.X < (this.CursorPosX + this.Cursor.Width) &&
                                           this.Mouse.Y >= (this.CursorPosY - this.Theme.Window.Header.Height) && this.Mouse.Y < this.CursorPosY
+
+                        // printfn "Cursor pos: %O" this.CursorPosX
+                        // printfn "Mouse pos: %O" this.Mouse.X
 
                         // Draw symbol background
                         if hoverSymbol then

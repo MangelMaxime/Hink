@@ -91,7 +91,6 @@ module Main =
         ui.Prepare()
 
         if ui.Window(window1) then
-            printfn "redraw"
             ui.Label(sprintf "Clicked: %i times" buttonCounter, Center)
             if ui.Button("Click me") then
                 buttonCounter <- buttonCounter + 1
