@@ -7,7 +7,7 @@
         <RepositoryUrl>https://github.com/MangelMaxime/Hink</RepositoryUrl>
         <PackageTags>fable;fsharp;gui</PackageTags>
         <Authors>Maxime Mangel</Authors>
-        <Version>0.1.0-beta-001</Version>
+        <Version>0.1.0-beta-002</Version>
     </PropertyGroup>
     <PropertyGroup>
         <TargetFramework>netstandard1.6</TargetFramework>
@@ -26,6 +26,10 @@
         <Compile Include="Widgets/Row.fs" />
         <Compile Include="Widgets/Window.fs" />
         <Compile Include="Widgets/LifeCycle.fs" />
+    </ItemGroup>
+    <!-- Add source files to "fable" folder in Nuget package -->
+    <ItemGroup>
+        <Content Include="*.fsproj; **\*.fs" PackagePath="fable\" />
     </ItemGroup>
     <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>
