@@ -1,2 +1,3 @@
-#### 0.0.1-beta
-* Starting prototype
+### 0.1.0-beta-001
+
+* Publish for FableConf demo
