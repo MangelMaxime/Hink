@@ -10,6 +10,40 @@ open System
 [<AutoOpen>]
 module Input =
 
+    let handleBackwardSelection info newCursorOffset =
+        if info.Value.Length > 0 then
+            let oldCursorOffset = info.CursorOffset
+            info.CursorOffset <- newCursorOffset
+            match info.Selection with
+            | Some selection ->
+                if oldCursorOffset = selection.Start then
+                    { selection with Start = info.CursorOffset }
+                else
+                    { selection with End = newCursorOffset }
+            | None ->
+                SelectionArea.Create(
+                    info.CursorOffset,
+                    oldCursorOffset
+                )
+            |> info.SetSelection
+
+    let handleForwardSelection info newCursorOffset =
+        if info.Value.Length > 0 then
+            let oldCursorOffset = info.CursorOffset
+            info.CursorOffset <- newCursorOffset
+            match info.Selection with
+            | Some selection ->
+                if selection.End = oldCursorOffset then
+                    { selection with End = info.CursorOffset }
+                else
+                    { selection with Start = newCursorOffset }
+            | None ->
+                SelectionArea.Create(
+                    oldCursorOffset,
+                    info.CursorOffset
+                )
+            |> info.SetSelection
+
     type Hink with
         member this.Input(info: InputInfo) =
             if not (this.IsVisibile(this.Theme.Element.Height)) then
@@ -121,40 +155,6 @@ module Input =
                         textMetrics.width - cursorMetrics.width / 2. - cursorOffsetMetrics.width + this.Theme.Text.OffsetX
                     )
 
-                let handleBackwardSelection newCursorOffset =
-                    if info.Value.Length > 0 then
-                        let oldCursorOffset = info.CursorOffset
-                        info.CursorOffset <- newCursorOffset
-                        match info.Selection with
-                        | Some selection ->
-                            if oldCursorOffset = selection.Start then
-                                { selection with Start = info.CursorOffset }
-                            else
-                                { selection with End = newCursorOffset }
-                        | None ->
-                            SelectionArea.Create(
-                                info.CursorOffset,
-                                oldCursorOffset
-                            )
-                        |> info.SetSelection
-
-                let handleForwardSelection newCursorOffset =
-                    if info.Value.Length > 0 then
-                        let oldCursorOffset = info.CursorOffset
-                        info.CursorOffset <- newCursorOffset
-                        match info.Selection with
-                        | Some selection ->
-                            if selection.End = oldCursorOffset then
-                                { selection with End = info.CursorOffset }
-                            else
-                                { selection with Start = newCursorOffset }
-                        | None ->
-                            SelectionArea.Create(
-                                oldCursorOffset,
-                                info.CursorOffset
-                            )
-                        |> info.SetSelection
-
                 if info.IsActive then
                     if this.Keyboard.HasNewKeyStroke() then
                         // Memorise if we capture the keystroke
@@ -167,10 +167,10 @@ module Input =
                                 match this.Keyboard.LastKey with
                                 | Keyboard.Keys.ArrowLeft ->
                                     NextIndexBackward(info.Value, ' ', info.CursorOffset + info.TextStartOrigin)
-                                    |> handleBackwardSelection
+                                    |> handleBackwardSelection info
                                 | Keyboard.Keys.ArrowRight ->
                                     NextIndexForward(info.Value, ' ', info.CursorOffset + info.TextStartOrigin)
-                                    |> handleForwardSelection
+                                    |> handleForwardSelection info
                                 | _ -> res <- false // Not captured
                             | { Control = true } ->
                                 info.ClearSelection()
@@ -206,10 +206,10 @@ module Input =
                                 match this.Keyboard.LastKey with
                                 | Keyboard.Keys.ArrowLeft ->
                                     Math.Max(0, info.CursorOffset - 1)
-                                    |> handleBackwardSelection
+                                    |> handleBackwardSelection info
                                 | Keyboard.Keys.ArrowRight ->
                                     Math.Min(info.CursorOffset + 1, info.Value.Length)
-                                    |> handleForwardSelection
+                                    |> handleForwardSelection info
                                 | _ -> res <- false // Not captured
                             | _ ->
                                 let oldSelection =
@@ -217,9 +217,9 @@ module Input =
                                         true, info.Selection.Value
                                     else
                                         false, SelectionArea.Create(0, 0)
-                                info.ClearSelection()
                                 match this.Keyboard.LastKey with
                                 | Keyboard.Keys.Backspace ->
+                                    info.ClearSelection()
                                     if info.Value.Length > 0 then
                                         match oldSelection with
                                         | (true, selection) ->
@@ -235,6 +235,7 @@ module Input =
                                                     info.CursorOffset <- info.CursorOffset - 1
                                                     info.Value <- info.Value.Remove(info.CursorOffset, 1)
                                 | Keyboard.Keys.Delete ->
+                                    info.ClearSelection()
                                     if info.Value.Length > 0 then
                                         match oldSelection with
                                         | (true, selection) ->
@@ -244,7 +245,13 @@ module Input =
                                         | (false, _) ->
                                             if info.CursorOffset < info.Value.Length then
                                                 info.Value <- info.Value.Remove(info.CursorOffset, 1)
+                                        // If the input is empty, make sure to reset the start origin
+                                        // Usefull when doing Ctrl + A -> Delete
+                                        // over a string longer than the input max size
+                                        if info.Value.Length = 0 then
+                                            info.TextStartOrigin <- 0
                                 | Keyboard.Keys.ArrowLeft ->
+                                    info.ClearSelection()
                                     match oldSelection with
                                     | (true, selection) ->
                                         if selection.Edging info.Value.Length then
@@ -261,6 +268,7 @@ module Input =
                                         else
                                             info.TextStartOrigin <- 0
                                 | Keyboard.Keys.ArrowRight ->
+                                    info.ClearSelection()
                                     match oldSelection with
                                     | (true, selection) ->
                                         if selection.Edging info.Value.Length then
@@ -274,9 +282,11 @@ module Input =
                                         info.TextStartOrigin <- Math.Min(info.Value.Length - maxChar, info.TextStartOrigin + 1)
                                         info.CursorOffset <- maxChar
                                 | Keyboard.Keys.Home ->
+                                    info.ClearSelection()
                                     info.CursorOffset <- 0
                                     info.TextStartOrigin <- 0
                                 | Keyboard.Keys.End ->
+                                    info.ClearSelection()
                                     if info.Value.Length > maxChar then
                                         info.CursorOffset <- maxChar
                                         info.TextStartOrigin <- info.Value.Length - maxChar
@@ -302,6 +312,14 @@ module Input =
                             res
 
                         if not isCapture && this.Keyboard.LastKeyIsPrintable then
+                            match info.Selection with
+                            | Some selection ->
+                                info.Value <- info.Value.Remove(selection.Start, selection.Length)
+                                if info.CursorOffset = selection.End then
+                                    info.CursorOffset <- Math.Max(info.CursorOffset - selection.Length, 0)
+                                    info.TextStartOrigin <- 0
+                            | None -> () // Nothing to do
+
                             info.Value <- info.Value.Insert(info.CursorOffset + info.TextStartOrigin, this.Keyboard.LastKeyValue)
                             info.CursorOffset <- info.CursorOffset + 1
                             if info.CursorOffset > maxChar then
