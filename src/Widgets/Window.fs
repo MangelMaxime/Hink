@@ -37,6 +37,15 @@ module Window =
 
             // If the Window is closed don't draw it
             if this.CurrentWindow.Value.Closed then
+                // TODO: To remove when layers works
+                if this.CurrentWindow.Value._Context.IsSome then
+                    // Clear the window context for the new frame
+                    this.CurrentWindow.Value._Context.Value.clearRect(
+                        0.,
+                        0.,
+                        this.CurrentContext.canvas.width,
+                        this.CurrentContext.canvas.height
+                    )
                 this.EndWindow()
                 false
             else
