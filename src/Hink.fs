@@ -160,6 +160,7 @@ module Gui =
         { mutable IsActive : bool
           mutable Value : string
           mutable Selection : SelectionArea option
+          mutable KeyboardCaptureHandler : (InputInfo -> Keyboard.Record -> bool) option
           // Positive offset of the cursor.
           // Offset of 0 = start of the input
           // Offset of 2 = cursor place after the second char of the input
@@ -175,9 +176,16 @@ module Gui =
         member this.SetSelection (value) =
             this.Selection <- Some value
 
+        member this.Empty() =
+            this.Value <- ""
+            this.Selection <- None
+            this.CursorOffset <- 0
+            this.TextStartOrigin <- 0
+
         static member Default
             with get () = { IsActive = false
                             Value = ""
+                            KeyboardCaptureHandler = None
                             Selection = None
                             CursorOffset = 0
                             TextStartOrigin = 0 }
