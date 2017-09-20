@@ -10,7 +10,7 @@ open Hink.Helpers
 module Checkbox =
 
     type Hink with
-        member this.Checkbox(checkboxInfo : CheckboxInfo, label) =
+        member this.Checkbox(checkboxInfo : CheckboxInfo, ?label) =
             if not (this.IsVisibile(this.Theme.Element.Height)) then
                 this.EndElement()
                 false
@@ -41,12 +41,15 @@ module Checkbox =
                         this.Cursor.Y + this.Theme.Element.Height / 2.
                     )
 
-                // Label section
-                this.CurrentContext.fillStyle <- !^this.Theme.Text.Color
-                this.FillSmallString(
-                    label,
-                    this.Theme.Checkbox.Width + this.Theme.CheckboxOffsetX * 2.
-                )
+                match label with
+                | Some label ->
+                    // Label section
+                    this.CurrentContext.fillStyle <- !^this.Theme.Text.Color
+                    this.FillSmallString(
+                        label,
+                        this.Theme.Checkbox.Width + this.Theme.CheckboxOffsetX * 4.
+                    )
+                | None -> ()
 
                 if released then
                     checkboxInfo.Value <- not checkboxInfo.Value
