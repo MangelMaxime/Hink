@@ -87,13 +87,53 @@ module Window =
                     // Common Y position for the title and the symbol
                     let headerTextY = this.Cursor.Y - this.Theme.Window.Header.Height / 2.
 
+                    let mutable symbolWidth = 0.
+
+                    if this.CurrentWindow.Value.Closable then
+                        let textSize = this.CurrentContext.measureText("\u2715")
+                        let textX = this.Cursor.X + this.Cursor.Width - textSize.width - this.Theme.Window.Header.SymbolOffsetX
+                        // Update symbolWidth to truncate the text
+                        symbolWidth <- textSize.width - this.Theme.Window.Header.SymbolOffsetX * 2.
+                        // Custom IsHover check has we don't follow auto layout management for the header symbol
+                        let hoverX = this.CursorPosX + this.Cursor.Width - textSize.width - this.Theme.Window.Header.SymbolOffsetX * 2.
+                        let hoverSymbol = this.Mouse.X >= hoverX && this.Mouse.X < (this.CursorPosX + this.Cursor.Width) &&
+                                          this.Mouse.Y >= (this.CursorPosY - this.Theme.Window.Header.Height) && this.Mouse.Y < this.CursorPosY
+
+                        // printfn "Cursor pos: %O" this.CursorPosX
+                        // printfn "Mouse pos: %O" this.Mouse.X
+
+                        // Draw symbol background
+                        if hoverSymbol then
+                            this.CurrentContext.fillStyle <- !^this.Theme.Window.Header.OverSymbolColor
+                            this.CurrentContext.fillRect(
+                                textX - this.Theme.Window.Header.SymbolOffsetX,
+                                this.Cursor.Y - this.Theme.Window.Header.Height,
+                                textSize.width + this.Theme.Window.Header.SymbolOffsetX * 2.,
+                                headerTextY + this.Theme.FontSize
+                            )
+                            if this.Mouse.JustReleased then
+                                this.ShouldCloseWindow <- true
+
+                        // Draw symbol
+                        this.CurrentContext.fillStyle <- !^this.Theme.Text.Color
+                        this.CurrentContext.fillText("\u2715", textX, headerTextY + this.Theme.Window.Header.SymbolOffsetY)
+
                     match this.CurrentWindow.Value.Title with
                     | None -> () // Nothing todo
                     | Some title ->
                         let textSize = this.CurrentContext.measureText(title)
+                        let maxWidth = this.Cursor.Width - symbolWidth - this.Theme.Text.OffsetX - this.Theme.Window.Header.SymbolOffsetX * 2.
+                        let text =
+                            if textSize.width > maxWidth then
+                                let charSize = this.CurrentContext.measureText(" ") // We assume to use a monospace font
+                                let maxChar = (maxWidth - this.Theme.Text.OffsetX) / charSize.width |> int
+                                title.Substring(0, maxChar - 2) + ".."
+                            else
+                                title
+
                         this.CurrentContext.fillStyle <- !^this.Theme.Text.Color
                         this.CurrentContext.fillText(
-                            title,
+                            text,
                             this.Cursor.X + this.Theme.Window.Header.SymbolOffsetX,
                             headerTextY + this.Theme.Text.OffsetY
                         )
@@ -119,34 +159,6 @@ module Window =
                             this.CurrentWindow.Value.IsDragging <- false
                             this.CurrentWindow.Value.DragXOrigin <- 0.
                             this.CurrentWindow.Value.DragYOrigin <- 0.
-
-                    if this.CurrentWindow.Value.Closable then
-                        let textSize = this.CurrentContext.measureText("\u2715")
-                        let textX = this.Cursor.X + this.Cursor.Width - textSize.width - this.Theme.Window.Header.SymbolOffsetX
-
-                        // Custom IsHover check has we don't follow auto layout management for the header symbol
-                        let hoverX = this.CursorPosX + this.Cursor.Width - textSize.width - this.Theme.Window.Header.SymbolOffsetX * 2.
-                        let hoverSymbol = this.Mouse.X >= hoverX && this.Mouse.X < (this.CursorPosX + this.Cursor.Width) &&
-                                          this.Mouse.Y >= (this.CursorPosY - this.Theme.Window.Header.Height) && this.Mouse.Y < this.CursorPosY
-
-                        // printfn "Cursor pos: %O" this.CursorPosX
-                        // printfn "Mouse pos: %O" this.Mouse.X
-
-                        // Draw symbol background
-                        if hoverSymbol then
-                            this.CurrentContext.fillStyle <- !^this.Theme.Window.Header.OverSymbolColor
-                            this.CurrentContext.fillRect(
-                                textX - this.Theme.Window.Header.SymbolOffsetX,
-                                this.Cursor.Y - this.Theme.Window.Header.Height,
-                                textSize.width + this.Theme.Window.Header.SymbolOffsetX * 2.,
-                                headerTextY + this.Theme.FontSize
-                            )
-                            if this.Mouse.JustReleased then
-                                this.ShouldCloseWindow <- true
-
-                        // Draw symbol
-                        this.CurrentContext.fillStyle <- !^this.Theme.Text.Color
-                        this.CurrentContext.fillText("\u2715", textX, headerTextY + this.Theme.Window.Header.SymbolOffsetY)
 
                     // Draw Window background
                     this.CurrentContext.fillStyle <- !^(defaultArg backgroundColor this.Theme.Window.Background)
