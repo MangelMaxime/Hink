@@ -160,141 +160,150 @@ module Input =
                         // Memorise if we capture the keystroke
                         // Example: Ctrl, Arrows are capture. Letters are not
                         let isCapture =
+                            // Let first the user capture the keystroke so he can cancel it if wanted
+                            let capturedByUser =
+                                match info.KeyboardCaptureHandler with
+                                | Some handler ->
+                                    handler info this.Keyboard
+                                | None -> false // Do nothing
+
                             let mutable res = true
-                            // First we resolve the action depending on modifiers
-                            match this.Keyboard.Modifiers with
-                            | { Control = true; Shift = true } ->
-                                match this.Keyboard.LastKey with
-                                | Keyboard.Keys.ArrowLeft ->
-                                    NextIndexBackward(info.Value, ' ', info.CursorOffset + info.TextStartOrigin)
-                                    |> handleBackwardSelection info
-                                | Keyboard.Keys.ArrowRight ->
-                                    NextIndexForward(info.Value, ' ', info.CursorOffset + info.TextStartOrigin)
-                                    |> handleForwardSelection info
-                                | _ -> res <- false // Not captured
-                            | { Control = true } ->
-                                info.ClearSelection()
-                                match this.Keyboard.LastKey with
-                                | Keyboard.Keys.ArrowLeft ->
-                                    if info.Value.Length > 0 then
-                                        let oldCursorOffset = info.CursorOffset
-                                        let index = NextIndexBackward(info.Value, ' ', info.CursorOffset + info.TextStartOrigin)
-                                        if index - info.TextStartOrigin < 0 then
-                                            info.CursorOffset <- 0
-                                            info.TextStartOrigin <- index
-                                        else
-                                            info.CursorOffset <- index - info.TextStartOrigin
-                                | Keyboard.Keys.ArrowRight ->
-                                    if info.Value.Length > 0 then
-                                        info.CursorOffset <- NextIndexForward(info.Value, ' ', info.CursorOffset + info.TextStartOrigin)
-                                | Keyboard.Keys.Backspace ->
-                                    if info.Value.Length > 0 then
-                                        let index = NextIndexBackward(info.Value, ' ', info.CursorOffset)
-                                        let delta = info.CursorOffset - index
-                                        info.Value <- info.Value.Remove(index, delta)
-                                        info.CursorOffset <- info.CursorOffset - delta
-                                | Keyboard.Keys.Delete ->
-                                    if info.Value.Length > 0 then
-                                        let index = NextIndexForward(info.Value, ' ', info.CursorOffset)
-                                        info.Value <- info.Value.Remove(info.CursorOffset, index - info.CursorOffset)
-                                | Keyboard.Keys.A ->
-                                    if info.Value.Length > 0 then
-                                        info.Selection <- Some (SelectionArea.Create(0, info.Value.Length))
-                                        info.CursorOffset <- info.Value.Length
-                                | _ -> res <- false // Not captured
-                            | { Shift = true } ->
-                                match this.Keyboard.LastKey with
-                                | Keyboard.Keys.ArrowLeft ->
-                                    Math.Max(0, info.CursorOffset - 1)
-                                    |> handleBackwardSelection info
-                                | Keyboard.Keys.ArrowRight ->
-                                    Math.Min(info.CursorOffset + 1, info.Value.Length)
-                                    |> handleForwardSelection info
-                                | _ -> res <- false // Not captured
-                            | _ ->
-                                let oldSelection =
-                                    if info.Selection.IsSome then
-                                        true, info.Selection.Value
-                                    else
-                                        false, SelectionArea.Create(0, 0)
-                                match this.Keyboard.LastKey with
-                                | Keyboard.Keys.Backspace ->
-                                    info.ClearSelection()
-                                    if info.Value.Length > 0 then
-                                        match oldSelection with
-                                        | (true, selection) ->
-                                            info.Value <- info.Value.Remove(selection.Start, selection.Length)
-                                            if info.CursorOffset = selection.End then
-                                                info.CursorOffset <- Math.Max(info.CursorOffset - selection.Length, 0)
-                                        | (false, _) ->
-                                            if info.CursorOffset > 0 then
-                                                if info.TextStartOrigin > 0 then
-                                                    info.TextStartOrigin <- info.TextStartOrigin - 1
-                                                    info.Value <- info.Value.Remove(info.TextStartOrigin + info.CursorOffset, 1)
-                                                else
-                                                    info.CursorOffset <- info.CursorOffset - 1
-                                                    info.Value <- info.Value.Remove(info.CursorOffset, 1)
-                                | Keyboard.Keys.Delete ->
-                                    info.ClearSelection()
-                                    if info.Value.Length > 0 then
-                                        match oldSelection with
-                                        | (true, selection) ->
-                                            info.Value <- info.Value.Remove(selection.Start, selection.Length)
-                                            if info.CursorOffset = selection.End then
-                                                info.CursorOffset <- Math.Max(info.CursorOffset - selection.Length, 0)
-                                        | (false, _) ->
-                                            if info.CursorOffset < info.Value.Length then
-                                                info.Value <- info.Value.Remove(info.CursorOffset, 1)
-                                        // If the input is empty, make sure to reset the start origin
-                                        // Usefull when doing Ctrl + A -> Delete
-                                        // over a string longer than the input max size
-                                        if info.Value.Length = 0 then
-                                            info.TextStartOrigin <- 0
-                                | Keyboard.Keys.ArrowLeft ->
-                                    info.ClearSelection()
-                                    match oldSelection with
-                                    | (true, selection) ->
-                                        if selection.Edging info.Value.Length then
-                                            info.CursorOffset <- 0
-                                            info.TextStartOrigin <- 0
-                                        else
-                                            info.CursorOffset <- Math.Max(0, info.CursorOffset - 1)
-                                    | (false, _) ->
-                                        info.CursorOffset <- Math.Max(0, info.CursorOffset - 1)
 
-                                    if info.CursorOffset = 0 then
-                                        if info.TextStartOrigin >= 1 then
-                                            info.TextStartOrigin <- info.TextStartOrigin - 1
-                                        else
-                                            info.TextStartOrigin <- 0
-                                | Keyboard.Keys.ArrowRight ->
+                            if not capturedByUser then
+                                // First we resolve the action depending on modifiers
+                                match this.Keyboard.Modifiers with
+                                | { Control = true; Shift = true } ->
+                                    match this.Keyboard.LastKey with
+                                    | Keyboard.Keys.ArrowLeft ->
+                                        NextIndexBackward(info.Value, ' ', info.CursorOffset + info.TextStartOrigin)
+                                        |> handleBackwardSelection info
+                                    | Keyboard.Keys.ArrowRight ->
+                                        NextIndexForward(info.Value, ' ', info.CursorOffset + info.TextStartOrigin)
+                                        |> handleForwardSelection info
+                                    | _ -> res <- false // Not captured
+                                | { Control = true } ->
                                     info.ClearSelection()
-                                    match oldSelection with
-                                    | (true, selection) ->
-                                        if selection.Edging info.Value.Length then
+                                    match this.Keyboard.LastKey with
+                                    | Keyboard.Keys.ArrowLeft ->
+                                        if info.Value.Length > 0 then
+                                            let oldCursorOffset = info.CursorOffset
+                                            let index = NextIndexBackward(info.Value, ' ', info.CursorOffset + info.TextStartOrigin)
+                                            if index - info.TextStartOrigin < 0 then
+                                                info.CursorOffset <- 0
+                                                info.TextStartOrigin <- index
+                                            else
+                                                info.CursorOffset <- index - info.TextStartOrigin
+                                    | Keyboard.Keys.ArrowRight ->
+                                        if info.Value.Length > 0 then
+                                            info.CursorOffset <- NextIndexForward(info.Value, ' ', info.CursorOffset + info.TextStartOrigin)
+                                    | Keyboard.Keys.Backspace ->
+                                        if info.Value.Length > 0 then
+                                            let index = NextIndexBackward(info.Value, ' ', info.CursorOffset)
+                                            let delta = info.CursorOffset - index
+                                            info.Value <- info.Value.Remove(index, delta)
+                                            info.CursorOffset <- info.CursorOffset - delta
+                                    | Keyboard.Keys.Delete ->
+                                        if info.Value.Length > 0 then
+                                            let index = NextIndexForward(info.Value, ' ', info.CursorOffset)
+                                            info.Value <- info.Value.Remove(info.CursorOffset, index - info.CursorOffset)
+                                    | Keyboard.Keys.A ->
+                                        if info.Value.Length > 0 then
+                                            info.Selection <- Some (SelectionArea.Create(0, info.Value.Length))
                                             info.CursorOffset <- info.Value.Length
+                                    | _ -> res <- false // Not captured
+                                | { Shift = true } ->
+                                    match this.Keyboard.LastKey with
+                                    | Keyboard.Keys.ArrowLeft ->
+                                        Math.Max(0, info.CursorOffset - 1)
+                                        |> handleBackwardSelection info
+                                    | Keyboard.Keys.ArrowRight ->
+                                        Math.Min(info.CursorOffset + 1, info.Value.Length)
+                                        |> handleForwardSelection info
+                                    | _ -> res <- false // Not captured
+                                | _ ->
+                                    let oldSelection =
+                                        if info.Selection.IsSome then
+                                            true, info.Selection.Value
                                         else
-                                            info.CursorOffset <- Math.Min(info.CursorOffset + 1, Math.Min(maxChar, info.Value.Length))
-                                    | (false, _) ->
-                                        info.CursorOffset <- Math.Min(info.CursorOffset + 1, Math.Min(maxChar, info.Value.Length))
+                                            false, SelectionArea.Create(0, 0)
+                                    match this.Keyboard.LastKey with
+                                    | Keyboard.Keys.Backspace ->
+                                        info.ClearSelection()
+                                        if info.Value.Length > 0 then
+                                            match oldSelection with
+                                            | (true, selection) ->
+                                                info.Value <- info.Value.Remove(selection.Start, selection.Length)
+                                                if info.CursorOffset = selection.End then
+                                                    info.CursorOffset <- Math.Max(info.CursorOffset - selection.Length, 0)
+                                            | (false, _) ->
+                                                if info.CursorOffset > 0 then
+                                                    if info.TextStartOrigin > 0 then
+                                                        info.TextStartOrigin <- info.TextStartOrigin - 1
+                                                        info.Value <- info.Value.Remove(info.TextStartOrigin + info.CursorOffset, 1)
+                                                    else
+                                                        info.CursorOffset <- info.CursorOffset - 1
+                                                        info.Value <- info.Value.Remove(info.CursorOffset, 1)
+                                    | Keyboard.Keys.Delete ->
+                                        info.ClearSelection()
+                                        if info.Value.Length > 0 then
+                                            match oldSelection with
+                                            | (true, selection) ->
+                                                info.Value <- info.Value.Remove(selection.Start, selection.Length)
+                                                if info.CursorOffset = selection.End then
+                                                    info.CursorOffset <- Math.Max(info.CursorOffset - selection.Length, 0)
+                                            | (false, _) ->
+                                                if info.CursorOffset < info.Value.Length then
+                                                    info.Value <- info.Value.Remove(info.CursorOffset, 1)
+                                            // If the input is empty, make sure to reset the start origin
+                                            // Usefull when doing Ctrl + A -> Delete
+                                            // over a string longer than the input max size
+                                            if info.Value.Length = 0 then
+                                                info.TextStartOrigin <- 0
+                                    | Keyboard.Keys.ArrowLeft ->
+                                        info.ClearSelection()
+                                        match oldSelection with
+                                        | (true, selection) ->
+                                            if selection.Edging info.Value.Length then
+                                                info.CursorOffset <- 0
+                                                info.TextStartOrigin <- 0
+                                            else
+                                                info.CursorOffset <- Math.Max(0, info.CursorOffset - 1)
+                                        | (false, _) ->
+                                            info.CursorOffset <- Math.Max(0, info.CursorOffset - 1)
 
-                                    if info.CursorOffset >= maxChar then
-                                        info.TextStartOrigin <- Math.Min(info.Value.Length - maxChar, info.TextStartOrigin + 1)
-                                        info.CursorOffset <- maxChar
-                                | Keyboard.Keys.Home ->
-                                    info.ClearSelection()
-                                    info.CursorOffset <- 0
-                                    info.TextStartOrigin <- 0
-                                | Keyboard.Keys.End ->
-                                    info.ClearSelection()
-                                    if info.Value.Length > maxChar then
-                                        info.CursorOffset <- maxChar
-                                        info.TextStartOrigin <- info.Value.Length - maxChar
-                                    else
-                                        info.CursorOffset <- info.Value.Length
-                                | Keyboard.Keys.Escape ->
-                                    info.ClearSelection()
-                                | _ -> res <- false // Not captured
+                                        if info.CursorOffset = 0 then
+                                            if info.TextStartOrigin >= 1 then
+                                                info.TextStartOrigin <- info.TextStartOrigin - 1
+                                            else
+                                                info.TextStartOrigin <- 0
+                                    | Keyboard.Keys.ArrowRight ->
+                                        info.ClearSelection()
+                                        match oldSelection with
+                                        | (true, selection) ->
+                                            if selection.Edging info.Value.Length then
+                                                info.CursorOffset <- info.Value.Length
+                                            else
+                                                info.CursorOffset <- Math.Min(info.CursorOffset + 1, Math.Min(maxChar, info.Value.Length))
+                                        | (false, _) ->
+                                            info.CursorOffset <- Math.Min(info.CursorOffset + 1, Math.Min(maxChar, info.Value.Length))
+
+                                        if info.CursorOffset >= maxChar then
+                                            info.TextStartOrigin <- Math.Min(info.Value.Length - maxChar, info.TextStartOrigin + 1)
+                                            info.CursorOffset <- maxChar
+                                    | Keyboard.Keys.Home ->
+                                        info.ClearSelection()
+                                        info.CursorOffset <- 0
+                                        info.TextStartOrigin <- 0
+                                    | Keyboard.Keys.End ->
+                                        info.ClearSelection()
+                                        if info.Value.Length > maxChar then
+                                            info.CursorOffset <- maxChar
+                                            info.TextStartOrigin <- info.Value.Length - maxChar
+                                        else
+                                            info.CursorOffset <- info.Value.Length
+                                    | Keyboard.Keys.Escape ->
+                                        info.ClearSelection()
+                                    | _ -> res <- false // Not captured
 
                             // Neutralize the selection (prevent visual bugs)
                             match info.Selection with
