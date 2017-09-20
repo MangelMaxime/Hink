@@ -243,19 +243,24 @@ module Gui =
 
         member this.CursorPosX
             with get () =
-                this.Cursor.X + this.CurrentWindow.Value.RealPositionX
+                match this.CurrentWindow with
+                | Some current -> this.Cursor.X + current.RealPositionX
+                | None -> this.Cursor.X
 
         member this.CursorPosY
             with get () =
-                this.Cursor.Y + this.CurrentWindow.Value.RealPositionY
+                match this.CurrentWindow with
+                | Some current -> this.Cursor.Y + current.RealPositionY
+                | None -> this.Cursor.Y
 
         member this.CurrentContext
             with get () : Browser.CanvasRenderingContext2D =
                 if this.CurrentWindow.IsSome then
                     this.CurrentWindow.Value._Context.Value
                 else
-                    failwith "Widgets need to be draw inside a Window for now"
+                    // failwith "Widgets need to be draw inside a Window for now"
                     //this.ApplicationContext
+                    this.ApplicationContext
 
         member this.SetCursor cursor =
             this.Mouse.SetCursor cursor
