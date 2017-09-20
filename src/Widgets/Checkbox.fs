@@ -55,4 +55,4 @@ module Checkbox =
                     checkboxInfo.Value <- not checkboxInfo.Value
 
                 this.EndElement()
-                checkboxInfo.Value
+                true
