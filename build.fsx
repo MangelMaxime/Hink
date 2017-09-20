@@ -128,7 +128,7 @@ let pushNuget (releaseNotes: ReleaseNotes) (projFile: string) =
             match environVarOrNone "NUGET_KEY" with
             | Some nugetKey -> nugetKey
             | None -> failwith "The Nuget API key must be set in a NUGET_KEY environmental variable"
-        runDotnet projDir (sprintf "pack -c Release /p:Version=%s /p:PackageReleaseNotes=\"%s\"" releaseNotes.NugetVersion (String.Join("\n",releaseNotes.Notes)))
+        runDotnet projDir (sprintf "pack -c Release /p:Version=%s /p:PackageReleaseNotes=\"%s\"" releaseNotes.NugetVersion (String.Join("\n * ",releaseNotes.Notes)))
         Directory.GetFiles(projDir </> "bin" </> "Release", "*.nupkg")
         |> Array.find (fun nupkg -> nupkg.Contains(releaseNotes.NugetVersion))
         |> (fun nupkg ->
