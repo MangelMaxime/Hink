@@ -330,26 +330,27 @@ module Gui =
                     x, y + this.Theme.Arrow.Height,
                     x + this.Theme.Arrow.Width, y + this.Theme.Arrow.Height / 2.)
 
-        member this.FillSmallString (text, ?offsetX, ?offsetY, ?align : Align) =
+        member this.FillSmallString (text, ?offsetX, ?offsetY, ?width, ?align : Align) =
             let offsetY = defaultArg offsetY this.Theme.Text.OffsetY
             let align = defaultArg align Left
             let textSize = this.CurrentContext.measureText(text)
+            let width = defaultArg width this.Cursor.Width
 
             let offsetX =
                 match align with
                 | Left ->
                     defaultArg offsetX this.Theme.Text.OffsetX
                 | Center ->
-                    (this.Cursor.Width / 2.) - (textSize.width / 2.)
+                    (width / 2.) - (textSize.width / 2.)
                 | Right ->
-                    this.Cursor.Width - textSize.width - this.Theme.Text.OffsetX
+                    width - textSize.width - this.Theme.Text.OffsetX
 
             this.CurrentContext.font <- this.Theme.FormatFontString this.Theme.FontSmallSize
 
             let text =
-                if textSize.width > this.Cursor.Width - this.Theme.Text.OffsetX then
+                if textSize.width > width - this.Theme.Text.OffsetX then
                     let charSize = this.CurrentContext.measureText(" ") // We assume to use a monospace font
-                    let maxChar = (this.Cursor.Width - this.Theme.Text.OffsetX) / charSize.width |> int
+                    let maxChar = (width - this.Theme.Text.OffsetX) / charSize.width |> int
                     text.Substring(0, maxChar - 2) + ".."
                 else
                     text
