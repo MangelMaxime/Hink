@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Simple Fable App",
   "scripts": {
-    "watch": "webpack-dev-server",
+    "start": "webpack-dev-server",
     "build": "webpack -p"
   },
   "keywords": [],
