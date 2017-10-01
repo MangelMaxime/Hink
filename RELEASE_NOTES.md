@@ -1,3 +1,9 @@
+### 0.1.0-beta-005
+
+* Fix #4: Implement slider
+* Improvement active widget management
+* BREAKING CHANGE: Normalize all the record for state management under "handler" name
+
 ### 0.1.0-beta-004
 
 * Fix #2: Only one widget can be active at a time

@@ -11,7 +11,7 @@ module Gui =
 
     type ID = string
 
-    type Layout =
+    type LayoutOrientation =
         | Horizontal
         | Vertical
 
@@ -55,12 +55,12 @@ module Gui =
         { OriginX : float
           OriginY : float }
 
-    type WindowInfo =
+    type WindowHandler =
         { mutable X : float
           mutable Y : float
           mutable Width : float
           mutable Height : float
-          mutable Layout : Layout
+          mutable Layout : LayoutOrientation
           mutable Draggable : bool
           mutable Closable : bool
           mutable Closed : bool
@@ -138,7 +138,7 @@ module Gui =
                   Guid = Guid.NewGuid() }
 
     /// Type used to stored combo information for drawing when Finish the loop
-    type ComboMemory =
+    type ComboHandler =
         { Info : ComboInfo
           X : float
           Y : float
@@ -156,10 +156,10 @@ module Gui =
         member this.ActiveRatio
             with get () = this.Ratios.[this.CurrentRatio]
 
-    type InputInfo =
+    type InputHandler =
         { mutable Value : string
           mutable Selection : SelectionArea option
-          mutable KeyboardCaptureHandler : (InputInfo -> Keyboard.Record -> bool) option
+          mutable KeyboardCaptureHandler : (InputHandler -> Keyboard.Record -> bool) option
           // Positive offset of the cursor.
           // Offset of 0 = start of the input
           // Offset of 2 = cursor place after the second char of the input
@@ -190,13 +190,35 @@ module Gui =
                             TextStartOrigin = 0
                             Guid = Guid.NewGuid() }
 
+    type SliderOrientation =
+        | Vertical
+        | Horizontal
+
+    type SliderHandler =
+        { Guid : Guid
+          mutable Value : float }
+        //   Max : float
+        //   Min : float
+        //   Value : float
+        //   Step : float
+        //   Orientation : SliderOrientation }
+
+        static member Default
+            with get () = { Guid = Guid.NewGuid()
+                            Value = 0. }
+                            // Max = 100.
+                            // Min = 0.
+                            // Value = 0.
+                            // Step = 10.
+                            // Orientation = SliderOrientation.Horizontal }
+
     type Hink =
         { Canvas : Browser.HTMLCanvasElement
           ApplicationContext : Browser.CanvasRenderingContext2D
           Mouse : Mouse.Record
           Keyboard : Keyboard.Record
           KeyboardCaptureHandler : (Keyboard.Record -> bool) option
-          mutable ActiveWidget : Guid
+          mutable ActiveWidget : Guid option
           mutable KeyboadHasBeenCapture : bool
           Theme : Theme
           mutable RowInfo : Row option
@@ -205,8 +227,8 @@ module Gui =
           mutable IsCursorStyled : bool
           /// Store if the window should be closed
           mutable ShouldCloseWindow : bool
-          mutable CurrentWindow : WindowInfo option
-          mutable CurrentCombo : ComboMemory option
+          mutable CurrentWindow : WindowHandler option
+          mutable CurrentCombo : ComboHandler option
           mutable LastReferenceTick : DateTime
           mutable Delta : TimeSpan }
 
@@ -226,7 +248,7 @@ module Gui =
               ApplicationContext = context
               Mouse = Mouse.Manager
               Keyboard = Keyboard.Manager
-              ActiveWidget = Guid.NewGuid()
+              ActiveWidget = None
               KeyboardCaptureHandler = keyboardCaptureHandler
               KeyboadHasBeenCapture = false
               IsCursorStyled = false
@@ -264,8 +286,11 @@ module Gui =
                     //this.ApplicationContext
                     this.ApplicationContext
 
+        member this.SetActiveWidget guid =
+            this.ActiveWidget <- Some guid
+
         member this.IsActive guid =
-            this.ActiveWidget = guid
+            this.ActiveWidget.IsSome && this.ActiveWidget.Value = guid
 
         member this.SetCursor cursor =
             this.Mouse.SetCursor cursor
@@ -297,7 +322,7 @@ module Gui =
             | None ->
                 this.Cursor.Y <- this.Cursor.Y + this.Theme.Element.Height + this.Theme.Element.SeparatorSize
 
-            | Some { Layout = Vertical } ->
+            | Some { Layout = LayoutOrientation.Vertical } ->
                 let elementHeight = defaultArg elementHeight (this.Theme.Element.Height + this.Theme.Element.SeparatorSize)
                 match this.RowInfo with
                 | None ->
@@ -318,7 +343,7 @@ module Gui =
                         this.Cursor.X <- this.Cursor.X + this.Cursor.Width
                         this.Cursor.Width <- rowInfo.SplitWidth * rowInfo.ActiveRatio
 
-            | Some { Layout = Horizontal } ->
+            | Some { Layout = LayoutOrientation.Horizontal } ->
                 this.Cursor.X <- this.Cursor.Width + this.Theme.Element.SeparatorSize
 
         member this.Empty() =

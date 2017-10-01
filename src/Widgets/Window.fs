@@ -23,13 +23,16 @@ module Window =
                     this.CurrentWindow.Value.RealPositionY
                 )
 
-            this.CurrentWindow.Value.ShouldRedraw <- false
+
+            // TODO: Re-activate when window layout system is complete
+            // I am desactivating the cache here to improve UX
+            // this.CurrentWindow.Value.ShouldRedraw <- false
 
             // Remove the window to end it
             this.CurrentWindow <- None
             // TODO: Handle scroll
 
-        member this.Window(windowInfo : WindowInfo, ?backgroundColor, ?headerColor) =
+        member this.Window(windowInfo : WindowHandler, ?backgroundColor, ?headerColor) =
             if this.CurrentWindow.IsSome then
                 this.EndWindow()
 

@@ -8,6 +8,7 @@ module rec Theme =
           FontString : Printf.StringFormat<float -> string>
           Text : TextTheme
           Button : ButtonTheme
+          Slider : SliderTheme
           Checkbox : CheckboxTheme
           Element : ElementTheme
           Label : LabelTheme
@@ -37,6 +38,10 @@ module rec Theme =
 
         member this.ArrowOffsetX
             with get () = (this.Element.Height - this.Arrow.Width) / 2.
+
+    type Padding =
+        { Horizontal : float
+          Vertical : float }
 
     type ArrowTheme =
         { Height : float
@@ -134,6 +139,14 @@ module rec Theme =
         { Background : string
           Text : string }
 
+    type SliderTheme =
+        { Height : float
+          Radius : float
+          Padding : Padding }
+
+        member this.HalfHeight =
+            this.Height / 2.
+
     let darkTheme : Theme =
         { FontSize = 16.
           FontSmallSize = 16.
@@ -214,4 +227,10 @@ module rec Theme =
               Background =
                 { Default = "#ecf0f1"
                   Active = "#ecf0f1" }
-              SelectionColor = "#3498db" } }
+              SelectionColor = "#3498db" }
+          Slider =
+            { Height = 12.
+              Radius = 9.
+              Padding =
+                { Horizontal = 10.
+                  Vertical = 0. } } }

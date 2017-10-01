@@ -22,19 +22,19 @@ module Main =
     Browser.document.body.appendChild stats.dom |> ignore
     #endif
 
-    let window1 = { WindowInfo.Default with X = 10.
-                                            Y = 10.
-                                            Width = 400.
-                                            Height = 320. }
+    let window1 = { WindowHandler.Default with X = 10.
+                                               Y = 10.
+                                               Width = 400.
+                                               Height = 400. }
 
-    let window2 = { WindowInfo.Default with X = 100.
-                                            Y = 50.
-                                            Width = 400.
-                                            Height = 285.
-                                            Closable = true
-                                            Closed = true
-                                            Draggable = true
-                                            Title = Some "You can close me" }
+    let window2 = { WindowHandler.Default with X = 100.
+                                               Y = 50.
+                                               Width = 400.
+                                               Height = 285.
+                                               Closable = true
+                                               Closed = true
+                                               Draggable = true
+                                               Title = Some "You can close me" }
 
     let Emerald = "#2ecc71"
     let Nephritis = "#27ae60"
@@ -46,8 +46,10 @@ module Main =
     let combo1 = ComboInfo.Default
 
     let checkbox1 = CheckboxInfo.Default
-    let input1 = { InputInfo.Default with Value = "Some text here" }
-    let input2 = InputInfo.Default
+    let input1 = { InputHandler.Default with Value = "Some text here" }
+    let input2 = InputHandler.Default
+
+    let slider1 = SliderHandler.Default
 
     let keyboardPreventHandler (e: Browser.KeyboardEvent) =
         let shouldPreventFromCtrl =
@@ -112,6 +114,9 @@ module Main =
             if ui.Button("Open second Window") then
                 window2.Closed <- false
             ui.Empty()
+
+            ui.Label(sprintf "Slider: %.0f" slider1.Value)
+            ui.Slider(slider1) |> ignore
 
             ui.Label("Use Ctrl+O to open the second Window", Center)
 

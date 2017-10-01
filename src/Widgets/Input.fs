@@ -10,7 +10,7 @@ open System
 [<AutoOpen>]
 module Input =
 
-    let handleBackwardSelection info newCursorOffset =
+    let handleBackwardSelection (info: InputHandler) newCursorOffset =
         if info.Value.Length > 0 then
             let oldCursorOffset = info.CursorOffset
             info.CursorOffset <- newCursorOffset
@@ -27,7 +27,7 @@ module Input =
                 )
             |> info.SetSelection
 
-    let handleForwardSelection info newCursorOffset =
+    let handleForwardSelection (info: InputHandler) newCursorOffset =
         if info.Value.Length > 0 then
             let oldCursorOffset = info.CursorOffset
             info.CursorOffset <- newCursorOffset
@@ -45,7 +45,7 @@ module Input =
             |> info.SetSelection
 
     type Hink with
-        member this.Input(info: InputInfo) =
+        member this.Input(info: InputHandler) =
             if not (this.IsVisibile(this.Theme.Element.Height)) then
                 this.EndElement()
                 false
@@ -57,7 +57,7 @@ module Input =
                     this.SetCursor Mouse.Cursor.Text
 
                 if pressed then
-                    this.ActiveWidget <- info.Guid
+                    this.SetActiveWidget info.Guid
 
                 this.CurrentContext.strokeStyle <-
                     if this.IsActive info.Guid then

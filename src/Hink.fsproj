@@ -23,6 +23,7 @@
         <Compile Include="Widgets/Combo.fs" />
         <Compile Include="Widgets/Input.fs" />
         <Compile Include="Widgets/Label.fs" />
+        <Compile Include="Widgets/Slider.fs" />
         <Compile Include="Widgets/Row.fs" />
         <Compile Include="Widgets/Window.fs" />
         <Compile Include="Widgets/LifeCycle.fs" />
