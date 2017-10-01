@@ -1,3 +1,7 @@
+### 0.1.0-beta-004
+
+* Fix #2: Only one widget can be active at a time
+
 ### 0.1.0-beta-003
 
 * Fix combo widgets
