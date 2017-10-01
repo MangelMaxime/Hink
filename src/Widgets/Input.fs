@@ -57,16 +57,16 @@ module Input =
                     this.SetCursor Mouse.Cursor.Text
 
                 if pressed then
-                    info.IsActive <- true
+                    this.ActiveWidget <- info.Guid
 
                 this.CurrentContext.strokeStyle <-
-                    if info.IsActive then
+                    if this.IsActive info.Guid then
                         !^this.Theme.Input.Border.Active
                     else
                         !^this.Theme.Input.Border.Default
 
                 this.CurrentContext.fillStyle <-
-                    if info.IsActive then
+                    if this.IsActive info.Guid then
                         !^this.Theme.Input.Background.Active
                     else
                         !^this.Theme.Input.Background.Default
@@ -140,7 +140,7 @@ module Input =
                 )
 
                 // Cursor
-                if info.IsActive && this.Delta < TimeSpan.FromMilliseconds(500.) && info.Selection.IsNone then
+                if this.IsActive info.Guid && this.Delta < TimeSpan.FromMilliseconds(500.) && info.Selection.IsNone then
 
                     this.CurrentContext.fillStyle <- !^"#000"
 
@@ -155,7 +155,7 @@ module Input =
                         textMetrics.width - cursorMetrics.width / 2. - cursorOffsetMetrics.width + this.Theme.Text.OffsetX
                     )
 
-                if info.IsActive then
+                if this.IsActive info.Guid then
                     if this.Keyboard.HasNewKeyStroke() then
                         // Memorise if we capture the keystroke
                         // Example: Ctrl, Arrows are capture. Letters are not

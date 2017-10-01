@@ -157,8 +157,7 @@ module Gui =
             with get () = this.Ratios.[this.CurrentRatio]
 
     type InputInfo =
-        { mutable IsActive : bool
-          mutable Value : string
+        { mutable Value : string
           mutable Selection : SelectionArea option
           mutable KeyboardCaptureHandler : (InputInfo -> Keyboard.Record -> bool) option
           // Positive offset of the cursor.
@@ -168,7 +167,8 @@ module Gui =
           // Start origin of the text to display
           // 0 = Start of the text
           // 2 = Start of the text after the 2 first chars
-          mutable TextStartOrigin : int }
+          mutable TextStartOrigin : int
+          Guid : Guid }
 
         member this.ClearSelection () =
             this.Selection <- None
@@ -183,12 +183,12 @@ module Gui =
             this.TextStartOrigin <- 0
 
         static member Default
-            with get () = { IsActive = false
-                            Value = ""
+            with get () = { Value = ""
                             KeyboardCaptureHandler = None
                             Selection = None
                             CursorOffset = 0
-                            TextStartOrigin = 0 }
+                            TextStartOrigin = 0
+                            Guid = Guid.NewGuid() }
 
     type Hink =
         { Canvas : Browser.HTMLCanvasElement
@@ -196,6 +196,7 @@ module Gui =
           Mouse : Mouse.Record
           Keyboard : Keyboard.Record
           KeyboardCaptureHandler : (Keyboard.Record -> bool) option
+          mutable ActiveWidget : Guid
           mutable KeyboadHasBeenCapture : bool
           Theme : Theme
           mutable RowInfo : Row option
@@ -225,6 +226,7 @@ module Gui =
               ApplicationContext = context
               Mouse = Mouse.Manager
               Keyboard = Keyboard.Manager
+              ActiveWidget = Guid.NewGuid()
               KeyboardCaptureHandler = keyboardCaptureHandler
               KeyboadHasBeenCapture = false
               IsCursorStyled = false
@@ -261,6 +263,9 @@ module Gui =
                     // failwith "Widgets need to be draw inside a Window for now"
                     //this.ApplicationContext
                     this.ApplicationContext
+
+        member this.IsActive guid =
+            this.ActiveWidget = guid
 
         member this.SetCursor cursor =
             this.Mouse.SetCursor cursor

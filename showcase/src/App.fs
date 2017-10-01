@@ -46,8 +46,8 @@ module Main =
     let combo1 = ComboInfo.Default
 
     let checkbox1 = CheckboxInfo.Default
-    let input1 = { InputInfo.Default with Value = "Some text here"
-                                          Selection = None }
+    let input1 = { InputInfo.Default with Value = "Some text here" }
+    let input2 = InputInfo.Default
 
     let keyboardPreventHandler (e: Browser.KeyboardEvent) =
         let shouldPreventFromCtrl =
@@ -133,6 +133,8 @@ module Main =
             ui.Checkbox(checkbox1, "Remember me") |> ignore
 
             ui.Input(input1) |> ignore
+
+            ui.Input(input2) |> ignore
 
             ui.Empty()
 
