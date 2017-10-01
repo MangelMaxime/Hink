@@ -7,7 +7,7 @@
         <RepositoryUrl>https://github.com/MangelMaxime/Hink</RepositoryUrl>
         <PackageTags>fable;fsharp;gui</PackageTags>
         <Authors>Maxime Mangel</Authors>
-        <Version>0.1.0-beta-004</Version>
+        <Version>0.1.0-beta-005</Version>
     </PropertyGroup>
     <PropertyGroup>
         <TargetFramework>netstandard1.6</TargetFramework>
