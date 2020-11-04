@@ -3,8 +3,8 @@
     "version": "1.0.0",
     "description": "Simple Fable App",
     "scripts": {
-    "watch": "dotnet fable watch . --define DEBUG --run parcel ./src/index.html",
-    "build": "webpack -p"
+    "watch": "dotnet fable watch . --define DEBUG --run parcel ./src/index.html --out-dir dist",
+    "build": "dotnet fable . && yarn run parcel build index.html --out-dir dist"
     },
     "keywords": [],
     "author": "",

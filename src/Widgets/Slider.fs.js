@@ -38,7 +38,11 @@ export function Hink_Gui_Hink__Hink_Slider_Z704370D1(this$, handler, min, max, s
         const x_1 = Hink__get_CursorPosX(this$) + slider.Padding.Horizontal;
         if ((hover ? pressed : false) ? Hink__IsActive_244AC511(this$, handler.Guid) : false) {
             let v;
-            const mousePos = null;
+            let mousePos;
+            const tupledArg = [this$.Mouse.X - x_1, 0, w];
+            const a = tupledArg[1];
+            const b = tupledArg[2];
+            mousePos = max_2(comparePrimitives, min_2(comparePrimitives, tupledArg[0], max_2(comparePrimitives, a, b)), min_2(comparePrimitives, a, b));
             v = (Math.ceil(((mousePos * max_1) / w) / step_1) * step_1);
             handler.Value = v;
             res = true;

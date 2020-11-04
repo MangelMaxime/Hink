@@ -154,8 +154,7 @@ export function init(element) {
     if (!Manager.HasBeenInitiated) {
         Manager.Element = element;
         element.addEventListener("mousedown", (ev) => {
-            const ev_1 = ev;
-            const matchValue = ev_1.button;
+            const matchValue = ev.button;
             switch (matchValue) {
                 case 0: {
                     Manager.Left = true;
@@ -175,8 +174,7 @@ export function init(element) {
             }
         });
         element.addEventListener("mouseup", (ev_2) => {
-            const ev_3 = ev_2;
-            const matchValue_1 = ev_3.button;
+            const matchValue_1 = ev_2.button;
             switch (matchValue_1) {
                 case 0: {
                     Manager.Left = false;

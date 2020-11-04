@@ -65,9 +65,7 @@ export function Hink_Gui_Hink__Hink_Input_Z1A61478C(this$, info) {
         Hink__get_CurrentContext(this$).lineWidth = 2;
         Browser_Types_CanvasRenderingContext2D__CanvasRenderingContext2D_RoundedRect_49C497E8(Hink__get_CurrentContext(this$), this$.Cursor.X + Theme__get_ButtonOffsetY(this$.Theme), this$.Cursor.Y + Theme__get_ButtonOffsetY(this$.Theme), this$.Cursor.Width - (Theme__get_ButtonOffsetY(this$.Theme) * 2), this$.Theme.Element.Height, this$.Theme.Element.CornerRadius, new RenderingType(2));
         Hink__get_CurrentContext(this$).font = Theme__get_FormatFontString(this$.Theme)(this$.Theme.FontSmallSize);
-        const offsetY = this$.Theme.Text.OffsetY;
         const textSize = Hink__get_CurrentContext(this$).measureText(info.Value);
-        const offsetX = this$.Theme.Text.OffsetX;
         const charSize = Hink__get_CurrentContext(this$).measureText(" ");
         let maxChar;
         const value = (this$.Cursor.Width - (this$.Theme.Text.OffsetX * 2)) / charSize.width;
@@ -98,7 +96,7 @@ export function Hink_Gui_Hink__Hink_Input_Z1A61478C(this$, info) {
             Hink__get_CurrentContext(this$).fillRect(startX + this$.Theme.Text.OffsetX, this$.Cursor.Y + ((this$.Theme.Element.Height - selectionHeight) / 2), min(comparePrimitives, selectionSize.width, charSize.width * maxChar), selectionHeight);
         }
         Hink__get_CurrentContext(this$).fillStyle = this$.Theme.Input.TextColor;
-        Hink__get_CurrentContext(this$).fillText(text, this$.Cursor.X + offsetX, (this$.Cursor.Y + Theme__get_FontSmallOffsetY(this$.Theme)) + offsetY);
+        Hink__get_CurrentContext(this$).fillText(text, this$.Cursor.X + this$.Theme.Text.OffsetX, (this$.Cursor.Y + Theme__get_FontSmallOffsetY(this$.Theme)) + this$.Theme.Text.OffsetY);
         if ((Hink__IsActive_244AC511(this$, info.Guid) ? (this$.Delta < 500) : false) ? (info.Selection == null) : false) {
             Hink__get_CurrentContext(this$).fillStyle = "#000";
             const cursorMetrics = Hink__get_CurrentContext(this$).measureText("|");
@@ -263,8 +261,7 @@ export function Hink_Gui_Hink__Hink_Input_Z1A61478C(this$, info) {
                             case 11: {
                                 InputHandler__ClearSelection(info);
                                 if (oldSelection[0]) {
-                                    const selection_3 = oldSelection[1];
-                                    if (SelectionArea__Edging_Z524259A4(selection_3, info.Value.length)) {
+                                    if (SelectionArea__Edging_Z524259A4(oldSelection[1], info.Value.length)) {
                                         info.CursorOffset = 0;
                                         info.TextStartOrigin = 0;
                                     }
@@ -288,8 +285,7 @@ export function Hink_Gui_Hink__Hink_Input_Z1A61478C(this$, info) {
                             case 13: {
                                 InputHandler__ClearSelection(info);
                                 if (oldSelection[0]) {
-                                    const selection_4 = oldSelection[1];
-                                    if (SelectionArea__Edging_Z524259A4(selection_4, info.Value.length)) {
+                                    if (SelectionArea__Edging_Z524259A4(oldSelection[1], info.Value.length)) {
                                         info.CursorOffset = info.Value.length;
                                     }
                                     else {
