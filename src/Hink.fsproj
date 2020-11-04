@@ -15,6 +15,7 @@
     <ItemGroup>
         <Compile Include="Inputs\Mouse.fs" />
         <Compile Include="Inputs\Keyboard.fs" />
+        <Compile Include="Inputs\Clipboard.fs" />
         <Compile Include="Helpers.fs" />
         <Compile Include="Theme.fs" />
         <Compile Include="Hink.fs" />

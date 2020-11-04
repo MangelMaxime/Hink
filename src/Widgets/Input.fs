@@ -214,6 +214,13 @@ module Input =
                                         if info.Value.Length > 0 then
                                             info.Selection <- Some (SelectionArea.Create(0, info.Value.Length))
                                             info.CursorOffset <- info.Value.Length
+                                    | Keyboard.Keys.C ->
+                                        match info.Selection with
+                                        | Some selection ->
+                                            let textToCopy = info.Value.Substring(selection.Start, selection.End)
+                                            Clipboard.copyToClipboard textToCopy
+                                        | None ->
+                                            ()
                                     | _ -> res <- false // Not captured
                                 | { Shift = true } ->
                                     match this.Keyboard.LastKey with
