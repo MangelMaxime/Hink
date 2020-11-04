@@ -16,7 +16,7 @@ module Keyboard =
     [<AutoOpen>]
     module Keys =
         type Keys =
-            | Unkown of string
+            | Unknown of string
             | Dead
             | Ampersand
             | Backspace
@@ -131,7 +131,7 @@ module Keyboard =
         | "x" -> Keys.X
         | "y" -> Keys.Y
         | "z" -> Keys.Z
-        | _ -> Keys.Unkown key
+        | _ -> Keys.Unknown key
 
     type Modifiers =
         {   mutable Shift : bool
@@ -160,14 +160,14 @@ module Keyboard =
             {   KeysPressed = Set.empty
                 LastKeyValue = ""
                 LastKeyIsPrintable = false
-                LastKey = Keys.Unkown ""
+                LastKey = Keys.Unknown ""
                 Modifiers = Modifiers.Initial }
 
         member self.IsPress key = self.KeysPressed.Contains(key)
         member self.ClearLastKey() =
             self.LastKeyValue <- ""
             self.LastKeyIsPrintable <- false
-            self.LastKey <- Keys.Unkown ""
+            self.LastKey <- Keys.Unknown ""
 
     let Manager = Record.Initial
 
@@ -178,6 +178,9 @@ module Keyboard =
             Manager.Modifiers.Alt <- e.altKey
             Manager.Modifiers.Shift <- e.shiftKey
             Manager.Modifiers.Control <- e.ctrlKey
+            // The keyCode of the CommandLeft and CommandRight seems to be browser dependant
+            // To be fix in the future
+            // https://stackoverflow.com/questions/3902635/how-does-one-capture-a-macs-command-key-via-javascript
             Manager.Modifiers.CommandLeft <- e.keyCode = 224.
             Manager.Modifiers.CommandRight <- e.keyCode = 224.
         element.addEventListener( "keydown",
@@ -186,7 +189,7 @@ module Keyboard =
                 let key = resolveKeyFromKey e.key
                 Manager.LastKeyValue <- e.key
                 // Here we try to determine if the key is printable or not
-                // Should not be "Dead". Exemple first press on '^' is Dead
+                // Should not be "Dead". Example first press on '^' is Dead
                 // And the value should be of size [1,2] because we can add:
                 // * One character at a time. Example: 'a', '!', '§'
                 // * Two characters at a time. Example '^^', '^p'
@@ -211,7 +214,6 @@ module Keyboard =
         element.addEventListener("keyup",
             fun e ->
                 let e = e :?> KeyboardEvent
-                let code = int e.keyCode
                 Manager.KeysPressed <- Set.remove (resolveKeyFromKey e.key) Manager.KeysPressed
                 // Update the Modifiers state
                 updateModifiers e
