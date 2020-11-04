@@ -1,7 +1,9 @@
 ﻿namespace Hink.Inputs
 
 open Fable.Core
-open Fable.Import.Browser
+open Browser.Types
+open Browser.Event
+open Browser
 
 [<RequireQualifiedAccess>]
 module Mouse =
@@ -52,31 +54,31 @@ module Mouse =
 
     /// Record used to store Mouse state
     type Record =
-        { mutable X : float
-          mutable Y : float
-          mutable Left : ButtonState
-          mutable Right : ButtonState
-          mutable Middle : ButtonState
-          mutable IsDragging : bool
-          mutable DragOriginX : float
-          mutable DragOriginY : float
-          mutable HasBeenInitiated : bool
-          mutable Element : HTMLElement
-          mutable JustReleased : bool }
+        {   mutable X : float
+            mutable Y : float
+            mutable Left : ButtonState
+            mutable Right : ButtonState
+            mutable Middle : ButtonState
+            mutable IsDragging : bool
+            mutable DragOriginX : float
+            mutable DragOriginY : float
+            mutable HasBeenInitiated : bool
+            mutable Element : HTMLElement
+            mutable JustReleased : bool }
 
         /// Initial state of Mouse
         static member Initial =
-            { X = 0.
-              Y = 0.
-              Left = false
-              Right = false
-              Middle = false
-              IsDragging = false
-              DragOriginX = 0.
-              DragOriginY = 0.
-              HasBeenInitiated = false
-              Element = window.document.body
-              JustReleased = false }
+            {   X = 0.
+                Y = 0.
+                Left = false
+                Right = false
+                Middle = false
+                IsDragging = false
+                DragOriginX = 0.
+                DragOriginY = 0.
+                HasBeenInitiated = false
+                Element = window.document.body
+                JustReleased = false }
 
         member this.HitRegion(x, y, w, h) = this.X > x && this.X <= x + w && this.Y > y && this.Y < y + h
         member this.SetCursor cursor = this.Element.style.cursor <- cursor
@@ -107,39 +109,44 @@ module Mouse =
         if not Manager.HasBeenInitiated then
             Manager.Element <- element
             /// Attach handler to Mouse down event
-            element.addEventListener_mousedown ((fun ev ->
-                match ev.which with
-                | 1. -> Manager.Left <- true
-                | 2. -> Manager.Middle <- true
-                | 3. -> Manager.Right <- true
-                | _ -> failwith "Not supported button"
-                null))
+            element.addEventListener("mousedown",
+                fun ev ->
+                    let ev = ev :?> MouseEvent
+                    match ev.button with
+                    | 0. -> Manager.Left <- true
+                    | 1. -> Manager.Right <- true
+                    | 2. -> Manager.Middle <- true
+                    | _ -> failwith "Not supported ButtonStatetton"
+            )
             /// Attach handler to Mouse up event
-            element.addEventListener_mouseup ((fun ev ->
-                match ev.which with
-                | 1. ->
-                    Manager.Left <- false
-                    Manager.IsDragging <- false
-                    Manager.DragOriginX <- 0.
-                    Manager.DragOriginY <- 0.
-                    Manager.JustReleased <- true
-                | 2. -> Manager.Middle <- false
-                | 3. -> Manager.Right <- false
-                | _ -> failwith "Not supported button"
-                null))
+            element.addEventListener("mouseup",
+                fun ev ->
+                    let ev = ev :?> MouseEvent
+                    match ev.button with
+                    | 0. ->
+                        Manager.Left <- false
+                        Manager.IsDragging <- false
+                        Manager.DragOriginX <- 0.
+                        Manager.DragOriginY <- 0.
+                        Manager.JustReleased <- true
+                    | 1. -> Manager.Middle <- false
+                    | 2. -> Manager.Right <- false
+                    | _ -> failwith "Not supported button"
+            )
             /// Attach handler to Mouse move event
-            element.addEventListener_mousemove ((fun ev ->
-                // Update position
-                Manager.X <- ev.offsetX
-                Manager.Y <- ev.offsetY
-                // Update dragging state
-                if Manager.Left then
-                    // Start dragging
-                    if not Manager.IsDragging then
-                        Manager.DragOriginX <- Manager.X
-                        Manager.DragOriginY <- Manager.Y
-                    Manager.IsDragging <- true
-
-                null))
+            element.addEventListener("mousemove",
+                fun ev ->
+                    let ev = ev :?> MouseEvent
+                    // Update position
+                    Manager.X <- ev.offsetX
+                    Manager.Y <- ev.offsetY
+                    // Update dragging state
+                    if Manager.Left then
+                        // Start dragging
+                        if not Manager.IsDragging then
+                            Manager.DragOriginX <- Manager.X
+                            Manager.DragOriginY <- Manager.Y
+                        Manager.IsDragging <- true
+            )
             // Tag that event listener has been set
             Manager.HasBeenInitiated <- true

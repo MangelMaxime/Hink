@@ -2,10 +2,13 @@ namespace Hink
 
 open Fable.Core
 open Fable.Core.JsInterop
-open Fable.Import
 open Hink.Inputs
 open Hink.Theme
 open System
+open Browser.Types
+open Browser.Dom
+open Browser
+open Browser.Css
 
 module Gui =
 
@@ -23,14 +26,14 @@ module Gui =
     let oneSecond = TimeSpan.FromSeconds 1.
 
     type Cursor =
-        { mutable X : float
-          mutable Y : float
-          mutable Width : float
-          mutable Height : float }
+        {   mutable X : float
+            mutable Y : float
+            mutable Width : float
+            mutable Height : float }
 
     type SelectionArea =
-        { Start: int
-          End: int }
+        {   Start: int
+            End: int }
 
         member this.Length =
             this.End - this.Start
@@ -48,46 +51,46 @@ module Gui =
             this.Start = 0 && this.End = size && this.Start <> this.End
 
         static member Create (start, ``end``) =
-            { Start = start
-              End = ``end`` }
+            {   Start = start
+                End = ``end`` }
 
     type DragInfo =
-        { OriginX : float
-          OriginY : float }
+        {   OriginX : float
+            OriginY : float }
 
     type WindowHandler =
-        { mutable X : float
-          mutable Y : float
-          mutable Width : float
-          mutable Height : float
-          mutable Layout : LayoutOrientation
-          mutable Draggable : bool
-          mutable Closable : bool
-          mutable Closed : bool
-          mutable Title : string option
-          mutable DragXOrigin : float
-          mutable DragYOrigin : float
-          mutable IsDragging : bool
-          mutable ShouldRedraw : bool
-          mutable _Canvas : Browser.HTMLCanvasElement option
-          mutable _Context : Browser.CanvasRenderingContext2D option }
+        {   mutable X : float
+            mutable Y : float
+            mutable Width : float
+            mutable Height : float
+            mutable Layout : LayoutOrientation
+            mutable Draggable : bool
+            mutable Closable : bool
+            mutable Closed : bool
+            mutable Title : string option
+            mutable DragXOrigin : float
+            mutable DragYOrigin : float
+            mutable IsDragging : bool
+            mutable ShouldRedraw : bool
+            mutable _Canvas : HTMLCanvasElement option
+            mutable _Context : CanvasRenderingContext2D option }
 
         static member Default =
-            { X = 0.
-              Y = 0.
-              Width = 100.
-              Height = 200.
-              Layout = Vertical
-              Draggable = false
-              Closable = false
-              Closed = false
-              Title = None
-              DragXOrigin = 0.
-              DragYOrigin = 0.
-              IsDragging = false
-              ShouldRedraw = true // Set to true to draw the first frame even if the mouse is not hover the window
-              _Canvas = None
-              _Context = None }
+            {   X = 0.
+                Y = 0.
+                Width = 100.
+                Height = 200.
+                Layout = Vertical
+                Draggable = false
+                Closable = false
+                Closed = false
+                Title = None
+                DragXOrigin = 0.
+                DragYOrigin = 0.
+                IsDragging = false
+                ShouldRedraw = true // Set to true to draw the first frame even if the mouse is not hover the window
+                _Canvas = None
+                _Context = None }
 
         member this.RealPositionX
             with get () =
@@ -105,7 +108,7 @@ module Gui =
 
         member this.EnsureContext () =
             if this._Canvas.IsNone then
-                let canvas = Browser.document.createElement_canvas()
+                let canvas = document.createElement("canvas") :?> HTMLCanvasElement
                 canvas.width <- this.Width
                 canvas.height <- this.Height
                 canvas.style.width <- string this.Width + "px"
@@ -127,76 +130,76 @@ module Gui =
         | Closed
 
     type ComboInfo =
-        { mutable SelectedIndex : int option
-          mutable State : ComboState
-          Guid : Guid }
+        {   mutable SelectedIndex : int option
+            mutable State : ComboState
+            Guid : Guid }
 
         static member Default
             with get () =
-                { SelectedIndex = None
-                  State = Closed
-                  Guid = Guid.NewGuid() }
+                {   SelectedIndex = None
+                    State = Closed
+                    Guid = Guid.NewGuid() }
 
     /// Type used to stored combo information for drawing when Finish the loop
     type ComboHandler =
-        { Info : ComboInfo
-          X : float
-          Y : float
-          Width : float
-          Height : float
-          Values : string list
-          Reference : ComboInfo }
+        {   Info : ComboInfo
+            X : float
+            Y : float
+            Width : float
+            Height : float
+            Values : string list
+            Reference : ComboInfo }
 
     type Row =
-        { mutable Ratios : float []
-          mutable CurrentRatio : int
-          mutable SplitX : float
-          mutable SplitWidth : float }
+        {   mutable Ratios : float []
+            mutable CurrentRatio : int
+            mutable SplitX : float
+            mutable SplitWidth : float }
 
         member this.ActiveRatio
             with get () = this.Ratios.[this.CurrentRatio]
 
     type InputHandler =
-        { mutable Value : string
-          mutable Selection : SelectionArea option
-          mutable KeyboardCaptureHandler : (InputHandler -> Keyboard.Record -> bool) option
+        {   mutable Value : string
+            mutable Selection : SelectionArea option
+            mutable KeyboardCaptureHandler : (InputHandler -> Keyboard.Record -> bool) option
           // Positive offset of the cursor.
           // Offset of 0 = start of the input
           // Offset of 2 = cursor place after the second char of the input
-          mutable CursorOffset : int
+            mutable CursorOffset : int
           // Start origin of the text to display
           // 0 = Start of the text
           // 2 = Start of the text after the 2 first chars
-          mutable TextStartOrigin : int
-          Guid : Guid }
+            mutable TextStartOrigin : int
+            Guid : Guid }
 
-        member this.ClearSelection () =
-            this.Selection <- None
+            member this.ClearSelection () =
+                this.Selection <- None
 
-        member this.SetSelection (value) =
-            this.Selection <- Some value
+            member this.SetSelection (value) =
+                this.Selection <- Some value
 
-        member this.Empty() =
-            this.Value <- ""
-            this.Selection <- None
-            this.CursorOffset <- 0
-            this.TextStartOrigin <- 0
+            member this.Empty() =
+                this.Value <- ""
+                this.Selection <- None
+                this.CursorOffset <- 0
+                this.TextStartOrigin <- 0
 
-        static member Default
-            with get () = { Value = ""
-                            KeyboardCaptureHandler = None
-                            Selection = None
-                            CursorOffset = 0
-                            TextStartOrigin = 0
-                            Guid = Guid.NewGuid() }
+            static member Default
+                with get () = { Value = ""
+                                KeyboardCaptureHandler = None
+                                Selection = None
+                                CursorOffset = 0
+                                TextStartOrigin = 0
+                                Guid = Guid.NewGuid() }
 
-    type SliderOrientation =
-        | Vertical
-        | Horizontal
+        type SliderOrientation =
+            | Vertical
+            | Horizontal
 
     type SliderHandler =
-        { Guid : Guid
-          mutable Value : float }
+        {   Guid : Guid
+            mutable Value : float }
         //   Max : float
         //   Min : float
         //   Value : float
@@ -213,57 +216,57 @@ module Gui =
                             // Orientation = SliderOrientation.Horizontal }
 
     type Hink =
-        { Canvas : Browser.HTMLCanvasElement
-          ApplicationContext : Browser.CanvasRenderingContext2D
-          Mouse : Mouse.Record
-          Keyboard : Keyboard.Record
-          KeyboardCaptureHandler : (Keyboard.Record -> bool) option
-          mutable ActiveWidget : Guid option
-          mutable KeyboadHasBeenCapture : bool
-          Theme : Theme
-          mutable RowInfo : Row option
-          mutable Cursor : Cursor
-          /// Store if the cursor has been styled in the last loop. Ex: Hover
-          mutable IsCursorStyled : bool
-          /// Store if the window should be closed
-          mutable ShouldCloseWindow : bool
-          mutable CurrentWindow : WindowHandler option
-          mutable CurrentCombo : ComboHandler option
-          mutable LastReferenceTick : DateTime
-          mutable Delta : TimeSpan }
+        {   Canvas : HTMLCanvasElement
+            ApplicationContext : CanvasRenderingContext2D
+            Mouse : Mouse.Record
+            Keyboard : Keyboard.Record
+            KeyboardCaptureHandler : (Keyboard.Record -> bool) option
+            mutable ActiveWidget : Guid option
+            mutable KeyboadHasBeenCapture : bool
+            Theme : Theme
+            mutable RowInfo : Row option
+            mutable Cursor : Cursor
+            /// Store if the cursor has been styled in the last loop. Ex: Hover
+            mutable IsCursorStyled : bool
+            /// Store if the window should be closed
+            mutable ShouldCloseWindow : bool
+            mutable CurrentWindow : WindowHandler option
+            mutable CurrentCombo : ComboHandler option
+            mutable LastReferenceTick : DateTime
+            mutable Delta : TimeSpan }
 
-        static member Create (canvas : Browser.HTMLCanvasElement, ?fontSize, ?theme, ?keyboardPreventHandler, ?keyboardCaptureHandler) =
-            // Allow canvas interaction
-            canvas.setAttribute ("tabindex", "1")
-            // Init the context
-            let context = canvas.getContext_2d()
-            context.textBaseline <- "middle"
-            canvas.focus()
+            static member Create (canvas : HTMLCanvasElement, ?fontSize, ?theme, ?keyboardPreventHandler, ?keyboardCaptureHandler) =
+                // Allow canvas interaction
+                canvas.setAttribute ("tabindex", "1")
+                // Init the context
+                let context = canvas.getContext_2d()
+                context.textBaseline <- "middle"
+                canvas.focus()
 
-            // Init input manager
-            Mouse.init canvas
-            Keyboard.init canvas true keyboardPreventHandler
+                // Init input manager
+                Mouse.init canvas
+                Keyboard.init canvas true keyboardPreventHandler
 
-            { Canvas = canvas
-              ApplicationContext = context
-              Mouse = Mouse.Manager
-              Keyboard = Keyboard.Manager
-              ActiveWidget = None
-              KeyboardCaptureHandler = keyboardCaptureHandler
-              KeyboadHasBeenCapture = false
-              IsCursorStyled = false
-              Theme = defaultArg theme darkTheme
-              Cursor =
-                { X = 0.
-                  Y = 0.
-                  Width = 0.
-                  Height = 0. }
-              CurrentWindow = None
-              ShouldCloseWindow = false
-              RowInfo = None
-              LastReferenceTick = DateTime.Now
-              Delta = TimeSpan.Zero
-              CurrentCombo = None }
+                {   Canvas = canvas
+                    ApplicationContext = context
+                    Mouse = Mouse.Manager
+                    Keyboard = Keyboard.Manager
+                    ActiveWidget = None
+                    KeyboardCaptureHandler = keyboardCaptureHandler
+                    KeyboadHasBeenCapture = false
+                    IsCursorStyled = false
+                    Theme = defaultArg theme darkTheme
+                    Cursor =
+                        {   X = 0.
+                            Y = 0.
+                            Width = 0.
+                            Height = 0. }
+                    CurrentWindow = None
+                    ShouldCloseWindow = false
+                    RowInfo = None
+                    LastReferenceTick = DateTime.Now
+                    Delta = TimeSpan.Zero
+                    CurrentCombo = None }
 
         member this.CursorPosX
             with get () =
@@ -278,7 +281,7 @@ module Gui =
                 | None -> this.Cursor.Y
 
         member this.CurrentContext
-            with get () : Browser.CanvasRenderingContext2D =
+            with get () : CanvasRenderingContext2D =
                 if this.CurrentWindow.IsSome then
                     this.CurrentWindow.Value._Context.Value
                 else

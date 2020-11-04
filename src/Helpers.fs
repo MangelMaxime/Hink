@@ -1,6 +1,7 @@
 namespace Hink
 
 open System
+open Browser.Types
 
 [<AutoOpen>]
 module Helpers =
@@ -27,7 +28,7 @@ module Helpers =
         | Fill
         | StrokeAndFill
 
-    type Fable.Import.Browser.CanvasRenderingContext2D with
+    type CanvasRenderingContext2D with
         member this.RoundedRect (x, y, width, height, radius, ?action) =
             let action = defaultArg action Fill
             this.save()

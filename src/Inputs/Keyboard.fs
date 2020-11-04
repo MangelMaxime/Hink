@@ -1,7 +1,6 @@
 ﻿namespace Hink.Inputs
 
-open Fable.Core
-open Fable.Import.Browser
+open Browser.Types
 
 [<RequireQualifiedAccess>]
 module Keyboard =
@@ -135,34 +134,34 @@ module Keyboard =
         | _ -> Keys.Unkown key
 
     type Modifiers =
-        { mutable Shift : bool
-          mutable Control : bool
-          mutable CommandLeft : bool
-          mutable CommandRight : bool
-          mutable Alt : bool }
+        {   mutable Shift : bool
+            mutable Control : bool
+            mutable CommandLeft : bool
+            mutable CommandRight : bool
+            mutable Alt : bool }
         static member Initial =
-            { Shift = false
-              Control = false
-              CommandLeft = false
-              CommandRight = false
-              Alt = false }
+            {   Shift = false
+                Control = false
+                CommandLeft = false
+                CommandRight = false
+                Alt = false }
 
     type Record =
-        { mutable KeysPressed : Set<Keys>
-          mutable LastKeyValue : string
-          mutable LastKeyIsPrintable : bool
-          mutable LastKey : Keys
-          Modifiers : Modifiers }
+        {   mutable KeysPressed : Set<Keys>
+            mutable LastKeyValue : string
+            mutable LastKeyIsPrintable : bool
+            mutable LastKey : Keys
+            Modifiers : Modifiers }
 
         member this.HasNewKeyStroke () =
             this.LastKeyValue <> ""
 
         static member Initial =
-            { KeysPressed = Set.empty
-              LastKeyValue = ""
-              LastKeyIsPrintable = false
-              LastKey = Keys.Unkown ""
-              Modifiers = Modifiers.Initial }
+            {   KeysPressed = Set.empty
+                LastKeyValue = ""
+                LastKeyIsPrintable = false
+                LastKey = Keys.Unkown ""
+                Modifiers = Modifiers.Initial }
 
         member self.IsPress key = self.KeysPressed.Contains(key)
         member self.ClearLastKey() =
@@ -181,41 +180,47 @@ module Keyboard =
             Manager.Modifiers.Control <- e.ctrlKey
             Manager.Modifiers.CommandLeft <- e.keyCode = 224.
             Manager.Modifiers.CommandRight <- e.keyCode = 224.
-        element.addEventListener_keydown (fun e ->
-            let key = resolveKeyFromKey e.key
-            Manager.LastKeyValue <- e.key
-            // Here we try to determine if the key is printable or not
-            // Should not be "Dead". Exemple first press on '^' is Dead
-            // And the value should be of size [1,2] because we can add:
-            // * One character at a time. Example: 'a', '!', '§'
-            // * Two characters at a time. Example '^^', '^p'
-            // Second case occured when pressing some keys in sequence.
-            // Example:
-            // * '^^' = '^' + '^'
-            // * '^p' = '^' + 'p'
-            // We also have to make sure the key is not F1..F12 so we exclude keycode range: [112,123]
-            let isPrintableKey =
-                match key with
-                | Keys.F1 | Keys.F2 | Keys.F3 | Keys.F4 | Keys.F5 | Keys.F6
-                | Keys.F7 | Keys.F8 | Keys.F9 | Keys.F10 | Keys.F11 | Keys.F12
-                | Keys.OS -> false
-                | _ -> true
+        element.addEventListener( "keydown",
+            fun e ->
+                let e = e :?> KeyboardEvent
+                let key = resolveKeyFromKey e.key
+                Manager.LastKeyValue <- e.key
+                // Here we try to determine if the key is printable or not
+                // Should not be "Dead". Exemple first press on '^' is Dead
+                // And the value should be of size [1,2] because we can add:
+                // * One character at a time. Example: 'a', '!', '§'
+                // * Two characters at a time. Example '^^', '^p'
+                // Second case occured when pressing some keys in sequence.
+                // Example:
+                // * '^^' = '^' + '^'
+                // * '^p' = '^' + 'p'
+                // We also have to make sure the key is not F1..F12 so we exclude keycode range: [112,123]
+                let isPrintableKey =
+                    match key with
+                    | Keys.F1 | Keys.F2 | Keys.F3 | Keys.F4 | Keys.F5 | Keys.F6
+                    | Keys.F7 | Keys.F8 | Keys.F9 | Keys.F10 | Keys.F11 | Keys.F12
+                    | Keys.OS -> false
+                    | _ -> true
 
-            Manager.LastKeyIsPrintable <- 1 <= e.key.Length && e.key.Length <= 2 && isPrintableKey
-            Manager.LastKey <- key
-            Manager.KeysPressed <- Set.add key Manager.KeysPressed
-            // Update the Modifiers state
-            updateModifiers e
-            null)
-        element.addEventListener_keyup (fun e ->
-            let code = int e.keyCode
-            Manager.KeysPressed <- Set.remove (resolveKeyFromKey e.key) Manager.KeysPressed
-            // Update the Modifiers state
-            updateModifiers e
-            null)
+                Manager.LastKeyIsPrintable <- 1 <= e.key.Length && e.key.Length <= 2 && isPrintableKey
+                Manager.LastKey <- key
+                Manager.KeysPressed <- Set.add key Manager.KeysPressed
+                // Update the Modifiers state
+                updateModifiers e
+            )
+        element.addEventListener("keyup",
+            fun e ->
+                let e = e :?> KeyboardEvent
+                let code = int e.keyCode
+                Manager.KeysPressed <- Set.remove (resolveKeyFromKey e.key) Manager.KeysPressed
+                // Update the Modifiers state
+                updateModifiers e
+                ()
+            )
         // If the user ask to prevent tab unloosing focus
         if preventDefault then
-            element.addEventListener_keydown (fun e ->
+            element.addEventListener("keydown", fun e ->
+                let e = e :?> KeyboardEvent
                 let shouldPreventFromCtrl =
                     if e.ctrlKey then
                         match resolveKeyFromKey e.key with
@@ -240,14 +245,16 @@ module Keyboard =
                 if shouldPreventNoModifier || shouldPreventFromCtrl || shouldPreventFromShift then
                     e.preventDefault()
                     unbox false
-                else null)
+                else ())
 
         match userPreventHandler with
         | Some handler ->
-            element.addEventListener_keydown (fun e ->
-                if handler e then
-                    e.preventDefault()
-                    unbox false
-                else
-                    null )
+            element.addEventListener("keydown",
+                fun e ->
+                    let e = e :?> KeyboardEvent
+                    if handler e then
+                        e.preventDefault()
+                        unbox false
+                    else
+                        () )
         | None -> () // Nothing to do
