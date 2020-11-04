@@ -101,7 +101,6 @@ module Main =
         if ui.Window(window1) then
             ui.Label(sprintf "Clicked: %i times" buttonCounter, Center)
             if ui.Button("Click me") then
-                printfn "Click"
                 buttonCounter <- buttonCounter + 1
 
             ui.Label("Row layout demo", Center, backgroundColor = "#34495e")

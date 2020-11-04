@@ -5,7 +5,7 @@ import { resolveKeyFromKey } from "../../src/Inputs/Keyboard.fs.js";
 import { Hink_Gui_Hink__Hink_Finish, Hink_Gui_Hink__Hink_Prepare } from "../../src/Widgets/LifeCycle.fs.js";
 import { Hink_Gui_Hink__Hink_Window_Z25586FD2 } from "../../src/Widgets/Window.fs.js";
 import { Hink_Gui_Hink__Hink_Label_7E23EBB7 } from "../../src/Widgets/Label.fs.js";
-import { toConsole, printf, toText } from "../.fable/fable-library.3.0.0-nagareyama-beta-005/String.js";
+import { printf, toText } from "../.fable/fable-library.3.0.0-nagareyama-beta-005/String.js";
 import { Hink_Gui_Hink__Hink_Button_Z123163C7 } from "../../src/Widgets/Button.fs.js";
 import { Hink_Gui_Hink__Hink_Row_Z33A93963 } from "../../src/Widgets/Row.fs.js";
 import { Hink_Gui_Hink__Hink_Slider_Z704370D1 } from "../../src/Widgets/Slider.fs.js";
@@ -118,7 +118,6 @@ export function render(_arg1) {
     if (Hink_Gui_Hink__Hink_Window_Z25586FD2(ui, window1)) {
         Hink_Gui_Hink__Hink_Label_7E23EBB7(ui, (arg10 = (buttonCounter() | 0), (clo1 = toText(printf("Clicked: %i times")), clo1(arg10))), new Align(1));
         if (Hink_Gui_Hink__Hink_Button_Z123163C7(ui, "Click me")) {
-            toConsole(printf("Click"));
             buttonCounter(buttonCounter() + 1, true);
         }
         Hink_Gui_Hink__Hink_Label_7E23EBB7(ui, "Row layout demo", new Align(1), "#34495e");

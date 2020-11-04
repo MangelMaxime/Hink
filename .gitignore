@@ -8,6 +8,7 @@ packages/
 TestResults/
 
 # globs
+*.fs.js
 Makefile.in
 *.DS_Store
 *.sln.cache
