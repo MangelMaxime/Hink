@@ -2,10 +2,10 @@ source https://www.nuget.org/api/v2
 storage:none
 
 nuget FSharp.Core redirects:force, content:none
-nuget Fable.Core prerelease
-nuget Fable.Import.Browser
-
-clitool dotnet-fable prerelease
+nuget Fable.Core
+nuget Fable.Browser.Dom
+nuget Fable.Browser.Event
+nuget Fable.Browser.Css
 
 group Build
 framework: net46

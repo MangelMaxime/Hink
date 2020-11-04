@@ -7,6 +7,10 @@
 packages/
 TestResults/
 
+.cache/
+#fable
+*.fs.js
+
 # globs
 Makefile.in
 *.DS_Store
@@ -50,3 +54,5 @@ Meta\.props
 
 docs/.sass-cache/
 docs/_public/
+
+.idea/

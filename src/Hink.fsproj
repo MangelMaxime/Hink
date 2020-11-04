@@ -7,10 +7,10 @@
         <RepositoryUrl>https://github.com/MangelMaxime/Hink</RepositoryUrl>
         <PackageTags>fable;fsharp;gui</PackageTags>
         <Authors>Maxime Mangel</Authors>
-        <Version>0.1.0-beta-005</Version>
+        <Version>0.1.0-beta-006</Version>
     </PropertyGroup>
     <PropertyGroup>
-        <TargetFramework>netstandard1.6</TargetFramework>
+        <TargetFramework>netstandard2.1</TargetFramework>
     </PropertyGroup>
     <ItemGroup>
         <Compile Include="Inputs\Mouse.fs" />

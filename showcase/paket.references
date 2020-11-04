@@ -1,4 +1,5 @@
 FSharp.Core
 Fable.Core
-Fable.Import.Browser
-dotnet-fable
+Fable.Browser.Dom
+Fable.Browser.Event
+Fable.Browser.Css

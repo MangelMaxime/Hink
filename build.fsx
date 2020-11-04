@@ -159,8 +159,8 @@ Target "Release" (fun _ ->
 Target "Publish" DoNothing
 
 // Build order
-"InstallDotNetCore"
-    ==> "Clean"
+//"InstallDotNetCore"
+"Clean"
     ==> "Install"
     ==> "Build"
     ==> "PublishNuget"

@@ -2,39 +2,45 @@ namespace Hink.Showcase
 
 open Fable.Core
 open Fable.Core.JsInterop
-open Fable.Import
+open Fable
 open Hink.Gui
 open Hink.Inputs
 open Hink.Widgets
+open Browser
+open Browser.Types
+open Fable.Import
 
 module Main =
     // Application code
-    let canvas = Browser.document.getElementById "application" :?> Browser.HTMLCanvasElement
+    let canvas = document.getElementById "application" :?> HTMLCanvasElement
 
     let mutable buttonCounter = 0
     let isChecked = ref false
     let switchValue = ref false
 
+    (*
     #if DEBUG
     let stats = Stats()
     stats.showPanel(0.)
 
-    Browser.document.body.appendChild stats.dom |> ignore
+    document.body.appendChild stats.dom |> ignore
     #endif
+*)
+    let window1 = { WindowHandler.Default with
+                        X = 10.
+                        Y = 10.
+                        Width = 400.
+                        Height = 400. }
 
-    let window1 = { WindowHandler.Default with X = 10.
-                                               Y = 10.
-                                               Width = 400.
-                                               Height = 400. }
-
-    let window2 = { WindowHandler.Default with X = 100.
-                                               Y = 50.
-                                               Width = 400.
-                                               Height = 285.
-                                               Closable = true
-                                               Closed = true
-                                               Draggable = true
-                                               Title = Some "You can close me" }
+    let window2 = { WindowHandler.Default with
+                        X = 100.
+                        Y = 50.
+                        Width = 400.
+                        Height = 285.
+                        Closable = true
+                        Closed = true
+                        Draggable = true
+                        Title = Some "You can close me" }
 
     let Emerald = "#2ecc71"
     let Nephritis = "#27ae60"
@@ -51,7 +57,7 @@ module Main =
 
     let slider1 = SliderHandler.Default
 
-    let keyboardPreventHandler (e: Browser.KeyboardEvent) =
+    let keyboardPreventHandler (e: KeyboardEvent) =
         let shouldPreventFromCtrl =
             if e.ctrlKey then
                 match Keyboard.resolveKeyFromKey e.key with
@@ -87,7 +93,7 @@ module Main =
         ui.ApplicationContext.fillStyle <- !^"#fff"
 
         #if DEBUG
-        stats.``begin``()
+        //stats.``begin``()
         #endif
 
         ui.Prepare()
@@ -148,10 +154,10 @@ module Main =
         ui.Finish()
 
         #if DEBUG
-        stats.``end``() |> ignore
+        //stats.``end``() |> ignore
         #endif
 
-        Browser.window.requestAnimationFrame(Browser.FrameRequestCallback(render))
+        window.requestAnimationFrame(fun dt -> render dt)
         |> ignore
 
     render 0.

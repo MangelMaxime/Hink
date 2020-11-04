@@ -56,23 +56,23 @@ module LifeCycle =
                     for index = 0 to comboInfo.Values.Length - 1 do
                         if comboInfo.Reference.SelectedIndex.IsSome && index = comboInfo.Reference.SelectedIndex.Value then
                             if this.Button(comboInfo.Values.[index],
-                                           pressedColor = this.Theme.Combo.Box.Selected.Background,
-                                           hoverColor = this.Theme.Combo.Box.Hover.Background,
-                                           defaultColor = this.Theme.Combo.Box.Selected.Background,
-                                           textPressed = this.Theme.Combo.Box.Selected.Text,
-                                           textHover = this.Theme.Combo.Box.Hover.Text,
-                                           textDefault = this.Theme.Combo.Box.Selected.Text) then
+                                            pressedColor = this.Theme.Combo.Box.Selected.Background,
+                                            hoverColor = this.Theme.Combo.Box.Hover.Background,
+                                            defaultColor = this.Theme.Combo.Box.Selected.Background,
+                                            textPressed = this.Theme.Combo.Box.Selected.Text,
+                                            textHover = this.Theme.Combo.Box.Hover.Text,
+                                            textDefault = this.Theme.Combo.Box.Selected.Text) then
                                 comboInfo.Reference.SelectedIndex <- Some index
                                 comboInfo.Reference.State <- Closed
                                 this.CurrentCombo <- None
                         else
                             if this.Button(comboInfo.Values.[index],
-                                           pressedColor = this.Theme.Combo.Box.Default.Background,
-                                           hoverColor = this.Theme.Combo.Box.Hover.Background,
-                                           defaultColor = this.Theme.Combo.Box.Default.Background,
-                                           textPressed = this.Theme.Combo.Box.Default.Text,
-                                           textHover = this.Theme.Combo.Box.Hover.Text,
-                                           textDefault = this.Theme.Combo.Box.Default.Text) then
+                                            pressedColor = this.Theme.Combo.Box.Default.Background,
+                                            hoverColor = this.Theme.Combo.Box.Hover.Background,
+                                            defaultColor = this.Theme.Combo.Box.Default.Background,
+                                            textPressed = this.Theme.Combo.Box.Default.Text,
+                                            textHover = this.Theme.Combo.Box.Hover.Text,
+                                            textDefault = this.Theme.Combo.Box.Default.Text) then
                                 comboInfo.Reference.SelectedIndex <- Some index
                                 comboInfo.Reference.State <- Closed
                                 this.CurrentCombo <- None

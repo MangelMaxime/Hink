@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="src/Libs/Stats.fs" />
-    <Compile Include="src/App.fs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="../src/Hink.fsproj"/>
-  </ItemGroup>
-  <Import Project="..\.paket\Paket.Restore.targets" />
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+    </PropertyGroup>
+    <ItemGroup>
+        <Compile Include="src/Libs/Stats.fs" />
+        <Compile Include="src/App.fs" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="../src/Hink.fsproj"/>
+    </ItemGroup>
+    <Import Project="../.paket/Paket.Restore.targets" />
 </Project>
