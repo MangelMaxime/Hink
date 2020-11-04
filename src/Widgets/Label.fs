@@ -11,7 +11,7 @@ module Label =
 
     type Hink with
         member this.Label (text, ?align : Align, ?backgroundColor : string) =
-            if not (this.IsVisibile(this.Theme.Element.Height)) then
+            if not (this.IsVisible(this.Theme.Element.Height)) then
                 this.EndElement()
             else
                 let align = defaultArg align Left

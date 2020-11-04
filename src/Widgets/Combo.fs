@@ -11,7 +11,7 @@ module Combo =
 
     type Hink with
         member this.Combo(comboInfo : ComboInfo, texts : string list, label : string option, ?labelAlign) =
-            if not (this.IsVisibile(this.Theme.Element.Height)) then
+            if not (this.IsVisible(this.Theme.Element.Height)) then
                 this.EndElement()
                 false
             else

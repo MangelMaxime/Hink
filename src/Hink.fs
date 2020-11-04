@@ -299,7 +299,7 @@ module Gui =
             this.Mouse.SetCursor cursor
             this.IsCursorStyled <- true
 
-        member this.IsVisibile(elementH) =
+        member this.IsVisible(elementH) =
             match this.CurrentWindow with
             | None -> true
             | Some { Closed = true } ->

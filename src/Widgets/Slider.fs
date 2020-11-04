@@ -12,7 +12,7 @@ module Slider =
 
     type Hink with
         member this.Slider (handler : SliderHandler, ?min, ?max, ?step) =
-            if not (this.IsVisibile(this.Theme.Element.Height)) then
+            if not (this.IsVisible(this.Theme.Element.Height)) then
                 this.EndElement()
                 false
             else

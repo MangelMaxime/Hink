@@ -11,7 +11,7 @@ module Button =
 
     type Hink with
         member this.Button (text, ?align : Align, ?pressedColor, ?hoverColor, ?defaultColor, ?textPressed, ?textHover, ?textDefault) =
-            if not (this.IsVisibile(this.Theme.Element.Height)) then
+            if not (this.IsVisible(this.Theme.Element.Height)) then
                 this.EndElement()
                 false
             else

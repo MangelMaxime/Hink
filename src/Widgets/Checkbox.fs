@@ -11,7 +11,7 @@ module Checkbox =
 
     type Hink with
         member this.Checkbox(checkboxInfo : CheckboxInfo, ?label) =
-            if not (this.IsVisibile(this.Theme.Element.Height)) then
+            if not (this.IsVisible(this.Theme.Element.Height)) then
                 this.EndElement()
                 false
             else

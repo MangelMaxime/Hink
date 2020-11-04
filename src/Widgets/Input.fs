@@ -46,7 +46,7 @@ module Input =
 
     type Hink with
         member this.Input(info: InputHandler) =
-            if not (this.IsVisibile(this.Theme.Element.Height)) then
+            if not (this.IsVisible(this.Theme.Element.Height)) then
                 this.EndElement()
                 false
             else
