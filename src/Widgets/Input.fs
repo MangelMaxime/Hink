@@ -221,6 +221,20 @@ module Input =
                                             Clipboard.copyToClipboard textToCopy
                                         | None ->
                                             ()
+                                    | Keyboard.Keys.X ->
+
+                                        match info.Selection with
+                                        | Some selection ->
+                                            let textToCopy = info.Value.Substring(selection.Start, selection.Length)
+                                            Clipboard.copyToClipboard textToCopy
+
+                                            info.ClearSelection()
+
+                                            info.Value <- info.Value.Remove(selection.Start, selection.Length)
+                                            if info.CursorOffset = selection.End then
+                                                info.CursorOffset <- Math.Max(info.CursorOffset - selection.Length, 0)
+                                        | None ->
+                                            ()
                                     | _ -> res <- false // Not captured
                                 | { Shift = true } ->
                                     match this.Keyboard.LastKey with

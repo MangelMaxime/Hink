@@ -30,7 +30,7 @@ module Main =
                         X = 10.
                         Y = 10.
                         Width = 400.
-                        Height = 400. }
+                        Height = 450. }
 
     let window2 = { WindowHandler.Default with
                         X = 100.
@@ -54,6 +54,7 @@ module Main =
     let checkbox1 = CheckboxInfo.Default
     let input1 = { InputHandler.Default with Value = "Some text here" }
     let input2 = InputHandler.Default
+    let input3 = { InputHandler.Default with Value = "Some text here" }
 
     let slider1 = SliderHandler.Default
 
@@ -113,6 +114,8 @@ module Main =
             ui.Label("We filled all the row, so new line here", Center, backgroundColor = "#34495e" )
 
             ui.Label("Text truncated because it's too long from here")
+
+            ui.Input(input3) |> ignore
 
             ui.Row([|1./4.; 1./2.; 1./4.|])
 
