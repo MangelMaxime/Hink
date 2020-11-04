@@ -54,3 +54,5 @@ Meta\.props
 
 docs/.sass-cache/
 docs/_public/
+
+.idea/
