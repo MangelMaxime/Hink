@@ -182,9 +182,9 @@ module Input =
                                         |> handleForwardSelection info
                                     | _ -> res <- false // Not captured
                                 | { Control = true } ->
-                                    info.ClearSelection()
                                     match this.Keyboard.LastKey with
                                     | Keyboard.Keys.ArrowLeft ->
+                                        info.ClearSelection()
                                         if info.Value.Length > 0 then
                                             let oldCursorOffset = info.CursorOffset
                                             let index = NextIndexBackward(info.Value, ' ', info.CursorOffset + info.TextStartOrigin)
@@ -194,19 +194,23 @@ module Input =
                                             else
                                                 info.CursorOffset <- index - info.TextStartOrigin
                                     | Keyboard.Keys.ArrowRight ->
+                                        info.ClearSelection()
                                         if info.Value.Length > 0 then
                                             info.CursorOffset <- NextIndexForward(info.Value, ' ', info.CursorOffset + info.TextStartOrigin)
                                     | Keyboard.Keys.Backspace ->
+                                        info.ClearSelection()
                                         if info.Value.Length > 0 then
                                             let index = NextIndexBackward(info.Value, ' ', info.CursorOffset)
                                             let delta = info.CursorOffset - index
                                             info.Value <- info.Value.Remove(index, delta)
                                             info.CursorOffset <- info.CursorOffset - delta
                                     | Keyboard.Keys.Delete ->
+                                        info.ClearSelection()
                                         if info.Value.Length > 0 then
                                             let index = NextIndexForward(info.Value, ' ', info.CursorOffset)
                                             info.Value <- info.Value.Remove(info.CursorOffset, index - info.CursorOffset)
                                     | Keyboard.Keys.A ->
+                                        info.ClearSelection()
                                         if info.Value.Length > 0 then
                                             info.Selection <- Some (SelectionArea.Create(0, info.Value.Length))
                                             info.CursorOffset <- info.Value.Length
