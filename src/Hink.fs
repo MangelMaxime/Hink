@@ -246,6 +246,7 @@ module Gui =
                 // Init input manager
                 Mouse.init canvas
                 Keyboard.init canvas true keyboardPreventHandler
+                Clipboard.init canvas
 
                 {   Canvas = canvas
                     ApplicationContext = context

@@ -1,5 +1,6 @@
 namespace Hink.Widgets
 
+open Browser.Types
 open Hink.Gui
 open Fable.Core
 open Fable.Core.JsInterop
@@ -198,17 +199,29 @@ module Input =
                                         if info.Value.Length > 0 then
                                             info.CursorOffset <- NextIndexForward(info.Value, ' ', info.CursorOffset + info.TextStartOrigin)
                                     | Keyboard.Keys.Backspace ->
-                                        info.ClearSelection()
-                                        if info.Value.Length > 0 then
-                                            let index = NextIndexBackward(info.Value, ' ', info.CursorOffset)
-                                            let delta = info.CursorOffset - index
-                                            info.Value <- info.Value.Remove(index, delta)
-                                            info.CursorOffset <- info.CursorOffset - delta
+                                        match info.Selection with
+                                        | Some selection ->
+                                            info.ClearSelection()
+                                            info.Value <- info.Value.Remove(selection.Start, selection.Length)
+                                            if info.CursorOffset = selection.End then
+                                                info.CursorOffset <- Math.Max(info.CursorOffset - selection.Length, 0)
+                                        | None ->
+                                            if info.Value.Length > 0 then
+                                                let index = NextIndexBackward(info.Value, ' ', info.CursorOffset)
+                                                let delta = info.CursorOffset - index
+                                                info.Value <- info.Value.Remove(index, delta)
+                                                info.CursorOffset <- info.CursorOffset - delta
                                     | Keyboard.Keys.Delete ->
-                                        info.ClearSelection()
-                                        if info.Value.Length > 0 then
-                                            let index = NextIndexForward(info.Value, ' ', info.CursorOffset)
-                                            info.Value <- info.Value.Remove(info.CursorOffset, index - info.CursorOffset)
+                                        match info.Selection with
+                                        | Some selection ->
+                                            info.ClearSelection()
+                                            info.Value <- info.Value.Remove(selection.Start, selection.Length)
+                                            if info.CursorOffset = selection.End then
+                                                info.CursorOffset <- Math.Max(info.CursorOffset - selection.Length, 0)
+                                        | None ->
+                                            if info.Value.Length > 0 && info.CursorOffset < info.Value.Length then
+                                                let index = NextIndexForward(info.Value, ' ', info.CursorOffset)
+                                                info.Value <- info.Value.Remove(info.CursorOffset, index - info.CursorOffset)
                                     | Keyboard.Keys.A ->
                                         info.ClearSelection()
                                         if info.Value.Length > 0 then
@@ -222,7 +235,6 @@ module Input =
                                         | None ->
                                             ()
                                     | Keyboard.Keys.X ->
-
                                         match info.Selection with
                                         | Some selection ->
                                             let textToCopy = info.Value.Substring(selection.Start, selection.Length)
@@ -235,7 +247,16 @@ module Input =
                                                 info.CursorOffset <- Math.Max(info.CursorOffset - selection.Length, 0)
                                         | None ->
                                             ()
-                                    | _ -> res <- false // Not captured
+                                    | Keyboard.Keys.V ->
+                                        match info.Selection with
+                                        | Some selection ->
+                                            info.Value <- info.Value.Remove(selection.Start, selection.Length).Insert(selection.Start, Clipboard.Manager.Content)
+                                            info.CursorOffset <- info.CursorOffset + Clipboard.Manager.Content.Length
+                                        | None ->
+                                            info.Value <- info.Value.Insert(info.CursorOffset, Clipboard.Manager.Content)
+                                            info.CursorOffset <- info.CursorOffset + Clipboard.Manager.Content.Length
+                                    | _ ->
+                                        res <- false // Not captured
                                 | { Shift = true } ->
                                     match this.Keyboard.LastKey with
                                     | Keyboard.Keys.ArrowLeft ->
