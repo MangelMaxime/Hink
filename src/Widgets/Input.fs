@@ -140,9 +140,8 @@ module Input =
                     this.Cursor.Y + this.Theme.FontSmallOffsetY + offsetY
                 )
 
-                // Cursor
-                if this.IsActive info.Guid && this.Delta < TimeSpan.FromMilliseconds(500.) && info.Selection.IsNone then
-
+                // If the widget is active check if we need to set a new cursor position
+                if this.IsActive info.Guid then
                     if hover && Mouse.Manager.Left && Mouse.Manager.JustPressed then
                         let deltaFromOrigin = Mouse.Manager.X - (this.Cursor.X + offsetX + this.Theme.Text.OffsetX)
                         // We round the value in order to make the cursor position decided on the center of the letter
@@ -150,6 +149,10 @@ module Input =
                         // This logic only works for monospace font
                         let cursorOffset = int (Math.Round(deltaFromOrigin / charSize.width))
                         info.CursorOffset <- Math.Min(cursorOffset, info.Value.Length) // Cursor position cannot be greater than the string length
+
+
+                // Cursor
+                if this.IsActive info.Guid && this.Delta < TimeSpan.FromMilliseconds(500.) && info.Selection.IsNone then
 
                     this.CurrentContext.fillStyle <- !^"#000"
 
