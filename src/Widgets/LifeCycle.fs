@@ -85,6 +85,7 @@ module LifeCycle =
 
             this.Mouse.ResetReleased ()
             this.Mouse.ResetDragInfo ()
+            this.Mouse.ResetPressed ()
             // Reset the cursor style if not styled
             if not this.IsCursorStyled then
                 this.Mouse.ResetCursor ()

@@ -54,7 +54,8 @@ module Mouse =
 
     /// Record used to store Mouse state
     type Record =
-        {   mutable X : float
+        {
+            mutable X : float
             mutable Y : float
             mutable Left : ButtonState
             mutable Right : ButtonState
@@ -64,11 +65,16 @@ module Mouse =
             mutable DragOriginY : float
             mutable HasBeenInitiated : bool
             mutable Element : HTMLElement
-            mutable JustReleased : bool }
+            // TODO: Specialized the JustReleased and JustPressed information
+            // Right now it only track the information for the Left mouse button
+            mutable JustReleased : bool
+            mutable JustPressed : bool
+        }
 
         /// Initial state of Mouse
         static member Initial =
-            {   X = 0.
+            {
+                X = 0.
                 Y = 0.
                 Left = false
                 Right = false
@@ -78,7 +84,9 @@ module Mouse =
                 DragOriginY = 0.
                 HasBeenInitiated = false
                 Element = window.document.body
-                JustReleased = false }
+                JustReleased = false
+                JustPressed = false
+            }
 
         member this.HitRegion(x, y, w, h) = this.X > x && this.X <= x + w && this.Y > y && this.Y < y + h
         member this.SetCursor cursor = this.Element.style.cursor <- cursor
@@ -90,6 +98,9 @@ module Mouse =
         member this.ResetDragInfo () =
             this.DragOriginX <- this.X
             this.DragOriginY <- this.Y
+
+        member this.ResetPressed() =
+            this.JustPressed <- false
 
         member this.DragDeltaX
             with get () =
@@ -113,7 +124,9 @@ module Mouse =
                 fun ev ->
                     let ev = ev :?> MouseEvent
                     match ev.button with
-                    | 0. -> Manager.Left <- true
+                    | 0. ->
+                        Manager.Left <- true
+                        Manager.JustPressed <- true
                     | 1. -> Manager.Right <- true
                     | 2. -> Manager.Middle <- true
                     | _ -> failwith "Not supported ButtonStatetton"
