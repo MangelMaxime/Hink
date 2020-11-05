@@ -18,14 +18,13 @@ module Main =
     let isChecked = ref false
     let switchValue = ref false
 
-    (*
     #if DEBUG
     let stats = Stats()
     stats.showPanel(0.)
 
     document.body.appendChild stats.dom |> ignore
     #endif
-*)
+
     let window1 = { WindowHandler.Default with
                         X = 10.
                         Y = 10.
@@ -157,7 +156,7 @@ module Main =
         ui.Finish()
 
         #if DEBUG
-        //stats.``end``() |> ignore
+        stats.``end``() |> ignore
         #endif
 
         window.requestAnimationFrame(fun dt -> render dt)
