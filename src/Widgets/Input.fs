@@ -1,5 +1,6 @@
 namespace Hink.Widgets
 
+open Browser
 open Browser.Types
 open Hink.Gui
 open Fable.Core
@@ -140,16 +141,44 @@ module Input =
                     this.Cursor.Y + this.Theme.FontSmallOffsetY + offsetY
                 )
 
-                // If the widget is active check if we need to set a new cursor position
                 if this.IsActive info.Guid then
-                    if hover && Mouse.Manager.Left && Mouse.Manager.JustPressed then
+                    // Handle simple "Left click" -> Placing the cursor position
+                    if hover && Mouse.Manager.Left && pressed && Mouse.Manager.JustPressed then
+
                         let deltaFromOrigin = Mouse.Manager.X - (this.Cursor.X + offsetX + this.Theme.Text.OffsetX)
                         // We round the value in order to make the cursor position decided on the center of the letter
                         // If the cursor, is a more on the right side of the letter place the cursor after that letter
                         // This logic only works for monospace font
                         let cursorOffset = int (Math.Round(deltaFromOrigin / charSize.width))
                         info.CursorOffset <- Math.Min(cursorOffset, info.Value.Length) // Cursor position cannot be greater than the string length
+                        // Remove the selection if there is one
+                        if info.Selection.IsSome then
+                            info.Selection <- None
 
+                    // Handle "Left click dragging" -> Selecting text
+                    else if hover && Mouse.Manager.Left && pressed && Mouse.Manager.IsDragging then
+                        let deltaFromOrigin = Mouse.Manager.X - (this.Cursor.X + offsetX + this.Theme.Text.OffsetX)
+                        let cursorOffset = int (Math.Round(deltaFromOrigin / charSize.width))
+                        let cursorOffset = Math.Min(cursorOffset, info.Value.Length)
+//                        printfn "djzidoz"
+                        match info.Selection with
+                        // If there is already a selection update it
+                        | Some selection ->
+                            match info.CursorDraggingOriginOffset with
+                            | Some cursorDraggingOriginOffset ->
+                                printfn "djzidoz2"
+                                if cursorOffset >= cursorDraggingOriginOffset then
+                                    info.Selection <- Some (SelectionArea.Create(cursorDraggingOriginOffset, cursorOffset))
+                                else
+                                    info.Selection <- Some (SelectionArea.Create(cursorOffset, cursorDraggingOriginOffset))
+                            | None ->
+                                Dom.console.warn "CursorDraggingOriginOffset should have already been set"
+                        // Otherwise create a new selection
+                        | None ->
+                            info.CursorDraggingOriginOffset <- Some cursorOffset
+                            info.Selection <- Some (SelectionArea.Create(info.CursorOffset, cursorOffset))
+
+                        info.CursorOffset <- Math.Clamp(cursorOffset, 0, info.Value.Length)
 
                 // Cursor
                 if this.IsActive info.Guid && this.Delta < TimeSpan.FromMilliseconds(500.) && info.Selection.IsNone then

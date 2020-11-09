@@ -163,14 +163,15 @@ module Gui =
         {   mutable Value : string
             mutable Selection : SelectionArea option
             mutable KeyboardCaptureHandler : (InputHandler -> Keyboard.Record -> bool) option
-          // Positive offset of the cursor.
-          // Offset of 0 = start of the input
-          // Offset of 2 = cursor place after the second char of the input
+            // Positive offset of the cursor.
+            // Offset of 0 = start of the input
+            // Offset of 2 = cursor place after the second char of the input
             mutable CursorOffset : int
-          // Start origin of the text to display
-          // 0 = Start of the text
-          // 2 = Start of the text after the 2 first chars
+            // Start origin of the text to display
+            // 0 = Start of the text
+            // 2 = Start of the text after the 2 first chars
             mutable TextStartOrigin : int
+            mutable CursorDraggingOriginOffset : int option
             Guid : Guid }
 
             member this.ClearSelection () =
@@ -191,7 +192,8 @@ module Gui =
                                 Selection = None
                                 CursorOffset = 0
                                 TextStartOrigin = 0
-                                Guid = Guid.NewGuid() }
+                                Guid = Guid.NewGuid()
+                                CursorDraggingOriginOffset = None }
 
         type SliderOrientation =
             | Vertical
