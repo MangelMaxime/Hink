@@ -13,18 +13,6 @@ module Helpers =
         let ($) s n = s + n.ToString()
         let rgb r g b = "rgb(" $ r $ "," $ g $ "," $ b $ ")"
 
-//    /// Extends Math type with Clamp function
-//    type System.Math with
-//        static member Clamp (value, (min: float), (max: float)) =
-//            let mutable res = value
-//            if value < min then
-//                res <- min
-//            if value > max then
-//                res <- max
-//            res
-
-    let clamp (num:float, a:float, b:float) = Math.Max(Math.Min(num, Math.Max(a, b)), Math.Min(a, b))
-
     type RenderingType =
         | Stroke
         | Fill

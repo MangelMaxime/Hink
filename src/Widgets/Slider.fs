@@ -70,7 +70,7 @@ module Slider =
 
                 if hover && pressed && this.IsActive handler.Guid then
                     let v =
-                        let mousePos = clamp((this.Mouse.X - x), 0., w)
+                        let mousePos = Math.Clamp((this.Mouse.X - x), 0., w)
                         Math.Ceiling(
                           ((mousePos * max) / w) / step
                         ) * step
