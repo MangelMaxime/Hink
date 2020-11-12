@@ -145,7 +145,7 @@ module Input =
                     // Handle simple "Left click" -> Placing the cursor position
                     if hover && Mouse.Manager.Left && pressed && Mouse.Manager.JustPressed then
 
-                        let deltaFromOrigin = Mouse.Manager.X - (this.Cursor.X + offsetX + this.Theme.Text.OffsetX)
+                        let deltaFromOrigin = Mouse.Manager.X - (this.CursorPosX + offsetX + this.Theme.Text.OffsetX)
                         // We round the value in order to make the cursor position decided on the center of the letter
                         // If the cursor, is a more on the right side of the letter place the cursor after that letter
                         // This logic only works for monospace font
@@ -157,10 +157,10 @@ module Input =
 
                     // Handle "Left click dragging" -> Selecting text
                     else if hover && Mouse.Manager.Left && pressed && Mouse.Manager.IsDragging then
-                        let deltaFromOrigin = Mouse.Manager.X - (this.Cursor.X + offsetX + this.Theme.Text.OffsetX)
+                        let deltaFromOrigin = Mouse.Manager.X - (this.CursorPosX + offsetX + this.Theme.Text.OffsetX)
                         let cursorOffset = int (Math.Round(deltaFromOrigin / charSize.width))
                         let cursorOffset = Math.Min(cursorOffset, info.Value.Length)
-//                        printfn "djzidoz"
+
                         match info.Selection with
                         // If there is already a selection update it
                         | Some selection ->
