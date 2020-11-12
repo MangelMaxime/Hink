@@ -156,7 +156,9 @@ module Input =
                             info.Selection <- None
 
                     // Handle "Left click dragging" -> Selecting text
-                    else if hover && Mouse.Manager.Left && pressed && Mouse.Manager.IsDragging then
+                    //
+                    else if hover && Mouse.Manager.Left && pressed && Mouse.Manager.IsDragging
+                            && info.Value.Length > 0 then // Update selection with mouse only if the text is not empty otherwise the cursor will stop blicking
                         let deltaFromOrigin = Mouse.Manager.X - (this.CursorPosX + offsetX + this.Theme.Text.OffsetX)
                         let cursorOffset = int (Math.Round(deltaFromOrigin / charSize.width))
                         let cursorOffset = Math.Min(cursorOffset, info.Value.Length)
