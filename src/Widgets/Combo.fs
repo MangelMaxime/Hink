@@ -28,17 +28,10 @@ module Combo =
                         !^this.Theme.Combo.Background.Default
 
                 let storeCombo () =
-                    let windowOffsetX, windowOffsetY =
-                        match this.CurrentWindow with
-                        | Some currentWindow ->
-                            currentWindow.X, currentWindow.Y
-                        | None ->
-                            0., 0.
-
                     { Info = comboInfo
                       Values = texts
-                      X = this.Cursor.X + this.Theme.ButtonOffsetY + windowOffsetX
-                      Y = this.Cursor.Y + this.Theme.Element.Height + windowOffsetY
+                      X = this.CursorPosX + this.Theme.ButtonOffsetY
+                      Y = this.CursorPosY + this.Theme.Element.Height
                       Width = this.Cursor.Width
                       Height = this.Cursor.Height
                       Reference = comboInfo }
